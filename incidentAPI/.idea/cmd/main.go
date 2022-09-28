@@ -9,11 +9,11 @@ func main() {
 
 	// Sender data.
 	from := "trakkemaskintrine@gmail.com"
-	password := ""
+	password := "INPUT_PASSWORD_HERE_"
 
 	// Receiver email address.
 	to := []string{
-		"",
+		"cleetorres68@gmail.com",
 	}
 
 	// smtp server configuration.
