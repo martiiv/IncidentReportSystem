@@ -2,36 +2,40 @@ package main
 
 import (
 	"fmt"
-	"net/smtp"
+	"github.com/gorilla/mux"
+	"net/http"
+	"os"
 )
 
 func main() {
+	r := mux.NewRouter()
 
-	// Sender data.
-	from := "trakkemaskintrine@gmail.com"
-	password := "INPUT_PASSWORD_HERE_"
+	//Log endpoint
+	r.Path("incident")                 //GET, POST
+	r.Path("incident/countermeasures") //PUT
 
-	// Receiver email address.
-	to := []string{
-		"cleetorres68@gmail.com",
-	}
+	//System Manager endpoint
+	r.Path("manager") //GET, POST, DELETE
 
-	// smtp server configuration.
-	smtpHost := "smtp.gmail.com"
-	smtpPort := "587"
+	//Warning Receiver endpoint
+	r.Path("warningreveiver") //POST, DELETE
 
-	// Message.
-	message := []byte("This is a test email message.")
-
-	// Authentication.
-	auth := smtp.PlainAuth("", from, password, smtpHost)
-
-	// Sending email.
-	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
+	err := http.ListenAndServe(getPort(), nil)
 	if err != nil {
-		fmt.Println(err)
-		return
+		fmt.Printf(err.Error())
 	}
-	fmt.Println("Email Sent Successfully!")
+}
 
+/*
+Function used for setting the port for the application
+We use localhost 8080 for testing
+Takes no parameters
+Returns the port the software is listening on
+*/
+func getPort() string {
+	var port = os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	return ":" + port
 }
