@@ -2,13 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
+	databasefunctions "incidentAPI/databaseFunctions"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	establishConnection()
+	databasefunctions.EstablishConnection()
 	r := mux.NewRouter()
 
 	//Log endpoint
