@@ -1,21 +1,20 @@
 package databasefunctions
 
+/**
+File connection.go, contains basic database functionality for the software
+*/
 import (
 	"database/sql"
-	_ "database/sql"
 	"encoding/json"
 	_ "errors"
 	"fmt"
-	_ "fmt"
 	"log"
 	"os"
 
 	"github.com/go-sql-driver/mysql"
-	_ "github.com/go-sql-driver/mysql"
 )
 
-var db *sql.DB
-
+// Struct Configuration used for getting environment variables for database
 type Configuration struct {
 	DB_NAME     string
 	DB_HOST     string
@@ -26,18 +25,21 @@ type Configuration struct {
 // in case of further help is need https://github.com/golangbot/mysqltutorial/blob/master/select/main.go
 func EstablishConnection() {
 
-	var configuration = Configuration{}
+	var configuration = Configuration{} //Defines a configuration struct
 
-	file, err := os.Open("config/config.development.json")
+	file, err := os.Open("config/config.development.json") //Opens a file containing credentials
 	if err != nil {
 		fmt.Print(err)
 	}
+
+	//Decodes credentials from the file into the configuration object
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&configuration)
 	if err != nil {
 		fmt.Print(err)
 	}
 
+	//Uses the config object to define a mysql config entity
 	cfg := mysql.Config{
 		User:   configuration.DB_USERNAME,
 		Passwd: configuration.DB_PASSWORD,
@@ -47,7 +49,9 @@ func EstablishConnection() {
 	}
 
 	fmt.Println("Now connecting...")
-	db, err := sql.Open("mydriver", cfg.FormatDSN())
+
+	//Establishes connection
+	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
 		log.Fatalf("could not connect to database: %v", err)
 	}
