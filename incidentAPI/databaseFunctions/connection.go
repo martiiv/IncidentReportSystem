@@ -3,34 +3,47 @@ package databasefunctions
 import (
 	"database/sql"
 	_ "database/sql"
+	"encoding/json"
 	_ "errors"
 	"fmt"
 	_ "fmt"
 	"log"
+	"os"
 
+	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql"
-
+)
 
 var db *sql.DB
-type DatabaseConfig struct{
-	DB_NAME 		string
-	DB_HOST			string
-	DB_USERNAME 	string
-	DB_PASSWORD		string
+
+type Configuration struct {
+	DB_NAME     string
+	DB_HOST     string
+	DB_USERNAME string
+	DB_PASSWORD string
 }
 
 // in case of further help is need https://github.com/golangbot/mysqltutorial/blob/master/select/main.go
-func establishConnection() {
-	file, err := os.Open("config/config.development.json") if err !=nil{ return err}
+func EstablishConnection() {
+
+	var configuration = Configuration{}
+
+	file, err := os.Open("config/config.development.json")
+	if err != nil {
+		fmt.Print(err)
+	}
 	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&databaseConfig) if err !=nil{ return err}
+	err = decoder.Decode(&configuration)
+	if err != nil {
+		fmt.Print(err)
+	}
 
 	cfg := mysql.Config{
-		User:   databaseConfig.DB_USERNAME,
-        Passwd: databaseConfig.DB_PASSWORD,
-        Net:    "tcp",
-        Addr:   databaseConfig.DB_HOST,
-        DBName: databaseConfig.DB_NAME,
+		User:   configuration.DB_USERNAME,
+		Passwd: configuration.DB_PASSWORD,
+		Net:    "tcp",
+		Addr:   configuration.DB_HOST,
+		DBName: configuration.DB_NAME,
 	}
 
 	fmt.Println("Now connecting...")
@@ -38,7 +51,7 @@ func establishConnection() {
 	if err != nil {
 		log.Fatalf("could not connect to database: %v", err)
 	}
-	
+
 	// for later testing insrt(db)
 	// To verify the connection to our database instance, we can call the `Ping`
 	// method. If no error is returned, we can assume a successful connection
