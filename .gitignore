@@ -1,4 +1,4 @@
 #Ignoring the database credentials file
 /database/credentials.txt
-/config/config.development.json
-/config/config.production.json
+/incidentApi/config/config.development.json
+/incidentApi/config/config.production.json
