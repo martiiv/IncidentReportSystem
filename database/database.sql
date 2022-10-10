@@ -7,45 +7,28 @@ TODO: Passwords need hashing and script needs testing
 Last update 2.10.2022
 */
 
-#Table System Manager, main user of the syste
 CREATE TABLE SystemManager (
     SMiD            int             NOT NULL AUTO_INCREMENT,
     Username        varchar(50)     NOT NULL,
     Company         varchar(100),
-    Credential      varchar(255),
-    
-    PRIMARY KEY (SMiD),
-    FOREIGN KEY (Credential)        REFERENCES Credentials(CiD)
+    Credential      int,
+
+    PRIMARY KEY (SMiD)
 );
 
-#Table Incident, the system manager will distribute these to WarningRecievers
 CREATE TABLE Incident (
     IncidentId      int             NOT NULL AUTO_INCREMENT,
     Name            varchar(50)     NOT NULL,
-    Context         varchar(max),
+    Context         varchar(255),
     Company         varchar(100),
     Credential      varchar(255),
     Receiving_group int,
-    Countermeasure  varchar(max),
+    Countermeasure  varchar(255),
     Sendbymanager   varchar(255),
-    
-    PRIMARY KEY (IncidentId),
-    FOREIGN KEY (Sendbymanager)     REFERENCES SystemManager(Username),
-    FOREIGN KEY (Receiving_group)   REFERENCES Groups(Groupid)
+
+    PRIMARY KEY (IncidentId)
 );
 
-#Table Groups, SystemManager will group WarningRecievers and send incidents
-CREATE TABLE Groups (
-    Groupid         int             NOT NULL AUTO_INCREMENT,
-    Name            varchar(50)     NOT NULL,
-    Info            varchar(max),
-    
-    PRIMARY KEY (id)
-
-);
-
-
-#Table WarningReciever, will recieve Incidents from SystemManager
 CREATE TABLE WarningReciever(
     WriD            int             NOT NULL AUTO_INCREMENT,
     Name            varchar(255)    NOT NULL,
@@ -53,31 +36,50 @@ CREATE TABLE WarningReciever(
     Credential      varchar(255),
     Company         varchar(255),
     RecieverGroup   varchar(255),
-    
-    PRIMARY KEY (WriD),
-    FOREIGN KEY(Credential)         REFERENCES Credentials(CiD),
-    FOREIGN KEY(RecieverGroup)      REFERENCES Groups(Groupid)
+
+    PRIMARY KEY (WriD)
+
 );
 
-#Table Credentials, contains the email and password for SystemManagers
 CREATE TABLE Credentials(
     CiD             int             NOT NULL AUTO_INCREMENT, 
     Email           varchar(255)    NOT NULL,
-    Password        varchar(255)    NOT NULL, 
+    Password        varchar(255)    NOT NULL,
+    
+    PRIMARY KEY(CiD)
 
-    PRIMARY KEY(CiD),
-    FOREIGN KEY(Email)              REFERENCES Emails(Email),
-    FOREIGN KEY(Password)           REFERENCES Passwords(Password)
 );
 
-#Table Password, NEEDS HASHING
 CREATE TABLE Passwords(
     Password varchar(255)           NOT NULL,
+    
     PRIMARY KEY (Password)
 );
 
-#Table Email
 CREATE TABLE Emails(
     Email	varchar(255)	NOT NULL,
     PRIMARY KEY(Email)
-)
+);
+
+CREATE TABLE RecieverGroups (
+    Groupid         int             NOT NULL AUTO_INCREMENT,
+    Name            varchar(255)     NOT NULL,
+    Info            varchar(255),
+
+    PRIMARY KEY (Groupid)
+);
+
+
+    ALTER TABLE SystemManager ADD FOREIGN KEY (Credential)        REFERENCES Credentials(CiD);
+        
+    ALTER TABLE Incident ADD FOREIGN KEY (Sendbymanager)     REFERENCES SystemManager(Username);
+    
+    ALTER TABLE Incident ADD FOREIGN KEY (Receiving_group)   REFERENCES RecieverGroups(Groupid);
+    
+    ALTER TABLE WarningReciever ADD FOREIGN KEY(Credential)         REFERENCES Credentials(CiD);
+    
+    ALTER TABLE WarningReciever ADD FOREIGN KEY(RecieverGroup)      REFERENCES RecieverGroups(Groupid);
+    
+    ALter TABLE Credentials ADD FOREIGN KEY(Email)              REFERENCES Emails(Email);
+    
+    ALTER TABLE Credentials ADD FOREIGN KEY(Password)           REFERENCES Passwords(Password);
