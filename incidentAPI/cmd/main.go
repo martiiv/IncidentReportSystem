@@ -13,16 +13,27 @@ func main() {
 	databasefunctions.EstablishConnection()
 	r := mux.NewRouter()
 
+	//Group endpoint
+	//Todo add function to endpoints
+	r.Path("/groups").Queries("id", "{id}") //PUT
+	r.Path("/groups")                       //GET, POST
+
 	//Log endpoint
-	r.Path("incident")                 //GET, POST
-	r.Path("incident/countermeasures") //PUT
+	//Todo add function to endpoints
+	r.Path("/incident").Queries("id", "{id}") //PUT
+	r.Path("/incident")                       //GET, POST
 
 	//System Manager endpoint
-	r.Path("manager") //GET, POST, DELETE
+	//Todo add function to endpoints
+	r.Path("/manager").Queries("id", "{id}") //PUT
+	r.Path("/manager")                       //GET, POST, DELETE
 
 	//Warning Receiver endpoint
-	r.Path("warningreveiver") //POST, DELETE
+	//Todo add function to endpoints
+	r.Path("/receiver").Queries("id", "{id}") //PUT
+	r.Path("/receiver")                       //POST, DELETE
 
+	http.Handle("/", r)
 	err := http.ListenAndServe(getPort(), nil)
 	if err != nil {
 		fmt.Printf(err.Error())
