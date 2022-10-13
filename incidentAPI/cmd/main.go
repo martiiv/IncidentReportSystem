@@ -23,6 +23,9 @@ func main() {
 	r.Path("/incident").Queries("id", "{id}") //PUT
 	r.Path("/incident")                       //GET, POST
 
+	// Send email
+	r.Path("/incident/sendMail").HandlerFunc(communication.SendMail)
+
 	//System Manager endpoint
 	//Todo add function to endpoints
 	r.Path("/manager").Queries("id", "{id}") //PUT
@@ -34,6 +37,9 @@ func main() {
 	r.Path("/receiver")                       //POST, DELETE
 
 	http.Handle("/", r)
+
+	fmt.Print("Listening on port:" + getPort())
+
 	err := http.ListenAndServe(getPort(), nil)
 	if err != nil {
 		fmt.Printf(err.Error())
