@@ -34,3 +34,22 @@ code {
 #table tr:nth-child(even){background-color: #f2f2f2;}
 
 #table tr:hover {background-color: #ddd;}
+
+
+.btn{
+  background-color: #4477d5;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  transition-duration: 0.4s;
+}
+
+.btn:hover{
+  background-color: #054dd2;
+  color: white;
+
+}
