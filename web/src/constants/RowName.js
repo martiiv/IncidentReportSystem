@@ -1,5 +1,5 @@
 const RowName = [
-    "Date", "WR Groups", "Sender", "Tags", "Countermeasures", "Button"
+    "Date", "WR Groups", "Name", "Tags", "Countermeasures", "Button"
 ]
 
 export default RowName
