@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	databasefunctions "incidentAPI/databaseFunctions"
+	"incidentAPI/communication"
 	"net/http"
 	"os"
 
@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	databasefunctions.EstablishConnection()
+	//databasefunctions.EstablishConnection()
 	r := mux.NewRouter()
 
 	//Group endpoint
@@ -24,7 +24,8 @@ func main() {
 	r.Path("/incident")                       //GET, POST
 
 	// Send email
-	r.Path("/incident/sendMail").HandlerFunc(communication.SendMail)
+	//r.Path("/incident/sendMail/").HandlerFunc(communication.SendMail)
+	r.HandleFunc("/incident/sendMail/", communication.SendMail)
 
 	//System Manager endpoint
 	//Todo add function to endpoints

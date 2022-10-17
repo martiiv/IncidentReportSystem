@@ -31,7 +31,7 @@ class Table extends Component {
 
                         <td>{type !== "WR" ? item.date : item.name}</td>
                         <td>{item.receivingGroup}</td>
-                        <td>{item.systemManager ? item.systemManager : item.department}</td>
+                        <td>{item.name ? item.name : item.department}</td>
                         <td>{item.email ? item.email : "Tags"}</td>
                         <td>{item.countermeasure ? item.countermeasure : item.phoneNumber}</td>
 

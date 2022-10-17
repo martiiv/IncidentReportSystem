@@ -1,7 +1,9 @@
+import IncidentReporting from "../components/IncidentReporting.js"
+
 function Incident() {
     return (
         <div className="App">
-            <h1>Log site</h1>
+            <IncidentReporting/>
         </div>
     );
 }

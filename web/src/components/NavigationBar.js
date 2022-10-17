@@ -19,7 +19,7 @@ const TopBar = () => {
                         <Button className="button">Dashboard</Button>
                     </Link>
                     <Link className="link" to={INCIDENT_URL}>
-                        <Button className="button">Log</Button>
+                        <Button className="button">Incident</Button>
                     </Link>
                     <Link className="link" to={RECEIVER_URL}>
                         <Button className="button">Warning Receiver</Button>

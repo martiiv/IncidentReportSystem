@@ -22,10 +22,10 @@ function App() {
                 <Routes> {/*Router that creates the routes the user is able to navigate*/}
                     <Route path={"/"} element={<Login/>}/>
                     <Route path={DASHBOARD_URL} element={<Dashboard/>}/>
-                    <Route path={INCIDENT_URL} element={<Log/>}/>
+                    <Route path={INCIDENT_URL} element={<Incident/>}/>
                     <Route path={MANAGER_URL} element={<Profile/>}/>
                     <Route path={RECEIVER_URL} element={<WarningReceiver/>}/>
-                    <Route path={INCIDENT_URL + ID_PARAM} element={<Incident/>}/>
+                    <Route path={INCIDENT_URL + ID_PARAM} element={<Log/>}/>
 
                 </Routes>
         </div>

@@ -6,21 +6,25 @@ import (
 	"incidentAPI/config"
 	"incidentAPI/structs"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/smtp"
 )
 
 func SendMail(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
+
 	fmt.Print("Du er inne i sendmail")
 
 	var incident structs.SendIndividualIncident
-	decoder := json.NewDecoder(r.Body)
-
-	err := decoder.Decode(&incident)
+	err := json.NewDecoder(r.Body).Decode(&incident) //Decodes the requests body into the structure defined above
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Error")
+		return
 	}
+
 	fmt.Print("Du har decoda")
 
 	// Sender data.
@@ -28,9 +32,9 @@ func SendMail(w http.ResponseWriter, r *http.Request) {
 	password := config.SenderEmailAppPassword
 
 	// Receiver email address.
-	reciever := incident.Receiver
+	receiver := incident.Receiver
 
-	to := []string{reciever}
+	to := []string{receiver}
 
 	// smtp server configuration.
 	smtpHost := "smtp.gmail.com"
