@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import "./IncidentReporting.css"
+import "./IncidentReporting.css";
+import TagsInput from "./TagsInput.js"
 
 function IncidentReportingForm() {
     const [state, setState] = useState({
@@ -7,10 +8,13 @@ function IncidentReportingForm() {
         context: "",
         information: "",
         receiver: "",
-        countermeasure: ""
+        countermeasure: "",
     })
 
+    const [tags, setTags] = useState([])
+
     const [isPending, setIsPending] = useState(false);
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         setIsPending(true)
@@ -41,7 +45,7 @@ function IncidentReportingForm() {
     return (
         <div className={"incidentCreate"}>
             <h2>New Incident</h2>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} onKeyDown={(e) => { e.key === 'Enter' && e.preventDefault(); }}>
                 <label>Incident Title:
                     <input
                         type={"text"}
@@ -79,13 +83,19 @@ function IncidentReportingForm() {
                         onChange={handleChange}
                     />
                 </label>
-                <label>Countermeasures</label>
+
+                <label>Countermeasures
                 <input
                     type={"text"}
                     name={"countermeasure"}
                     value={state.countermeasure}
                     onChange={handleChange}
                 />
+                </label>
+
+                {tags}
+
+                <TagsInput setTagsFunc={setTags}/>
 
                 { !isPending && <button>SEND INCIDENT</button> }
                 { isPending && <button disabled>Sending mail...</button> }
