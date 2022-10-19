@@ -2,3 +2,5 @@
 /database/credentials.txt
 /incidentApi/config/config.development.json
 /incidentApi/config/config.production.json
+incidentAPI/.vscode/launch.json
+incidentAPI/cmd/__debug_bin.exe
