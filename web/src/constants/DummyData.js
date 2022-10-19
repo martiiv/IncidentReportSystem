@@ -4,7 +4,6 @@ const Incident = [
         name: "Moist floor",
         context: "The floor is slippery",
         tags: "Floor",
-
         information: "Jon Gunnar did spill some coffee on the floor",
         receivingGroup: "All",
         countermeasure: "Do not spill coffee. Wipe it of the floor",

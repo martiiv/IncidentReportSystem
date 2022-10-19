@@ -56,14 +56,15 @@ func getWarningReceiver(w http.ResponseWriter, r *http.Request, id string) {
 		&warning.CredentialId,
 		&warning.Company,
 		&warning.Group,
+		&warning.Email,
 	); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
 		return
 	}
 
 	err := json.NewEncoder(w).Encode(warning)
 	if err != nil {
-		http.Error(w, "Error", http.StatusInternalServerError)
+		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
 		return
 	}
 
@@ -78,7 +79,7 @@ func getWarningReceivers(w http.ResponseWriter, r *http.Request) {
 	var warnings []structs.GetWarningReceiver
 	row, err := databasefunctions.Db.Query("SELECT * FROM `WarningReceiver`")
 	if err != nil {
-		http.Error(w, "Error", http.StatusInternalServerError)
+		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
 		return
 	}
 	// Loop through rows, using Scan to assign column data to struct fields.
@@ -93,20 +94,20 @@ func getWarningReceivers(w http.ResponseWriter, r *http.Request) {
 			&warning.Group,
 			&warning.ReceiverId,
 		); err != nil {
-			http.Error(w, "Error", http.StatusInternalServerError)
+			http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
 			return
 		}
 
 		warnings = append(warnings, warning)
 	}
 	if err := row.Err(); err != nil {
-		http.Error(w, "Error", http.StatusInternalServerError)
+		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
 		return
 	}
 
 	err = json.NewEncoder(w).Encode(warnings)
 	if err != nil {
-		http.Error(w, "Error", http.StatusInternalServerError)
+		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
 		return
 	}
 }
@@ -115,29 +116,29 @@ func createReceiver(w http.ResponseWriter, r *http.Request) {
 	var incident structs.CreateWarningReceiver
 	err := json.NewDecoder(r.Body).Decode(&incident) //Decodes the requests body into the structure defined above
 	if err != nil {
-		fmt.Println("Error")
+		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
 		return
 	}
 
 	result, err := databasefunctions.Db.Exec("INSERT INTO `WarningReceiver`(`Name`, `PhoneNumber`, `Company`) VALUES (?,?,?)", incident.Name, incident.PhoneNumber, incident.Company)
 	if err != nil {
-		http.Error(w, "Error", http.StatusInternalServerError)
+		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
 		return
 	}
 	id, err := result.LastInsertId()
 	if err != nil {
-		http.Error(w, "Error", http.StatusInternalServerError)
+		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
 		return
 	}
 
-	_, _ = fmt.Fprintf(w, "added with id %v", id)
+	fmt.Fprintf(w, "added with id %v", id)
 }
 
 func deleteReceiver(w http.ResponseWriter, r *http.Request) {
 	var incident structs.DeleteWarningReceiver
 	err := json.NewDecoder(r.Body).Decode(&incident) //Decodes the requests body into the structure defined above
 	if err != nil {
-		fmt.Println("Error")
+		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
 		return
 	}
 

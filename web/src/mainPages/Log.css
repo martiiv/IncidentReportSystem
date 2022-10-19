@@ -1,3 +1,8 @@
+.log-screen{
+    padding: 30px 10% ;
+}
+
+
 .incident_title{
     display: flex;
     justify-content: center;
@@ -11,6 +16,7 @@
 
 .textarea-context{
     height: 20rem;
+
 }
 
 .textarea-countermeasure{
@@ -23,18 +29,37 @@
 }
 
 .text-area-wr{
-    display: flex;
-    justify-content: center ;
+    display: inline-grid;
+    grid-template-columns: auto auto;
+    column-gap: 150px;
 }
 
 .log-btn{
     display: flex;
     float: right;
-    padding-right: 26rem;
-    padding-top: 2rem;
+    padding-right: 4%;
+    align-self: flex-end;
+    padding-bottom: 30px;
 }
 
 .text-area-title{
     margin-bottom: 10px;
+}
+
+.tag-input{
+    border-radius: 5px;
+    border: black solid 1px;
+    height: fit-content;
+    background-color: #eaeaea;
+    padding-top: 30px;
+    margin-top: 30px;
+}
+
+.tag-title{
+    margin-bottom: -20px;
+}
+
+.textarea-small{
+    width: 250px !important;
 }
 
