@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"incidentAPI/communication"
+	databasefunctions "incidentAPI/databaseFunctions"
+	"incidentAPI/endpoints"
 	"net/http"
 	"os"
 
@@ -10,7 +12,7 @@ import (
 )
 
 func main() {
-	//databasefunctions.EstablishConnection()
+	databasefunctions.EstablishConnection()
 	r := mux.NewRouter()
 
 	//Group endpoint
@@ -20,8 +22,8 @@ func main() {
 
 	//Log endpoint
 	//Todo add function to endpoints
-	r.Path("/incident").Queries("id", "{id}") //PUT
-	r.Path("/incident")                       //GET, POST
+	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest).Queries("id", "{id}") //GET PUT
+	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest)                       //GET, POST
 
 	// Send email
 	//r.Path("/incident/sendMail/").HandlerFunc(communication.SendMail)
@@ -34,8 +36,8 @@ func main() {
 
 	//Warning Receiver endpoint
 	//Todo add function to endpoints
-	r.Path("/receiver").Queries("id", "{id}") //PUT
-	r.Path("/receiver")                       //POST, DELETE
+	r.Path("/receiver").HandlerFunc(endpoints.HandleRequestWarningReceiver).Queries("id", "{id}") //PUT
+	r.Path("/receiver").HandlerFunc(endpoints.HandleRequestWarningReceiver)                       //POST, DELETE
 
 	http.Handle("/", r)
 

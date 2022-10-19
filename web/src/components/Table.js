@@ -31,11 +31,9 @@ class Table extends Component {
 
                         <td>{type !== "WR" ? item.date : item.name}</td>
                         <td>{item.receivingGroup}</td>
-                        <td>{item.name ? item.name : item.department}</td>
-                        <td>{item.email ? item.email : "Tags"}</td>
-                        <td>{item.countermeasure ? item.countermeasure : item.phoneNumber}</td>
-
-
+                        <td>{type !== "WR"  ? item.name : item.department}</td>
+                        <td>{type === "WR" ? item.email : "Tags"}</td>
+                        <td>{type !== "WR" ? item.countermeasure : item.phoneNumber}</td>
                         {type !== "WR" &&
                             <td>
                                 <Link to={INCIDENT_URL + "/" + item.id}>
