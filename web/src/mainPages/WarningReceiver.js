@@ -2,7 +2,7 @@ import Table from "../components/Table";
 import Persons from "../constants/DummyPersons";
 import RowWR from "../constants/RowWR";
 import {Component} from "react";
-
+import "./WarningReceiver.css"
 
 class WarningReceiver extends Component {
     state = {
@@ -40,9 +40,9 @@ class WarningReceiver extends Component {
                         onChangeValue={this.onChangeValueHandler}
                     />
                     <div className={"button-group"} style={{display: "flex", justifyContent: "center"}}>
-                        <button className={"btn"}>Delete</button>
-                        <button className={"btn"}>Create</button>
-                        <button className={"btn"}>Group</button>
+                        <button className={"btn btnGroup"}>Delete</button>
+                        <button className={"btn btnGroup"}>Create</button>
+                        <button className={"btn btnGroup"}>Group</button>
                     </div>
                 </div>
         );

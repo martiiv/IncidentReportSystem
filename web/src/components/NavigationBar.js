@@ -16,16 +16,16 @@ const TopBar = () => {
             <AppBar position="sticky">
                 <Toolbar className="toolbar">
                     <Link className="link" to={DASHBOARD_URL}>
-                        <Button className="button">Dashboard</Button>
+                        <Button className="topBarBtn">Dashboard</Button>
                     </Link>
                     <Link className="link" to={INCIDENT_URL}>
-                        <Button className="button">Incident</Button>
+                        <Button className="topBarBtn">Incident</Button>
                     </Link>
                     <Link className="link" to={RECEIVER_URL}>
-                        <Button className="button">Warning Receiver</Button>
+                        <Button className="topBarBtn">Warning Receiver</Button>
                     </Link>
                     <Link className="link" to={MANAGER_URL}>
-                        <Button className="button">Profile</Button>
+                        <Button className="topBarBtn">Profile</Button>
                     </Link>
                 </Toolbar>
             </AppBar>

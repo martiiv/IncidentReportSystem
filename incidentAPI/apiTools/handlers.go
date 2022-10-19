@@ -86,17 +86,19 @@ func MasterHandler(w http.ResponseWriter, r *http.Request, url string, Method st
 	return "Incorrect method string used", nil
 }
 
-func DecodeBody(w http.ResponseWriter, r *http.Request, structBody struct{}) struct{} {
+// Dont use this garbage yet, its a passion project ( : )
+func DecodeBody(w http.ResponseWriter, r *http.Request, interfaceBody interface{}) interface{} {
 	decoder := json.NewDecoder(r.Body)
 
-	err := decoder.Decode(&structBody)
+	err := decoder.Decode(&interfaceBody)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return structBody
+	return interfaceBody
 }
 
+// Dont use this garbage yet, its a passion project ( : )
 func EncodeBody(w http.ResponseWriter, r *http.Request, body struct{}) http.ResponseWriter {
 	err := json.NewEncoder(w).Encode(body)
 	if err != nil {
@@ -104,4 +106,8 @@ func EncodeBody(w http.ResponseWriter, r *http.Request, body struct{}) http.Resp
 	}
 
 	return w
+}
+
+func parseURL(url string) {
+
 }

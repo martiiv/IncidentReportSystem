@@ -22,6 +22,8 @@ type Configuration struct {
 	DB_PASSWORD string
 }
 
+var Db *sql.DB
+
 // in case of further help is need https://github.com/golangbot/mysqltutorial/blob/master/select/main.go
 func EstablishConnection() {
 
@@ -51,15 +53,17 @@ func EstablishConnection() {
 	fmt.Println("Now connecting...")
 
 	//Establishes connection
-	db, err := sql.Open("mysql", cfg.FormatDSN())
+	Db, err = sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
 		log.Fatalf("could not connect to database: %v", err)
 	}
 
+	//defer Db.Close()
+
 	// for later testing insrt(db)
 	// To verify the connection to our database instance, we can call the `Ping`
 	// method. If no error is returned, we can assume a successful connection
-	if err := db.Ping(); err != nil {
+	if err := Db.Ping(); err != nil {
 		log.Fatalf("unable to reach database: %v", err)
 	}
 	fmt.Println("connected...")

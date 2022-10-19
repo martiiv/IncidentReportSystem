@@ -1,0 +1,40 @@
+.incident_title{
+    display: flex;
+    justify-content: center;
+}
+
+.date-sender{
+    display: flex;
+    justify-content: center;
+    gap: 10rem;
+}
+
+.textarea-context{
+    height: 20rem;
+}
+
+.textarea-countermeasure{
+    height: 10rem;
+}
+
+.textarea-log{
+    justify-content: center;
+    width: 60rem;
+}
+
+.text-area-wr{
+    display: flex;
+    justify-content: center ;
+}
+
+.log-btn{
+    display: flex;
+    float: right;
+    padding-right: 26rem;
+    padding-top: 2rem;
+}
+
+.text-area-title{
+    margin-bottom: 10px;
+}
+
