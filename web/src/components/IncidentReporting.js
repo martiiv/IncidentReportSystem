@@ -95,7 +95,8 @@ function IncidentReportingForm() {
 
                 {tags}
 
-                <TagsInput setTagsFunc={setTags}/>
+                <TagsInput setTagsFunc={setTags}
+                           tagsFunc={tags}/>
 
                 { !isPending && <button>SEND INCIDENT</button> }
                 { isPending && <button disabled>Sending mail...</button> }
