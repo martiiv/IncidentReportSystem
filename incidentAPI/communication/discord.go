@@ -3,6 +3,7 @@ package communication
 import (
 	"bytes"
 	"encoding/json"
+	"incidentAPI/structs"
 	"log"
 	"net/http"
 )
@@ -12,7 +13,7 @@ func discordWebhook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	webhookURL := "https://discord.com/api/webhooks/1026402234877087784/8SYbrxxZU0ehZowC6x3qZr-XC890Vi-ddRXwCz8R3H3RKdGN-lYQb4nb9yzMvssZNgif"
 
-	var input messageInput
+	var input structs.MessageInput
 
 	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
@@ -20,8 +21,8 @@ func discordWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var embeds = Embeds{
-		Author: Author{
+	var embeds = structs.Embeds{
+		Author: structs.Author{
 			Name:    "",
 			URL:     "",
 			IconURL: "",
@@ -31,7 +32,7 @@ func discordWebhook(w http.ResponseWriter, r *http.Request) {
 		Color:       0,
 	}
 
-	var outputStruct = messageOutput{
+	var outputStruct = structs.MessageOutput{
 		Username:  "",
 		AvatarURL: "",
 		Embeds:    embeds,

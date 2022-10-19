@@ -65,7 +65,7 @@ func addStruct(r *http.Request) interface{} {
 		fmt.Println("Error")
 	}
 
-	var project messageInput                //Defines the structure of the request
+	var project structs.MessageInput        //Defines the structure of the request
 	err = json.Unmarshal(request, &project) //Unmarshall the request data into the project struct
 	if err != nil {
 		fmt.Println("Error")
