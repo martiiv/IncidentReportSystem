@@ -71,3 +71,37 @@ func CheckExisting(tableName string, columnName string, entityID string) bool {
 	}
 
 }
+
+/*
+*Function createNewUser will insert a new email and password into the email and password table
+* And create a new credentials entity using the email and password
+ */
+func CreateNewUser(newEmail string, newPassword string) int {
+	Db.Begin()
+	_, err := Db.Exec("INSERT INTO `Emails`(`Email`) VALUES (?)", newEmail)
+	if err != nil {
+		log.Fatal(err.Error())
+		return 0
+	}
+
+	_, err = Db.Exec("INSERT INTO `Passwords`(`Password`) VALUES (?);", newPassword)
+	if err != nil {
+		log.Fatal(err.Error())
+		return 0
+	}
+
+	credentials, err := Db.Exec("INSERT INTO `Credentials`(`Email`, `Password`) VALUES(?, ?)", newEmail, newPassword)
+	if err != nil {
+		log.Fatal(err.Error())
+		return 0
+	}
+
+	id, err := credentials.LastInsertId()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	fmt.Printf("Successfully created credential row with id: %v", int(id))
+
+	return int(id)
+}

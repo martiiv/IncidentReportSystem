@@ -52,6 +52,11 @@ Function getIncidents, will fetch all incidents, one specific incident or incide
 Function does forward the request to the appropriate endpoint based on wether or not the url contains parameters or not
 */
 func getIncident(w http.ResponseWriter, r *http.Request, url string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
+
 	variables := mux.Vars(r)
 	id := variables["id"]
 
@@ -69,11 +74,16 @@ func getIncident(w http.ResponseWriter, r *http.Request, url string) {
 Function will fetch all incidents in the Incident table in the database
 */
 func getAllIncidents(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
+
 	var incidentList []structs.GetIncident
 
 	rows, err := databasefunctions.Db.Query("SELECT * FROM `Incident`") //Defines the sql request
 	if err != nil {
-		fmt.Fprintf(w, "Error occurred: %v", err.Error())
+		fmt.Fprintf(w, "Error occurred when querying database, error: %v", err.Error())
 	}
 
 	for rows.Next() { //For all the rows in the database we convert the sql entity to a string and insert it into a struct
@@ -109,11 +119,17 @@ func getAllIncidents(w http.ResponseWriter, r *http.Request) {
 Function will fetch one specific incident from the database based on the passed in ID
 */
 func getOneIncident(w http.ResponseWriter, r *http.Request, id string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
+
 	incident := structs.GetIncident{}
 	rows, err := databasefunctions.Db.Query("SELECT * FROM `Incident` WHERE `IncidentId` = ?", id) //Defines the SQL statement with ID
 	if err != nil {
-		fmt.Fprintf(w, "Error occurred: %v", err.Error())
+		fmt.Fprintf(w, "Error occurred when querying database, error: %v", err.Error())
 	}
+
 	for rows.Next() {
 		err = rows.Scan( //Converts the columns and inserts them into appropriate struct
 			&incident.IncidentId,
@@ -143,6 +159,11 @@ func getOneIncident(w http.ResponseWriter, r *http.Request, id string) {
 Function creaetIncident will create a new incident in the database
 */
 func createIncident(w http.ResponseWriter, r *http.Request, url string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
+
 	var incident structs.CreateIncident
 	err := json.NewDecoder(r.Body).Decode(&incident)
 	if err != nil {
@@ -186,6 +207,11 @@ func createIncident(w http.ResponseWriter, r *http.Request, url string) {
 Function updateCountermeasures will update the incidents suggested countermeasures in the database
 */
 func updateCountermeasures(w http.ResponseWriter, r *http.Request, url string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
+
 	var countermeasure structs.UpdateCountermeasure
 
 	err := json.NewDecoder(r.Body).Decode(&countermeasure)
