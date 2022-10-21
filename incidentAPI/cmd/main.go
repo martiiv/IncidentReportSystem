@@ -31,8 +31,8 @@ func main() {
 
 	//System Manager endpoint
 	//Todo add function to endpoints
-	r.Path("/manager").Queries("id", "{id}") //PUT
-	r.Path("/manager")                       //GET, POST, DELETE
+	r.Path("/manager").HandlerFunc(endpoints.HandleSystemManagerRequest).Queries("id", "{id}") //PUT
+	r.Path("/manager").HandlerFunc(endpoints.HandleSystemManagerRequest)                       //GET, POST, DELETE
 
 	//Warning Receiver endpoint
 	//Todo add function to endpoints

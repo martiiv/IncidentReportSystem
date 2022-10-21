@@ -113,14 +113,14 @@ func getWarningReceivers(w http.ResponseWriter, r *http.Request) {
 }
 
 func createReceiver(w http.ResponseWriter, r *http.Request) {
-	var incident structs.CreateWarningReceiver
-	err := json.NewDecoder(r.Body).Decode(&incident) //Decodes the requests body into the structure defined above
+	var warningReceiver structs.CreateWarningReceiver
+	err := json.NewDecoder(r.Body).Decode(&warningReceiver) //Decodes the requests body into the structure defined above
 	if err != nil {
 		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
 		return
 	}
 
-	result, err := databasefunctions.Db.Exec("INSERT INTO `WarningReceiver`(`Name`, `PhoneNumber`, `Company`) VALUES (?,?,?)", incident.Name, incident.PhoneNumber, incident.Company)
+	result, err := databasefunctions.Db.Exec("INSERT INTO `WarningReceiver`(`Name`, `PhoneNumber`, `Company`) VALUES (?,?,?)", warningReceiver.Name, warningReceiver.PhoneNumber, warningReceiver.Company)
 	if err != nil {
 		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
 		return
@@ -135,8 +135,8 @@ func createReceiver(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteReceiver(w http.ResponseWriter, r *http.Request) {
-	var incident structs.DeleteWarningReceiver
-	err := json.NewDecoder(r.Body).Decode(&incident) //Decodes the requests body into the structure defined above
+	var warningReceiver structs.DeleteWarningReceiver
+	err := json.NewDecoder(r.Body).Decode(&warningReceiver) //Decodes the requests body into the structure defined above
 	if err != nil {
 		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
 		return
@@ -150,9 +150,9 @@ func deleteReceiver(w http.ResponseWriter, r *http.Request) {
 	}
 	// `tx` is an instance of `*sql.Tx` through which we can execute our queries
 
-	for i := 0; i < len(incident); i++ {
+	for i := 0; i < len(warningReceiver); i++ {
 		// Here, the query is executed on the transaction instance, and not applied to the database yet
-		_, err = tx.ExecContext(ctx, "DELETE FROM `WarningReceiver` WHERE WriD = ?", incident[i].Id)
+		_, err = tx.ExecContext(ctx, "DELETE FROM `WarningReceiver` WHERE WriD = ?", warningReceiver[i].Id)
 		if err != nil {
 			// Incase we find any error in the query execution, rollback the transaction
 			tx.Rollback()
@@ -167,6 +167,6 @@ func deleteReceiver(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	fmt.Fprintf(w, "Successfully deleted Warning receiver with id %v", incident)
+	fmt.Fprintf(w, "Successfully deleted Warning receiver with id %v", warningReceiver)
 
 }
