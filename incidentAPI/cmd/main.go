@@ -12,9 +12,9 @@ import (
 )
 
 func main() {
-	databasefunctions.EstablishConnection()
 	r := mux.NewRouter()
 
+	databasefunctions.EstablishConnection()
 	//Group endpoint
 	//Todo add function to endpoints
 	r.Path("/groups").Queries("id", "{id}") //PUT
@@ -23,7 +23,7 @@ func main() {
 	//Log endpoint
 	//Todo add function to endpoints
 	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest).Queries("id", "{id}") //GET PUT
-	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest)                       //GET, POST
+	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest)
 
 	// Send email
 	//r.Path("/incident/sendMail/").HandlerFunc(communication.SendMail)
@@ -31,14 +31,13 @@ func main() {
 
 	//System Manager endpoint
 	//Todo add function to endpoints
-	r.Path("/manager").Queries("id", "{id}") //PUT
-	r.Path("/manager")                       //GET, POST, DELETE
+	r.Path("/manager").HandlerFunc(endpoints.HandleSystemManagerRequest).Queries("id", "{id}") //PUT
+	r.Path("/manager").HandlerFunc(endpoints.HandleSystemManagerRequest)                       //GET, POST, DELETE
 
 	//Warning Receiver endpoint
 	//Todo add function to endpoints
-	r.Path("/receiver").HandlerFunc(endpoints.HandleRequestWarningReceiver).Queries("id", "{id}") //PUT
-	r.Path("/receiver").HandlerFunc(endpoints.HandleRequestWarningReceiver)                       //POST, DELETE
-
+	r.Path("/receiver").Queries("id", "{id}")                               //PUT
+	r.Path("/receiver").HandlerFunc(endpoints.HandleRequestWarningReceiver) //POST, DELETE
 	http.Handle("/", r)
 
 	fmt.Print("Listening on port:" + getPort())

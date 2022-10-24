@@ -2,7 +2,6 @@ package structs
 
 // Method for creating system managers /manager Method POST
 type CreateSystemManager struct {
-	Id       int    `json:"id"`
 	UserName string `json:"userName"`
 	Company  string `json:"company"`
 	Email    string `json:"email"`

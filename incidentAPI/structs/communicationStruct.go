@@ -1,11 +1,11 @@
-package communication
+package structs
 
-type messageInput struct {
-	title       string
+type MessageInput struct {
+	Title       string
 	Description string `json:"description"`
 }
 
-type messageOutput struct {
+type MessageOutput struct {
 	Username  string `json:"username"`
 	AvatarURL string `json:"avatar_url"`
 	Embeds    `json:"embeds"`
