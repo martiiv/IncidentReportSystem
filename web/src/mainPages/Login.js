@@ -1,7 +1,11 @@
+import "./Login.css"
+
 function Login() {
     return (
-        <div className="App">
-            <h1>Login page</h1>
+        <div className="login-page" style={{display: "flex", flexDirection: "column"}}>
+            <input type={"text"} placeholder={"Username"}/>
+            <input type={"password"} placeholder={"Password"}/>
+            <button className={"btn"}>Login</button>
         </div>
     );
 }
