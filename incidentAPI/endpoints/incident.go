@@ -16,7 +16,7 @@ Class incident, will handle
 - incident creation
 - insertion of countermeasures
 - fetching incidents from the database
-
+TODO Error handle
 TODO create DELETE functionality
 !You can only send in one recieverGroup when creating the incident
 
