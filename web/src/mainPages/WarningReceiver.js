@@ -1,12 +1,11 @@
 import Table from "../components/Table";
-import Persons from "../constants/DummyPersons";
 import RowWR from "../constants/RowWR";
 import {Component} from "react";
 import "./WarningReceiver.css"
 import fetchData from "../middleware/FetchData";
 import {RECEIVER_URL} from "../constants/WebURL";
 import deleteData from "../middleware/deleteData";
-import {forEach, map} from "react-bootstrap/ElementChildren";
+
 
 class WarningReceiver extends Component {
     state = {
@@ -22,7 +21,7 @@ class WarningReceiver extends Component {
     onChangeValueHandler = val => {
         if (val.target.checked){
             this.setState(prevState =>( {
-                    value: [...prevState.value, val.target.value]
+                    value: [...prevState.value, {id: parseInt(val.target.value)}]
                 })
             )
         }else{
@@ -42,29 +41,12 @@ class WarningReceiver extends Component {
 
     deleteWarningReceivers = async () => {
         const {value} = this.state;
-        console.log(value)
-
-        let deleteBody = [
-            value.map( val => "{" + val + "},")
-        ]
-
-        console.log(deleteBody)
-
-
-
         // eslint-disable-next-line no-restricted-globals
         if (confirm('Are you sure you want to save this thing into the database?')) {
             // Save it!
-            console.log(deleteBody)
-
-        } else {
-            // Do nothing!
-            console.log('Thing was not saved to the database.');
+            await deleteData(RECEIVER_URL, value)
         }
-
-
     }
-
 
 
     render() {
@@ -81,7 +63,7 @@ class WarningReceiver extends Component {
                  />
                  <div className={"button-group"} style={{display: "flex", justifyContent: "center"}}>
                      <button className={"btn btnGroup"} onClick={this.deleteWarningReceivers}>Delete</button>
-                     <button className={"btn btnGroup"}>Create</button>
+                     <button className={"btn btnGroup"} onClick={this.modalComponent} >Create</button>
                      <button className={"btn btnGroup"}>Group</button>
                  </div>
              </div>
