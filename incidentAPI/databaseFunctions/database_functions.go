@@ -87,10 +87,37 @@ func Delet(dbname *sql.DB, tblname string, params []string) {
 			fmt.Println(queryError)
 
 		}
+	case "ReceiverGroups": //this is the case for the table of the Incidents
+		stmt, err := dbname.Prepare(statementtext + " " + tblname + " where Groupid=? and Name=? ;")
+		if err != nil {
+			fmt.Print("helper_methods.go : 118")
+			fmt.Println(err)
+
+		}
+
+		_, queryError := stmt.Exec(params[0], params[1])
+		if queryError != nil {
+			fmt.Print("Something went wrong with the execution of the query")
+			fmt.Println(queryError)
+
+		}
+	case "WarningReceiver": //this is the case for the table of the Incidents
+		stmt, err := dbname.Prepare(statementtext + " " + tblname + " where WriD=? and Name=? and Company = ? and ReceiverGroup = ?;")
+		if err != nil {
+			fmt.Print("helper_methods.go : 118")
+			fmt.Println(err)
+
+		}
+
+		_, queryError := stmt.Exec(params[0], params[1],params[2], params[3])
+		if queryError != nil {
+			fmt.Print("Something went wrong with the execution of the query")
+			fmt.Println(queryError)
+
+		}
 
 	}
 }
-
 // Function to be used by the manager in case data needs to be altered
 func Update(dbname *sql.DB, tblname string, params []string) {
 

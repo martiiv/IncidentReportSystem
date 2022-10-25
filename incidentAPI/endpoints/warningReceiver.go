@@ -15,9 +15,8 @@ import (
 Class warningReceivers, will handle
 - receiver creation
 -
-
 Author Aleksander Aaboen
-Last rev 17.10
+Last rev 25.10 Martin Iversen
 */
 
 /*
@@ -58,10 +57,9 @@ func getWarningReceiver(w http.ResponseWriter, r *http.Request, id string) {
 		&warning.Id,
 		&warning.Name,
 		&warning.PhoneNumber,
-		&warning.CredentialId,
 		&warning.Company,
-		&warning.Group,
-		&warning.Email,
+		&warning.ReceiverGroup,
+		&warning.ReceiverEmail,
 	); err != nil {
 		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
 		return
@@ -94,10 +92,9 @@ func getWarningReceivers(w http.ResponseWriter, r *http.Request) {
 			&warning.Id,
 			&warning.Name,
 			&warning.PhoneNumber,
-			&warning.CredentialId,
 			&warning.Company,
-			&warning.Group,
-			&warning.ReceiverId,
+			&warning.ReceiverGroup,
+			&warning.ReceiverEmail,
 		); err != nil {
 			http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
 			return
@@ -125,11 +122,24 @@ func createReceiver(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := databasefunctions.Db.Exec("INSERT INTO `WarningReceiver`(`Name`, `PhoneNumber`, `Company`) VALUES (?,?,?)", warningReceiver.Name, warningReceiver.PhoneNumber, warningReceiver.Company)
+	if !(databasefunctions.CheckExisting("ReceiverGroups", "Name", warningReceiver.ReceiverGroup)) {
+		http.Error(w, apitools.UnexpectedError, http.StatusNotImplemented)
+		fmt.Fprintf(w, "This receiverGroup does not exist, please use an existing group or create a new one!")
+		return
+	}
+
+	_, err = databasefunctions.Db.Exec("INSERT INTO `Emails`(`Email`) VALUES (?)", warningReceiver.ReceiverEmail)
+	if err != nil {
+		http.Error(w, apitools.UnexpectedError, http.StatusBadRequest)
+		return
+	}
+
+	result, err := databasefunctions.Db.Exec("INSERT INTO `WarningReceiver`(`Name`, `PhoneNumber`, `Company`, `ReceiverGroup`, `ReceiverEmail`) VALUES (?,?,?,?,?)", warningReceiver.Name, warningReceiver.PhoneNumber, warningReceiver.Company, warningReceiver.ReceiverGroup, warningReceiver.ReceiverEmail)
 	if err != nil {
 		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
 		return
 	}
+
 	id, err := result.LastInsertId()
 	if err != nil {
 		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)

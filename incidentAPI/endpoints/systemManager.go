@@ -12,13 +12,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
-/**
+/*
 Class systemManager will handle all communication with the SystemManager entity in the database
 Will handle GET, POST and DELETE
-* TODO Implement GET SystemManager
-* TODO Implement POST SystemManager
-* TODO Implement DELETE SystemManager
-
+TODO Implement DELETE SystemManager
+TODO Error handle
 */
 
 // Handler for forwarding request to appropriate function based on HTTP method
@@ -45,6 +43,11 @@ func HandleSystemManagerRequest(w http.ResponseWriter, r *http.Request) {
  * Function getSystemManager will forward the GET request based on wether or not the user sends in an id or not
  */
 func getSystemManager(w http.ResponseWriter, r *http.Request, url string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
+
 	variables := mux.Vars(r)
 	id := variables["id"]
 

@@ -1,7 +1,11 @@
 package databasefunctions
 
-/**
+/*
 File connection.go, contains basic database functionality for the software
+
+TODO Implement PUT Request
+TODO Implement DELETE Request
+TODO Error handle
 */
 import (
 	"database/sql"
@@ -58,9 +62,9 @@ identical to a passed in one using an id or another identifier
 */
 func CheckExisting(tableName string, columnName string, entityID string) bool {
 	//Queries the database
-	rows, err := Db.Query("SELECT * FROM " + tableName + " WHERE " + columnName + " = " + entityID)
+	rows, err := Db.Query("SELECT * FROM "+tableName+" WHERE "+columnName+" = ?", entityID)
 	if err != nil {
-		log.Fatal(err)
+		log.Print("Error when querying" + err.Error())
 		return false
 	}
 	//If the entity already exists
@@ -81,19 +85,16 @@ func CreateNewUser(newEmail string, newPassword string) int {
 	_, err := Db.Exec("INSERT INTO `Emails`(`Email`) VALUES (?)", newEmail)
 	if err != nil {
 		log.Fatal(err.Error())
-		return 0
 	}
 
 	_, err = Db.Exec("INSERT INTO `Passwords`(`Password`) VALUES (?);", newPassword)
 	if err != nil {
 		log.Fatal(err.Error())
-		return 0
 	}
 
 	credentials, err := Db.Exec("INSERT INTO `Credentials`(`Email`, `Password`) VALUES(?, ?)", newEmail, newPassword)
 	if err != nil {
 		log.Fatal(err.Error())
-		return 0
 	}
 
 	id, err := credentials.LastInsertId()

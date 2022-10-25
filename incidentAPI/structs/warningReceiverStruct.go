@@ -1,21 +1,20 @@
 package structs
 
 type CreateWarningReceiver struct {
-	Name        string `json:"name"`
-	PhoneNumber string `json:"phoneNumber"`
-	Company     string `json:"company"`
-	Group       string `json:"group"`
+	Name          string `json:"name"`
+	PhoneNumber   string `json:"phoneNumber"`
+	Company       string `json:"company"`
+	ReceiverGroup string `json:"receiverGroup"`
+	ReceiverEmail string `json:"receiverEmail"`
 }
 
 type GetWarningReceiver struct {
-	Id           int     `json:"id"`
-	Name         *string `json:"name"`
-	PhoneNumber  *string `json:"phoneNumber"`
-	Company      *string `json:"company"`
-	CredentialId *string `json:"credentialId"`
-	Group        *string `json:"group"`
-	ReceiverId   *string `json:"receiverId"`
-	Email        *string `json:"email"`
+	Id            int     `json:"id"`
+	Name          *string `json:"name"`
+	PhoneNumber   *string `json:"phoneNumber"`
+	Company       *string `json:"company"`
+	ReceiverGroup *string `json:"receiverGroup"`
+	ReceiverEmail *string `json:"receiverEmail"`
 }
 
 type DeleteWarningReceiver []struct {
