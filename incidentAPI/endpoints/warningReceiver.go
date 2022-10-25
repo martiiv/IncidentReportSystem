@@ -23,6 +23,11 @@ Last rev 25.10 Martin Iversen
 Function handleRequest will forward the request to an appropriate function based on method and url
 */
 func HandleRequestWarningReceiver(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
+
 	method := r.Method
 	switch method {
 	case "GET":
