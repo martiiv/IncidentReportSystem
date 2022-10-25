@@ -16,12 +16,10 @@ func main() {
 
 	databasefunctions.EstablishConnection()
 	//Group endpoint
-	//Todo add function to endpoints
-	r.Path("/groups").Queries("id", "{id}") //PUT
-	r.Path("/groups")                       //GET, POST
+	r.Path("/groups").HandlerFunc(endpoints.HandleReceivingGroup).Queries("id", "{id}") //PUT
+	r.Path("/groups").HandlerFunc(endpoints.HandleReceivingGroup)                       //GET, POST
 
 	//Log endpoint
-	//Todo add function to endpoints
 	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest).Queries("id", "{id}") //GET PUT
 	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest)
 
@@ -30,14 +28,12 @@ func main() {
 	r.HandleFunc("/incident/sendMail/", communication.SendMail)
 
 	//System Manager endpoint
-	//Todo add function to endpoints
 	r.Path("/manager").HandlerFunc(endpoints.HandleSystemManagerRequest).Queries("id", "{id}") //PUT
 	r.Path("/manager").HandlerFunc(endpoints.HandleSystemManagerRequest)                       //GET, POST, DELETE
 
 	//Warning Receiver endpoint
-	//Todo add function to endpoints
-	r.Path("/receiver").Queries("id", "{id}")                               //PUT
-	r.Path("/receiver").HandlerFunc(endpoints.HandleRequestWarningReceiver) //POST, DELETE
+	r.Path("/receiver").HandlerFunc(endpoints.HandleRequestWarningReceiver).Queries("id", "{id}") //PUT
+	r.Path("/receiver").HandlerFunc(endpoints.HandleRequestWarningReceiver)                       //POST, DELETE
 	http.Handle("/", r)
 
 	fmt.Print("Listening on port:" + getPort())
