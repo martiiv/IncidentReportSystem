@@ -1,17 +1,19 @@
 import {BASE_URL} from "../constants/WebURL";
-
-
-
 /**
- * Function to fetch data from an api
+ * Function that will send a delete request to an api.
  *
- * @param url we would like to fetch data from.
+ * @param url to the request we would like to send
+ * @param body request body
  * @returns {Promise<unknown>}
  */
-export default function fetchData(url) {
+
+export default function deleteData(url, body) {
     return new Promise(function (resolve, reject) {
         const xhr = new XMLHttpRequest();
-
+        /*
+            load event is also ok to use here,
+            but readystatechange was giving me more descriptive errors
+        */
         xhr.addEventListener('readystatechange', () => {
             if (xhr.readyState !== 4) {
                 return;
@@ -24,14 +26,14 @@ export default function fetchData(url) {
                 });
             } else {
                 resolve({
-                    statusCode: xhr.status,
-                    data: JSON.parse(xhr.responseText)
+                        statusCode: xhr.status,
+                        data: JSON.parse(xhr.responseText)
                     }
                 );
             }
         });
-        xhr.open('GET',  BASE_URL + url);
-        xhr.send();
+        xhr.open('DELETE',  BASE_URL + url);
+        xhr.send(JSON.stringify(body));
     });
 }
 
