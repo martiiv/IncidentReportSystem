@@ -31,7 +31,7 @@ type SendIndividualIncident struct {
 	Name           string `json:"name"`
 	Context        string `json:"context"`
 	Information    string `json:"information"`
-	Receiver       string `json:"receiver"`
+	Receiver       []int  `json:"receiver"`
 	Countermeasure string `json:"countermeasure"`
 }
 
