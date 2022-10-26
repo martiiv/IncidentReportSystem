@@ -62,12 +62,14 @@ func getWarningReceiver(w http.ResponseWriter, r *http.Request, id string) {
 		&warning.ReceiverEmail,
 	); err != nil {
 		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+		log.Println(err.Error())
 		return
 	}
 
 	err := json.NewEncoder(w).Encode(warning)
 	if err != nil {
 		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
+		log.Println(err.Error())
 		return
 	}
 
@@ -83,6 +85,7 @@ func getWarningReceivers(w http.ResponseWriter, r *http.Request) {
 	row, err := databasefunctions.Db.Query("SELECT * FROM `WarningReceiver`")
 	if err != nil {
 		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+		log.Println(err.Error())
 		return
 	}
 	// Loop through rows, using Scan to assign column data to struct fields.
@@ -97,6 +100,7 @@ func getWarningReceivers(w http.ResponseWriter, r *http.Request) {
 			&warning.ReceiverEmail,
 		); err != nil {
 			http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+			log.Println(err.Error())
 			return
 		}
 
@@ -104,12 +108,14 @@ func getWarningReceivers(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := row.Err(); err != nil {
 		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+		log.Println(err.Error())
 		return
 	}
 
 	err = json.NewEncoder(w).Encode(warnings)
 	if err != nil {
 		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
+		log.Println(err.Error())
 		return
 	}
 }
@@ -119,6 +125,7 @@ func createReceiver(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&warningReceiver) //Decodes the requests body into the structure defined above
 	if err != nil {
 		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
+		log.Println(err.Error())
 		return
 	}
 
@@ -130,23 +137,26 @@ func createReceiver(w http.ResponseWriter, r *http.Request) {
 
 	_, err = databasefunctions.Db.Exec("INSERT INTO `Emails`(`Email`) VALUES (?)", warningReceiver.ReceiverEmail)
 	if err != nil {
-		http.Error(w, apitools.UnexpectedError, http.StatusBadRequest)
+		http.Error(w, apitools.UnexpectedError, http.StatusServiceUnavailable)
+		log.Println(err.Error())
 		return
 	}
 
 	result, err := databasefunctions.Db.Exec("INSERT INTO `WarningReceiver`(`Name`, `PhoneNumber`, `Company`, `ReceiverGroup`, `ReceiverEmail`) VALUES (?,?,?,?,?)", warningReceiver.Name, warningReceiver.PhoneNumber, warningReceiver.Company, warningReceiver.ReceiverGroup, warningReceiver.ReceiverEmail)
 	if err != nil {
-		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+		http.Error(w, apitools.UnexpectedError, http.StatusServiceUnavailable)
+		log.Println(err.Error())
 		return
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+		http.Error(w, apitools.UnexpectedError, http.StatusServiceUnavailable)
+		log.Println(err.Error())
 		return
 	}
 
-	fmt.Fprintf(w, "added with id %v", id)
+	http.Error(w, "added with "+string(id), http.StatusOK)
 }
 
 func deleteReceiver(w http.ResponseWriter, r *http.Request) {
@@ -154,6 +164,7 @@ func deleteReceiver(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&warningReceiver) //Decodes the requests body into the structure defined above
 	if err != nil {
 		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
+		log.Println(err.Error())
 		return
 	}
 
@@ -161,7 +172,9 @@ func deleteReceiver(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	tx, err := databasefunctions.Db.BeginTx(ctx, nil)
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+		log.Println(err.Error())
+		return
 	}
 	// `tx` is an instance of `*sql.Tx` through which we can execute our queries
 
@@ -170,7 +183,14 @@ func deleteReceiver(w http.ResponseWriter, r *http.Request) {
 		_, err = tx.ExecContext(ctx, "DELETE FROM `WarningReceiver` WHERE WriD = ?", warningReceiver[i].Id)
 		if err != nil {
 			// Incase we find any error in the query execution, rollback the transaction
-			tx.Rollback()
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+				log.Println(rollbackErr.Error())
+
+				return
+			}
+			http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+			log.Println(err.Error())
 			return
 		}
 	}
@@ -179,9 +199,12 @@ func deleteReceiver(w http.ResponseWriter, r *http.Request) {
 	// this applies the above changes to our database
 	err = tx.Commit()
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+		log.Println(err.Error())
+		return
 	}
 
-	fmt.Fprintf(w, "Successfully deleted Warning receiver with id %v", warningReceiver)
+	wrId := fmt.Sprintf("%#v", warningReceiver)
 
+	http.Error(w, "Successfully deleted Warning receiver with id "+wrId, http.StatusOK)
 }
