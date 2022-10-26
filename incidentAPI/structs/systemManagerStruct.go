@@ -13,7 +13,7 @@ type GetSystemManager struct {
 	Id       int    `json:"id"`
 	UserName string `json:"userName"`
 	Company  string `json:"company"`
-	Email    string `json:"email"`
+	Credentials    int `json:"credentials"`
 }
 
 // Method for deleting system managers /manager

@@ -3,11 +3,14 @@ package communication
 import (
 	"encoding/json"
 	"fmt"
+	_ "incidentAPI/apiTools"
 	"incidentAPI/config"
+	databasefunctions "incidentAPI/databaseFunctions"
 	"incidentAPI/structs"
 	"io/ioutil"
 	"net/http"
 	"net/smtp"
+	"strconv"
 )
 
 func SendMail(w http.ResponseWriter, r *http.Request) {
@@ -32,9 +35,9 @@ func SendMail(w http.ResponseWriter, r *http.Request) {
 	password := config.SenderEmailAppPassword
 
 	// Receiver email address.
-	receiver := incident.Receiver
+	//receiver := incident.Receiver
 
-	to := []string{receiver}
+	to := getEmails(incident.Receiver)
 
 	// smtp server configuration.
 	smtpHost := "smtp.gmail.com"
@@ -72,4 +75,38 @@ func addStruct(r *http.Request) interface{} {
 	}
 
 	return project
+}
+
+func getEmails(groups []int) []string {
+	var emails []string
+
+	var searchString string
+	if len(groups) > 1 {
+		for i := 0; i < len(groups); i++ {
+			searchString += strconv.Itoa(groups[i]) + " AND "
+		}
+	}
+
+	searchString = searchString[:len(searchString)-5]
+
+	fmt.Println(searchString)
+
+	row, err := databasefunctions.Db.Query("SELECT Emails.Email FROM WarningReceiver INNER JOIN Emails ON WarningReceiver.ReceiverEmail = Emails.Email INNER JOIN ReceiverGroups ON WarningReceiver.ReceiverGroup = ReceiverGroups.Name WHERE ReceiverGroups.Groupid = ?", searchString)
+	if err != nil {
+		return nil
+	}
+	// Loop through rows, using Scan to assign column data to struct fields.
+	for row.Next() {
+		email := structs.GetEmails{}
+		if err = row.Scan(
+			&email.Email,
+		); err != nil {
+			return nil
+		}
+
+		emails = append(emails, email.Email)
+
+	}
+	return emails
+
 }
