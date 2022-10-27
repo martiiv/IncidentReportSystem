@@ -94,7 +94,6 @@ func getAllIncidents(w http.ResponseWriter, r *http.Request) {
 			&incident.Name,
 			&incident.Description,
 			&incident.Company,
-			&incident.Credential,
 			&incident.ReceivingGroup,
 			&incident.Countermeasure,
 			&incident.Sendbymanager,
@@ -137,7 +136,6 @@ func getOneIncident(w http.ResponseWriter, r *http.Request, id string) {
 			&incident.Name,
 			&incident.Description,
 			&incident.Company,
-			&incident.Credential,
 			&incident.ReceivingGroup,
 			&incident.Countermeasure,
 			&incident.Sendbymanager,
@@ -180,12 +178,11 @@ func createIncident(w http.ResponseWriter, r *http.Request, url string) {
 		log.Print(checkGroup) //Remove this later
 	}
 
-	object, err := databasefunctions.Db.Exec("INSERT INTO `Incident` (`Tag`, `Name`, `Description`, `Company`, `Credential`, `Receiving_Group`, `Countermeasure`, `Sendbymanager`, `Date`) VALUES(?,?,?,?,?,?,?,?,?)",
+	object, err := databasefunctions.Db.Exec("INSERT INTO `Incident` (`Tag`, `Name`, `Description`, `Company`, `Receiving_Group`, `Countermeasure`, `Sendbymanager`, `Date`) VALUES(?,?,?,?,?,?,?,?)",
 		incident.Tag,
 		incident.Name,
 		incident.Description,
 		incident.Company,
-		incident.Credential,
 		incident.ReceivingGroup,
 		incident.Countermeasure,
 		incident.Sendbymanager,
@@ -200,6 +197,7 @@ func createIncident(w http.ResponseWriter, r *http.Request, url string) {
 		log.Fatal(err)
 	}
 
+	w.WriteHeader(201)
 	fmt.Fprintf(w, "New incident added with id: %v", id)
 }
 
@@ -232,5 +230,5 @@ func updateCountermeasures(w http.ResponseWriter, r *http.Request, url string) {
 Function deleteIncident will delete a given incident from the database
 */
 func deleteIncident(w http.ResponseWriter, r *http.Request, url string) {
-
+	// TODO Ikke gjort enda
 }

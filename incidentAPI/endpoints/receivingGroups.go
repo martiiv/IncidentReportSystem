@@ -148,6 +148,7 @@ func createReceivingGroups(w http.ResponseWriter, r *http.Request, url string) {
 		log.Fatal(err)
 	}
 
+	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintf(w, "New receiver group added with id: %v", id)
 }
 
