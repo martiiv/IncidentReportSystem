@@ -10,10 +10,10 @@ type CreateSystemManager struct {
 
 // Method for getting a system manager /manager?id=92 Method GET
 type GetSystemManager struct {
-	Id       int    `json:"id"`
-	UserName string `json:"userName"`
-	Company  string `json:"company"`
-	Credentials    int `json:"credentials"`
+	Id         int    `json:"id"`
+	UserName   string `json:"userName"`
+	Company    string `json:"company"`
+	Credential string `json:"credential"`
 }
 
 // Method for deleting system managers /manager

@@ -156,7 +156,8 @@ func createReceiver(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Error(w, "added with "+string(id), http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprintf(w, "added with id %v", id)
 }
 
 func deleteReceiver(w http.ResponseWriter, r *http.Request) {

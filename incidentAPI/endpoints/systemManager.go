@@ -72,7 +72,7 @@ func getAllSystemManagers(w http.ResponseWriter, r *http.Request) {
 
 	var smList []structs.GetSystemManager
 
-	rows, err := databasefunctions.Db.Query("SELECT * FROM SystemManager")
+	rows, err := databasefunctions.Db.Query("SELECT * FROM `SystemManager`")
 	if err != nil {
 		fmt.Fprintf(w, "Error occurred when querying database, error: %v", err.Error())
 	}
@@ -83,7 +83,7 @@ func getAllSystemManagers(w http.ResponseWriter, r *http.Request) {
 			&systemManager.Id,
 			&systemManager.UserName,
 			&systemManager.Company,
-			&systemManager.Credentials)
+			&systemManager.Credential)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -112,17 +112,18 @@ func getOneSystemManager(w http.ResponseWriter, r *http.Request, id string) {
 
 	systemManager := structs.GetSystemManager{}
 
-	rows, err := databasefunctions.Db.Query("SELECT * FROM `SystemManager`WHERE SMiD = ?", id)
+	rows, err := databasefunctions.Db.Query("SELECT * FROM `SystemManager` WHERE SMiD = ?", id)
 	if err != nil {
 		fmt.Fprintf(w, "Error occurred when querying database, error: %v", err.Error())
 	}
 
 	for rows.Next() { //For all the rows in the database we convert the sql entity to a string and insert it into a struct
+		systemManager = structs.GetSystemManager{}
 		err = rows.Scan(
 			&systemManager.Id,
 			&systemManager.UserName,
 			&systemManager.Company,
-			&systemManager.Credentials)
+			&systemManager.Credential)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -165,6 +166,7 @@ func createSystemManagers(w http.ResponseWriter, r *http.Request, url string) {
 		log.Fatal(err)
 	}
 
+	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintf(w, "New System manager added with id: %v", id)
 }
 
