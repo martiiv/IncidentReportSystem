@@ -57,7 +57,7 @@ func Test_createIncident(t *testing.T) {
 			Post("/incident").
 			Body(`{ 
 			"tag": "Test",
-			"name":  "TestIncident",
+			"name":  "TestIncidentAPITEST",
 			"description": "I am testing an incident",
 			"company": "IncidentCorp",
 			"receivingGroup": "1",
@@ -91,7 +91,8 @@ func Test_updateCountermeasures(t *testing.T) {
 
 	t.Run("Reverting the countermeasures", func(t *testing.T) {
 		apitest.New().
-			Handler(r).Put("/incident").
+			Handler(r).
+			Put("/incident").
 			Body(`{
 				"incidentId": 1,
 				"countermeasure" : "Contact janitor, Fix door"
@@ -104,5 +105,20 @@ func Test_updateCountermeasures(t *testing.T) {
 }
 
 func Test_deleteIncident(t *testing.T) {
-
+	r := mux.NewRouter()
+	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest)
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+	t.Run("Deleting testIncident incident with name TestIncidentAPITEST", func(t *testing.T) {
+		apitest.New().
+			Handler(r).
+			Delete("/incident").
+			Body(`[{
+		"incidentId": "",
+		"incidentName" : "TestIncidentAPITEST"
+		}]`).
+			Expect(t).
+			Status(http.StatusOK).
+			End()
+	})
 }

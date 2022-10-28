@@ -1,8 +1,10 @@
 package endpoints
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	apitools "incidentAPI/apiTools"
 	databasefunctions "incidentAPI/databaseFunctions"
 	"incidentAPI/structs"
 	"log"
@@ -17,8 +19,8 @@ Class incident, will handle
 - insertion of countermeasures
 - fetching incidents from the database
 TODO Error handle
-TODO create DELETE functionality
 !You can only send in one recieverGroup when creating the incident
+!The delete functionality will delete ALL incidents named incidentName
 
 Author Martin Iversen
 Last rev 19.10
@@ -228,7 +230,71 @@ func updateCountermeasures(w http.ResponseWriter, r *http.Request, url string) {
 
 /*
 Function deleteIncident will delete a given incident from the database
+Takes in either the incident id or the incidentName in order to delete an instance of incident from the database
 */
 func deleteIncident(w http.ResponseWriter, r *http.Request, url string) {
-	// TODO Ikke gjort enda
+	var incident structs.DeleteIncident
+	err := json.NewDecoder(r.Body).Decode(&incident) //Decodes the requests body into the structure defined above
+	if err != nil {
+		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
+	// Create a new context, and begin a transaction
+	ctx := context.Background()
+	tx, err := databasefunctions.Db.BeginTx(ctx, nil)
+	if err != nil {
+		http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+		log.Println(err.Error())
+		return
+	}
+
+	//For each of incident struct objects passed in
+	for i := 0; i < len(incident); i++ {
+		//If the IncidentId field is left as an empty string this means the function should delete based on name instead
+		if incident[i].IncidentId == "" {
+			_, err = tx.ExecContext(ctx, "DELETE FROM `Incident` WHERE Name = ?", incident[i].IncidentName)
+			if err != nil {
+				// In case we find any error in the query execution, rollback the transaction
+				if rollbackErr := tx.Rollback(); rollbackErr != nil {
+					http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+					log.Println(rollbackErr.Error())
+
+					return
+				}
+				http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+				log.Println(err.Error())
+				return
+			}
+			//If the IncidentId field isnt empty we delete using the id
+		} else {
+			_, err = tx.ExecContext(ctx, "DELETE FROM `Incident` WHERE IncidentId = ?", incident[i].IncidentId)
+			if err != nil {
+				// Incase we find any error in the query execution, rollback the transaction
+				if rollbackErr := tx.Rollback(); rollbackErr != nil {
+					http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+					log.Println(rollbackErr.Error())
+
+					return
+				}
+				http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+				log.Println(err.Error())
+				return
+			}
+		}
+	}
+
+	// Finally, if no errors are recieved from the queries, commit the transaction
+	// this applies the above changes to our database
+	err = tx.Commit()
+	if err != nil {
+		http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+		log.Println(err.Error())
+		return
+	}
+
+	wrId := fmt.Sprintf("%#v", incident)
+	w.WriteHeader(http.StatusOK)
+	http.Error(w, "Successfully deleted Warning receiver with id "+wrId, http.StatusOK)
 }

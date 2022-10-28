@@ -57,11 +57,11 @@ func Test_createReceiver(t *testing.T) {
 			Handler(r).
 			Post("/receiver").
 			Body(`{
-				"name":"TestReceiver",
+				"name":"TestReceiverAPITEST",
 				"phoneNumber":"12345678",
 				"company":"IncidentCorp",
 				"receiverGroup":"Marketing",
-				"receiverEmail":"test123@gmail.com"
+				"receiverEmail":"APITEST@gmail.com"
 			}`).
 			Expect(t).
 			Status(http.StatusCreated).
@@ -70,11 +70,13 @@ func Test_createReceiver(t *testing.T) {
 
 }
 
+/*
 func Test_updateReceiver(t *testing.T) {
-	//? not implemented yet
+	? not implemented yet
 }
+*/
 
-func Test_deleteReceiver(t *testing.T) { //! Funkær ikke faen i hælvette
+func Test_deleteReceiver(t *testing.T) {
 	databasefunctions.EstablishConnection()
 	r := mux.NewRouter()
 	r.Path("/receiver").HandlerFunc(endpoints.HandleRequestWarningReceiver)
@@ -84,9 +86,10 @@ func Test_deleteReceiver(t *testing.T) { //! Funkær ikke faen i hælvette
 		apitest.New().
 			Handler(r).
 			Delete("/receiver").
-			Body(`{
-				"id": 21
-			}`).
+			Body(`[{
+				"id": 0,
+				"email":"APITEST@gmail.com"
+			}]`).
 			Expect(t).
 			Status(http.StatusOK).
 			End()
