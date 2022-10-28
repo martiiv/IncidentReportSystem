@@ -180,19 +180,37 @@ func deleteReceiver(w http.ResponseWriter, r *http.Request) {
 	// `tx` is an instance of `*sql.Tx` through which we can execute our queries
 
 	for i := 0; i < len(warningReceiver); i++ {
-		// Here, the query is executed on the transaction instance, and not applied to the database yet
-		_, err = tx.ExecContext(ctx, "DELETE FROM `WarningReceiver` WHERE WriD = ?", warningReceiver[i].Id)
-		if err != nil {
-			// Incase we find any error in the query execution, rollback the transaction
-			if rollbackErr := tx.Rollback(); rollbackErr != nil {
-				http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
-				log.Println(rollbackErr.Error())
 
+		if !(warningReceiver[i].Email == "") {
+			// Here, the query is executed on the transaction instance, and not applied to the database yet
+			_, err = tx.ExecContext(ctx, "DELETE FROM `WarningReceiver` WHERE ReceiverEmail = ?", warningReceiver[i].Email)
+			if err != nil {
+				// Incase we find any error in the query execution, rollback the transaction
+				if rollbackErr := tx.Rollback(); rollbackErr != nil {
+					http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+					log.Println(rollbackErr.Error())
+
+					return
+				}
+				http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+				log.Println(err.Error())
 				return
 			}
-			http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
-			log.Println(err.Error())
-			return
+		} else {
+			// Here, the query is executed on the transaction instance, and not applied to the database yet
+			_, err = tx.ExecContext(ctx, "DELETE FROM `WarningReceiver` WHERE WriD = ?", warningReceiver[i].Id)
+			if err != nil {
+				// Incase we find any error in the query execution, rollback the transaction
+				if rollbackErr := tx.Rollback(); rollbackErr != nil {
+					http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+					log.Println(rollbackErr.Error())
+
+					return
+				}
+				http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+				log.Println(err.Error())
+				return
+			}
 		}
 	}
 
@@ -206,6 +224,7 @@ func deleteReceiver(w http.ResponseWriter, r *http.Request) {
 	}
 
 	wrId := fmt.Sprintf("%#v", warningReceiver)
+	w.WriteHeader(http.StatusOK)
 
 	http.Error(w, "Successfully deleted Warning receiver with id "+wrId, http.StatusOK)
 }

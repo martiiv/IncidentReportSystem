@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	apitools "incidentAPI/apiTools"
@@ -171,5 +172,68 @@ func createSystemManagers(w http.ResponseWriter, r *http.Request, url string) {
 }
 
 func deleteSystemManagers(w http.ResponseWriter, r *http.Request, url string) {
+	var systemManager structs.DeleteSystemManager
+	err := json.NewDecoder(r.Body).Decode(&systemManager) //Decodes the requests body into the structure defined above
+	if err != nil {
+		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
 
+	// Create a new context, and begin a transaction
+	ctx := context.Background()
+	tx, err := databasefunctions.Db.BeginTx(ctx, nil)
+	if err != nil {
+		http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+		log.Println(err.Error())
+		return
+	}
+
+	//For each of receiverGroup struct objects passed in
+	for i := 0; i < len(systemManager); i++ {
+		//If the id field is left as an empty string this means the function should delete based on name instead
+		if systemManager[i].Id == "" {
+			_, err = tx.ExecContext(ctx, "DELETE FROM `SystemManager` WHERE Username = ?", systemManager[i].Name)
+			if err != nil {
+				// In case we find any error in the query execution, rollback the transaction
+				if rollbackErr := tx.Rollback(); rollbackErr != nil {
+					http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+					log.Println(rollbackErr.Error())
+
+					return
+				}
+				http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+				log.Println(err.Error())
+				return
+			}
+			//If the id field isnt empty we delete using the id
+		} else {
+			_, err = tx.ExecContext(ctx, "DELETE FROM `SystemManager` WHERE SMiD = ?", systemManager[i].Id)
+			if err != nil {
+				// Incase we find any error in the query execution, rollback the transaction
+				if rollbackErr := tx.Rollback(); rollbackErr != nil {
+					http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+					log.Println(rollbackErr.Error())
+
+					return
+				}
+				http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+				log.Println(err.Error())
+				return
+			}
+		}
+	}
+
+	// Finally, if no errors are recieved from the queries, commit the transaction
+	// this applies the above changes to our database
+	err = tx.Commit()
+	if err != nil {
+		http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+		log.Println(err.Error())
+		return
+	}
+
+	wrId := fmt.Sprintf("%#v", systemManager)
+	w.WriteHeader(http.StatusOK)
+	http.Error(w, "Successfully deleted Receiver group with id "+wrId, http.StatusOK)
 }

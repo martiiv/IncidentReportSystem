@@ -40,3 +40,8 @@ type UpdateCountermeasure struct {
 	IncidentId     int    `json:"incidentId"`
 	Countermeasure string `json:"countermeasure"`
 }
+
+type DeleteIncident []struct {
+	IncidentId   string `json:"incidentId"`
+	IncidentName string `json:"incidentName"`
+}

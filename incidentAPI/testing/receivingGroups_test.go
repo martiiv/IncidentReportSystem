@@ -56,8 +56,8 @@ func Test_createReceiverGroup(t *testing.T) {
 			Handler(r).
 			Post("/groups").
 			Body(`{
-				"name": "Test Group",
-				"info": "Group for testing the api"
+				"name": "TestGroupAPITEST",
+				"info": "Group for testing the api using apitestf"
 			}`).
 			Expect(t).
 			Status(http.StatusCreated).
@@ -65,38 +65,27 @@ func Test_createReceiverGroup(t *testing.T) {
 	})
 }
 
-func Test_updateReceiverGroup(t *testing.T) { //! Not working cuz not implemented
-	databasefunctions.EstablishConnection() //? Not implemented
-	r := mux.NewRouter()
-	r.Path("/groups").HandlerFunc(endpoints.HandleIncidentRequest)
-	ts := httptest.NewServer(r)
-	defer ts.Close()
-	t.Run("Updating incident with id 1", func(t *testing.T) {
-		apitest.New().
-			Handler(r).Put("/incident").
-			Body(`{
-		"incidentId": 1,
-		"countermeasure" : "Updating countermeasures ins TestIncident"
-		}`).
-			Expect(t).
-			Status(http.StatusOK).
-			End()
-	})
-
-	t.Run("Reverting the countermeasures", func(t *testing.T) {
-		apitest.New().
-			Handler(r).Put("/incident").
-			Body(`{
-				"incidentId": 1,
-				"countermeasure" : "Contact janitor, Fix door"
-	}`).
-			Expect(t).
-			Status(http.StatusOK).
-			End()
-	})
-
+/*
+func Test_updateReceiverGroup(t *testing.T) {
+	! PUT Request not implemented for this endpoint
 }
+*/
 
 func Test_deleteReceiverGroup(t *testing.T) {
-	//? Not implemented
+	r := mux.NewRouter()
+	r.Path("/groups").HandlerFunc(endpoints.HandleReceivingGroup)
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+	t.Run("Deleting test group incident with name TestGroupAPITEST", func(t *testing.T) {
+		apitest.New().
+			Handler(r).
+			Delete("/groups").
+			Body(`[{
+		"id": "",
+		"name" : "TestGroupAPITEST"
+		}]`).
+			Expect(t).
+			Status(http.StatusOK).
+			End()
+	})
 }

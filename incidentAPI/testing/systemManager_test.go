@@ -56,12 +56,7 @@ func Test_createSystemManager(t *testing.T) {
 		apitest.New().
 			Handler(r).
 			Post("/manager").
-			Body(`{
-				"userName": "TestManager",
-				"company":"IncidentCorp",
-				"email":"testManager@gmail.com",
-				"password": "1241erreth23e23r1231"
-			}`).
+			Body(`{"userName": "TestManagerAPITEST","company":"IncidentCorp","email":"testManager@gmail.com","password": "1241erreth23e23r1231"}`).
 			Expect(t).
 			Status(http.StatusCreated).
 			End()
@@ -69,23 +64,25 @@ func Test_createSystemManager(t *testing.T) {
 
 }
 
+/*
 func Test_updateSystemManager(t *testing.T) {
-	//? not implemented yet
+	? not implemented yet
 }
+*/
 
-func Test_deleteSystemManager(t *testing.T) { //! Funkær ikke faen i hælvette
-	databasefunctions.EstablishConnection()
+func Test_deleteSystemManager(t *testing.T) {
 	r := mux.NewRouter()
 	r.Path("/manager").HandlerFunc(endpoints.HandleSystemManagerRequest)
 	ts := httptest.NewServer(r)
 	defer ts.Close()
-	t.Run("Deleting the test manager", func(t *testing.T) {
+	t.Run("Deleting system manager with name TestManagerAPITEST", func(t *testing.T) {
 		apitest.New().
 			Handler(r).
 			Delete("/manager").
-			Body(`{
-				"id": 21
-			}`).
+			Body(`[{
+		"id": "",
+		"name" : "TestManagerAPITEST"
+		}]`).
 			Expect(t).
 			Status(http.StatusOK).
 			End()
