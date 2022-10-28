@@ -4,7 +4,6 @@ package databasefunctions
 File connection.go, contains basic database functionality for the software
 
 TODO Implement PUT Request
-TODO Implement DELETE Request
 TODO Error handle
 */
 import (
@@ -79,7 +78,8 @@ func CheckExisting(tableName string, columnName string, entityID string) bool {
 /*
 *Function createNewUser will insert a new email and password into the email and password table
 * And create a new credentials entity using the email and password
- */
+! Something wrong with foreign key stuff when using this function
+*/
 func CreateNewUser(newEmail string, newPassword string) int {
 	Db.Begin()
 	_, err := Db.Exec("INSERT INTO `Emails`(`Email`) VALUES (?)", newEmail)

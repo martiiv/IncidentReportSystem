@@ -2,45 +2,48 @@ package communication
 
 import (
 	"encoding/json"
-	"fmt"
+	_ "incidentAPI/apiTools"
 	"incidentAPI/config"
+	databasefunctions "incidentAPI/databaseFunctions"
 	"incidentAPI/structs"
-	"io/ioutil"
+	_ "io/ioutil"
+	"log"
 	"net/http"
 	"net/smtp"
+	"strconv"
 )
 
+/**
+Function that will send mail
+*/
 func SendMail(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
 
-	fmt.Print("Du er inne i sendmail")
-
+	//Declaring struct to
 	var incident structs.SendIndividualIncident
 	err := json.NewDecoder(r.Body).Decode(&incident) //Decodes the requests body into the structure defined above
 	if err != nil {
-		fmt.Println("Error")
+		http.Error(w, "email not sent", http.StatusInternalServerError)
+		log.Println(err.Error())
 		return
 	}
 
-	fmt.Print("Du har decoda")
-
-	// Sender data.
+	// Sending data from email
 	from := "trakkemaskintrine@gmail.com"
 	password := config.SenderEmailAppPassword
 
-	// Receiver email address.
-	receiver := incident.Receiver
+	//Array of email receivers
+	to := getEmails(incident.Receiver)
 
-	to := []string{receiver}
-
-	// smtp server configuration.
+	//smtp server configuration.
 	smtpHost := "smtp.gmail.com"
 	smtpPort := "587"
 
-	messageString := incident.Information
+	//Main mail body
+	messageString := "Subject: " + incident.Context + "\n\nInformation:\n" + incident.Information + "\r\nCountermeasures:\n" + incident.Countermeasure
 
 	// Message.
 	message := []byte((messageString))
@@ -51,25 +54,48 @@ func SendMail(w http.ResponseWriter, r *http.Request) {
 	// Sending email.
 	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
 	if err != nil {
-		fmt.Println(err)
+		http.Error(w, "email not sent", http.StatusInternalServerError)
+		log.Println(err.Error())
 		return
 	}
 
-	fmt.Println("Email Sent Successfully!")
+	http.Error(w, "email successfully sent", http.StatusOK)
 }
 
-func addStruct(r *http.Request) interface{} {
+/**
+Function that will retrieve the emails of a selected group
+*/
+func getEmails(groups []int) []string {
+	var emails []string
 
-	request, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		fmt.Println("Error")
+	//Create SQL Query statement
+	var searchString string
+	if len(groups) > 1 {
+		for i := 0; i < len(groups); i++ {
+			searchString += strconv.Itoa(groups[i]) + " AND "
+		}
 	}
+	searchString = searchString[:len(searchString)-5] //Will trim the last AND
 
-	var project structs.MessageInput        //Defines the structure of the request
-	err = json.Unmarshal(request, &project) //Unmarshall the request data into the project struct
+	//Fetching from database
+	row, err := databasefunctions.Db.Query("SELECT Emails.Email FROM WarningReceiver INNER JOIN Emails ON WarningReceiver.ReceiverEmail = Emails.Email INNER JOIN ReceiverGroups ON WarningReceiver.ReceiverGroup = ReceiverGroups.Name WHERE ReceiverGroups.Groupid = ?", searchString)
 	if err != nil {
-		fmt.Println("Error")
+		log.Println(err.Error())
+		return nil
 	}
+	// Loop through rows, using Scan to assign column data to struct fields.
+	for row.Next() {
+		email := structs.GetEmails{}
+		if err = row.Scan(
+			&email.Email,
+		); err != nil {
+			log.Println(err.Error())
+			return nil
+		}
 
-	return project
+		emails = append(emails, email.Email)
+
+	}
+	return emails
+
 }
