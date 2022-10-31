@@ -6,6 +6,7 @@ import {Component} from "react";
 class Table extends Component {
 
     render() {
+
         const { onChangeValue, type, data, row } = this.props;
         return (
             <div className={"table-div"} style={{display: "flex", justifyContent: "center"}}>
@@ -29,9 +30,9 @@ class Table extends Component {
                         }
 
                         <td>{type !== "WR" ? item.date : item.name}</td>
-                        <td>{item.receiverGroup}</td>
+                        <td>{type !== "WR" ? item.receivingGroup: item.receiverGroup}</td>
                         <td>{type !== "WR"  ? item.name : item.company}</td>
-                        <td>{type === "WR" ? item.email : "Tags"}</td>
+                        <td>{type === "WR" ? item.receiverEmail : item.tag}</td>
                         <td>{type !== "WR" ? item.countermeasure : item.phoneNumber}</td>
                         {type !== "WR" &&
                             <td>

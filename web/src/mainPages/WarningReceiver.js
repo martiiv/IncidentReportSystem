@@ -3,8 +3,9 @@ import RowWR from "../constants/RowWR";
 import {Component} from "react";
 import "./WarningReceiver.css"
 import fetchData from "../middleware/FetchData";
-import {RECEIVER_URL} from "../constants/WebURL";
+import {INCIDENT_URL, RECEIVER_URL} from "../constants/WebURL";
 import deleteData from "../middleware/deleteData";
+import {Link} from "react-router-dom";
 
 
 class WarningReceiver extends Component {
@@ -63,7 +64,10 @@ class WarningReceiver extends Component {
                  />
                  <div className={"button-group"} style={{display: "flex", justifyContent: "center"}}>
                      <button className={"btn btnGroup"} onClick={this.deleteWarningReceivers}>Delete</button>
-                     <button className={"btn btnGroup"} onClick={this.modalComponent} >Create</button>
+                     <Link to={INCIDENT_URL + "/new"}>
+                         <button className={"btn btnGroup"}>Create</button>
+                     </Link>
+
                      <button className={"btn btnGroup"}>Group</button>
                  </div>
              </div>
