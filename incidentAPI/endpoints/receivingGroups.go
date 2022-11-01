@@ -24,6 +24,12 @@ TODO Error handle
 
 // Handling the request and forwarding it to the appropriate method
 func HandleReceivingGroup(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
+
+
 	url := r.URL.String()
 	method := r.Method
 
@@ -143,11 +149,13 @@ func createReceivingGroups(w http.ResponseWriter, r *http.Request, url string) {
 
 	if err != nil {
 		log.Fatal(err)
+		return
 	}
 
 	id, err := object.LastInsertId()
 	if err != nil {
 		log.Fatal(err)
+		return
 	}
 
 	w.WriteHeader(http.StatusCreated)

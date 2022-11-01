@@ -8,6 +8,8 @@ import WarningReceiver from "./mainPages/WarningReceiver";
 import TopBar from "./components/NavigationBar";
 import Login from "./mainPages/Login";
 import Log from "./mainPages/Log";
+import CreateWarningReceiver from "./mainPages/CreateWarningReceiver";
+import CreateGroup from "./mainPages/CreateGroup";
 
 
 /**
@@ -26,6 +28,8 @@ function App() {
                     <Route path={MANAGER_URL} element={<Profile/>}/>
                     <Route path={RECEIVER_URL} element={<WarningReceiver/>}/>
                     <Route path={INCIDENT_URL + ID_PARAM} element={<Log/>}/>
+                    <Route path={RECEIVER_URL + "/new"} element={<CreateWarningReceiver/>}/>
+                    <Route path={RECEIVER_URL + "/group"} element={<CreateGroup/>}/>
 
                 </Routes>
         </div>
