@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import "./Log.css"
 import TagsInput from "../components/TagsInput";
 import dummyData from "../constants/DummyData";
+import fetchData from "../middleware/FetchData";
+import {INCIDENT_URL} from "../constants/WebURL";
 
 /**
  * Function that will get the project id form the url.
@@ -14,17 +16,27 @@ function getProjectID() {
     return pathSplit[pathSplit.length - 1]
 }
 
-function getDataFromID(id) {
-    const data = DummyData;
-    console.log(data)
-    return (data.filter(incident => String(incident.id) === id))
-}
-
 
 
 function Log() {
+    const [incident, setIncident] = useState([])
     const id = getProjectID()
-    const incident = getDataFromID(id)[0]
+
+
+    useEffect( () => {
+        const fetch = async () => {
+            const data = await fetchData(INCIDENT_URL + "?id=" + id)
+            setIncident(data.data)
+        }
+
+        fetch()
+            // make sure to catch any error
+            .catch(console.error);
+    }, [])
+
+
+    console.log(incident);
+
     const navigate = useNavigate();
     const [tags, setTags] = useState([])
 
@@ -35,7 +47,7 @@ function Log() {
             <h1 className={"incident_title"}>{incident.name}</h1>
             <div className={"date-sender"}>
                 <h3>Date: {incident.date}</h3>
-                <h3>Sender: {incident.systemManager}</h3>
+                <h3>Sender: {incident.sendbymanager}</h3>
             </div>
             <div className={"text-area-wr"}>
                 <div className={"warning-receiver"}>
@@ -47,17 +59,17 @@ function Log() {
                 <div>
                     <h4 className={"text-area-title"}>Description</h4>
                     <textarea className={"textarea-log textarea-context"}>
-                        {incident.context}
+                        {incident.description}
                     </textarea>
                 </div>
             </div>
-            <div className={"text-area-wr"} >
+            <div className={"text-area-wr"}>
 
                 <div>
                     <h4 className={"text-area-title tag-title"}>Tags</h4>
                     <div className={"tag-input textarea-small"}>
                         <TagsInput setTagsFunc={setTags}
-                                    data ={dummyData[0].tags}/>
+                                   data={incident.tags}/>
                     </div>
                 </div>
 
