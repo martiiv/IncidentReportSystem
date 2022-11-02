@@ -3,7 +3,6 @@ import DummyData from "../constants/DummyData";
 import { useNavigate } from 'react-router-dom';
 import "./Log.css"
 import TagsInput from "../components/TagsInput";
-import dummyData from "../constants/DummyData";
 import fetchData from "../middleware/FetchData";
 import {INCIDENT_URL} from "../constants/WebURL";
 
@@ -16,10 +15,21 @@ function getProjectID() {
     return pathSplit[pathSplit.length - 1]
 }
 
+function getDataFromID(id) {
+    const data = DummyData;
+    console.log(data)
+    return (data.filter(incident => String(incident.id) === id))
+}
+
 
 
 function Log() {
     const [incident, setIncident] = useState([])
+    const [tags, setTags] = useState([])
+    const [countermeasure, setCountermeasure] = useState("")
+    const [description, setDescription] = useState("")
+    const [receiver, setReceiver] = useState("")
+
     const id = getProjectID()
 
 
@@ -27,6 +37,10 @@ function Log() {
         const fetch = async () => {
             const data = await fetchData(INCIDENT_URL + "?id=" + id)
             setIncident(data.data)
+            setCountermeasure(data.data.countermeasure)
+            setDescription(data.data.description)
+            setReceiver(data.data.receivingGroup)
+            setTags(data.data.tags)
         }
 
         fetch()
@@ -38,7 +52,6 @@ function Log() {
     console.log(incident);
 
     const navigate = useNavigate();
-    const [tags, setTags] = useState([])
 
 
     return (
@@ -52,31 +65,28 @@ function Log() {
             <div className={"text-area-wr"}>
                 <div className={"warning-receiver"}>
                     <h4 className={"text-area-title"}>Warning Receiver</h4>
-                    <textarea className={"textarea-small"}>
-                        {incident.receivingGroup}
+                    <textarea className={"textarea-small"} value={receiver}>
                     </textarea>
                 </div>
                 <div>
                     <h4 className={"text-area-title"}>Description</h4>
-                    <textarea className={"textarea-log textarea-context"}>
-                        {incident.description}
+                    <textarea className={"textarea-log textarea-context"} value={description} onChange={e => setDescription(e.target.value)}>
                     </textarea>
                 </div>
             </div>
             <div className={"text-area-wr"}>
-
                 <div>
                     <h4 className={"text-area-title tag-title"}>Tags</h4>
                     <div className={"tag-input textarea-small"}>
-                        <TagsInput setTagsFunc={setTags}
-                                   data={incident.tags}/>
+                        {incident.tag ?  <TagsInput setTagsFunc={setTags}
+                                           data={incident.tag}/> : null}
+
                     </div>
                 </div>
 
                 <div>
                     <h4 className={"text-area-title"}>Countermeasures</h4>
-                    <textarea className={"textarea-log textarea-countermeasure"}>
-                        {incident.countermeasure}
+                    <textarea className={"textarea-log textarea-countermeasure"} value={countermeasure} onChange={e => setCountermeasure(e.target.value)}>
                     </textarea>
                 </div>
 
