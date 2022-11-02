@@ -5,14 +5,16 @@ import fetchData from "../middleware/FetchData";
 function Profile() {
 
     const [profileData, setProfileData] = useState("")
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const fetch = async () => {
             const data = await fetchData(MANAGER_URL + "?id=1");
-            setProfileData(data)
+            setProfileData(data.data)
+
         }
 
-        fetch()
+        fetch().then(() => setLoading(false))
             // make sure to catch any error
             .catch(console.error);
     }, [])
@@ -20,16 +22,24 @@ function Profile() {
 
 
 
-    console.log(profileData.data)
-    return (
-        <div className="App">
+    console.log(profileData)
+    if (loading){
+        return (
+            <h1>Loading</h1>
+        )
+    }else {
+        return (
+            <div className="App">
             <span>
-                <p>Name: {profileData.data.userName}</p>
-                <p>Company: {profileData.data.company}</p>
+                <p>Name: {profileData.userName}</p>
+                <p>Company: {profileData.company}</p>
 
             </span>
-        </div>
-    );
+            </div>
+
+        );
+    }
+
 }
 
 export default Profile;

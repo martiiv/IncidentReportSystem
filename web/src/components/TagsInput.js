@@ -10,9 +10,9 @@ import dummyData from "../constants/DummyData";
  * @constructor
  */
 function TagsInput({setTagsFunc, data}){
-    const [tags, setTags] = useState([data])
-    console.log(tags);
-
+    const test = data
+    const [tags, setTags] = useState([test])
+    console.log(test);
 
     function handleKeyDown(e){
         if(e.key !== 'Enter') return

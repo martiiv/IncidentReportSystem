@@ -1,8 +1,9 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import postModel from "../middleware/postData";
-import {RECEIVER_URL} from "../constants/WebURL";
-
+import {GROUPS_URL, RECEIVER_URL} from "../constants/WebURL";
+import Select from 'react-select'
 import "./CreateWarningReceiver.css"
+import fetchData from "../middleware/FetchData";
 
 
 function CreateWarningReceiver(){
@@ -15,11 +16,33 @@ function CreateWarningReceiver(){
         receiverEmail: ""
     })
 
+    const [options, setOptions] = useState([])
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         await postModel(RECEIVER_URL, warning)
             .then(res => console.log(res))
 
+    }
+
+    useEffect(() => {
+        const fetch = async () => {
+            const data = await fetchData(GROUPS_URL)
+            console.log(data.data)
+
+            setOptions(data.data.map(item => ({value: item.name, label: item.name})))
+        }
+
+        fetch().catch(e => console.log(e))
+    }, [])
+
+
+
+    function handleChangeOptions(e) {
+       const group = (e.map(item => item.value).join(","))
+        setWarning({
+            ...warning, ["receiverGroup"]: group
+        })
     }
 
 
@@ -54,7 +77,7 @@ function CreateWarningReceiver(){
                     />
                 </label>
 
-                <label>Comapny:
+                <label>Company:
                     <input
                         type={"text"}
                         name={"company"}
@@ -65,17 +88,12 @@ function CreateWarningReceiver(){
                 </label>
 
                 <label>Receiver Group:
-                    <textarea
-                        name={"receiverGroup"}
-                        required
-                        value={warning.receiverGroup}
-                        onChange={handleChange}
-                    />
+                    <Select isMulti options={options} onChange={handleChangeOptions} className={"input-group"}/>
                 </label>
 
                 <label>Email:
                     <input
-                        type={"text"}
+                        type={"email"}
                         name={"receiverEmail"}
                         value={warning.receiverEmail}
                         onChange={handleChange}
