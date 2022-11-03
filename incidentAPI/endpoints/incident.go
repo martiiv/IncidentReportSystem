@@ -91,7 +91,8 @@ func createIncident(w http.ResponseWriter, r *http.Request, url string) {
 	var incident structs.CreateIncident
 	err := json.NewDecoder(r.Body).Decode(&incident)
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, apitools.DecodeError, http.StatusBadRequest)
+		log.Println(err.Error())
 		return
 	}
 
@@ -120,12 +121,16 @@ func updateCountermeasures(w http.ResponseWriter, r *http.Request, url string) {
 
 	err := json.NewDecoder(r.Body).Decode(&countermeasure)
 	if err != nil {
-		fmt.Fprintf(w, "Error occurred: %v", err.Error())
+		http.Error(w, apitools.DecodeError, http.StatusBadRequest)
+		log.Println(err.Error())
+		return
 	}
 
 	_, err = databasefunctions.Db.Exec("UPDATE `Incident` SET `Countermeasure` = ? WHERE `IncidentId` = ?", countermeasure.Countermeasure, countermeasure.IncidentId)
 	if err != nil {
-		fmt.Fprintf(w, "Error occurred: %v", err.Error())
+		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
