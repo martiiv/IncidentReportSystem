@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import {useState} from 'react';
 import "./IncidentReporting.css";
 import TagsInput from "./TagsInput.js"
+import GroupSelectComponent from "./GroupSelectComponent.js"
+import DummyGroups from "../constants/DummyGroups";
 
 function IncidentReportingForm() {
     const [state, setState] = useState({
@@ -12,6 +14,8 @@ function IncidentReportingForm() {
     })
 
     const [tags, setTags] = useState([])
+
+    const [selectedGroups, setSelectedGroups] = useState([])
 
     const [isPending, setIsPending] = useState(false);
 
@@ -45,6 +49,15 @@ function IncidentReportingForm() {
     return (
         <div className={"incidentCreate"}>
             <h2>New Incident</h2>
+
+            {selectedGroups}
+            {
+                <GroupSelectComponent
+                    data={DummyGroups}
+                    setSelectedFunc={setSelectedGroups}
+                />
+            }
+
             <form onSubmit={handleSubmit} onKeyDown={(e) => { e.key === 'Enter' && e.preventDefault(); }}>
                 <label>Incident Title:
                     <input
@@ -85,18 +98,19 @@ function IncidentReportingForm() {
                 </label>
 
                 <label>Countermeasures
-                <input
-                    type={"text"}
-                    name={"countermeasure"}
-                    value={state.countermeasure}
-                    onChange={handleChange}
-                />
+                    <input
+                        type={"text"}
+                        name={"countermeasure"}
+                        value={state.countermeasure}
+                        onChange={handleChange}
+                    />
                 </label>
 
                 {tags}
 
                 <TagsInput setTagsFunc={setTags}
-                           tagsFunc={tags}/>
+                           tagsFunc={tags}
+                />
 
                 { !isPending && <button>SEND INCIDENT</button> }
                 { isPending && <button disabled>Sending mail...</button> }
