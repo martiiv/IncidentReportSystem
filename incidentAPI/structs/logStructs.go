@@ -7,7 +7,6 @@ type GetIncident struct {
 	Name           *string `json:"name"`
 	Description    *string `json:"description"`
 	Company        *string `json:"company"`
-	Credential     *string `json:"credential"`
 	ReceivingGroup *string `json:"receivingGroup"`
 	Countermeasure *string `json:"countermeasure"`
 	Sendbymanager  *string `json:"sendbymanager"`
@@ -16,15 +15,13 @@ type GetIncident struct {
 
 // Struct method for creating incidents endpoint: /incident Method POST
 type CreateIncident struct {
-	Tag            string  `json:"tag"`
-	Name           string  `json:"name"`
-	Description    string  `json:"description"`
-	Company        string  `json:"company"`
-	Credential     *string `json:"credential"`
-	ReceivingGroup string  `json:"receivingGroup"`
-	Countermeasure string  `json:"countermeasure"`
-	Sendbymanager  string  `json:"sendbymanager"`
-	Date           string  `json:"date"`
+	Tag            string `json:"tag"`
+	Name           string `json:"name"`
+	Description    string `json:"description"`
+	Company        string `json:"company"`
+	ReceivingGroup string `json:"receivingGroup"`
+	Countermeasure string `json:"countermeasure"`
+	Sendbymanager  string `json:"sendbymanager"`
 }
 
 type SendIndividualIncident struct {
