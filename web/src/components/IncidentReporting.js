@@ -3,6 +3,7 @@ import "./IncidentReporting.css";
 import TagsInput from "./TagsInput.js"
 import GroupSelectComponent from "./GroupSelectComponent.js"
 import DummyGroups from "../constants/DummyGroups";
+import DummyTags from "../constants/DummyTags";
 
 function IncidentReportingForm() {
     const [state, setState] = useState({
@@ -49,14 +50,6 @@ function IncidentReportingForm() {
     return (
         <div className={"incidentCreate"}>
             <h2>New Incident</h2>
-
-            {selectedGroups}
-            {
-                <GroupSelectComponent
-                    data={DummyGroups}
-                    setSelectedFunc={setSelectedGroups}
-                />
-            }
 
             <form onSubmit={handleSubmit} onKeyDown={(e) => { e.key === 'Enter' && e.preventDefault(); }}>
                 <label>Incident Title:
@@ -106,10 +99,17 @@ function IncidentReportingForm() {
                     />
                 </label>
 
+                {selectedGroups}
+                <GroupSelectComponent
+                    data={DummyGroups}
+                    setSelectedFunc={setSelectedGroups}
+                />
+
                 {tags}
 
-                <TagsInput setTagsFunc={setTags}
-                           tagsFunc={tags}
+                <TagsInput
+                    setTagsFunc={setTags}
+                    data={DummyTags}
                 />
 
                 { !isPending && <button>SEND INCIDENT</button> }
