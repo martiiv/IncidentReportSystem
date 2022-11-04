@@ -4,6 +4,7 @@ import {GROUPS_URL, RECEIVER_URL} from "../constants/WebURL";
 import Select from 'react-select'
 import "./CreateWarningReceiver.css"
 import fetchData from "../middleware/FetchData";
+import {useNavigate} from "react-router-dom";
 
 
 function CreateWarningReceiver(){
@@ -17,11 +18,12 @@ function CreateWarningReceiver(){
     })
 
     const [options, setOptions] = useState([])
+    const navigate = useNavigate()
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         await postModel(RECEIVER_URL, warning)
-            .then(res => console.log(res))
+            .then(() => navigate(-1))
 
     }
 
@@ -39,9 +41,9 @@ function CreateWarningReceiver(){
 
 
     function handleChangeOptions(e) {
-       const group = (e.map(item => item.value).join(","))
+        console.log(e.value)
         setWarning({
-            ...warning, ["receiverGroup"]: group
+            ...warning, ["receiverGroup"]: e.value
         })
     }
 
@@ -88,7 +90,7 @@ function CreateWarningReceiver(){
                 </label>
 
                 <label>Receiver Group:
-                    <Select isMulti options={options} onChange={handleChangeOptions} className={"input-group"}/>
+                    <Select options={options} onChange={handleChangeOptions} className={"input-group"}/>
                 </label>
 
                 <label>Email:
@@ -99,7 +101,7 @@ function CreateWarningReceiver(){
                         onChange={handleChange}
                     />
                 </label>
-             <button className={"btn"}>SEND </button>
+                <button className={"btn"}>SEND</button>
             </form>
         </div>
     )

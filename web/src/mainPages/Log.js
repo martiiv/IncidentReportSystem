@@ -5,6 +5,7 @@ import "./Log.css"
 import TagsInput from "../components/TagsInput";
 import fetchData from "../middleware/FetchData";
 import {INCIDENT_URL} from "../constants/WebURL";
+import putModel from "../middleware/putData";
 
 /**
  * Function that will get the project id form the url.
@@ -15,13 +16,6 @@ function getProjectID() {
     return pathSplit[pathSplit.length - 1]
 }
 
-function getDataFromID(id) {
-    const data = DummyData;
-    console.log(data)
-    return (data.filter(incident => String(incident.id) === id))
-}
-
-
 
 function Log() {
     const [incident, setIncident] = useState([])
@@ -29,6 +23,9 @@ function Log() {
     const [countermeasure, setCountermeasure] = useState("")
     const [description, setDescription] = useState("")
     const [receiver, setReceiver] = useState("")
+    const [changed, setChanged] = useState(false)
+    const [backup, setBackup] = useState("")
+
 
     const id = getProjectID()
 
@@ -38,6 +35,8 @@ function Log() {
             const data = await fetchData(INCIDENT_URL + "?id=" + id)
             setIncident(data.data)
             setCountermeasure(data.data.countermeasure)
+            setBackup(data.data.countermeasure)
+
             setDescription(data.data.description)
             setReceiver(data.data.receivingGroup)
             setTags(data.data.tags)
@@ -49,10 +48,20 @@ function Log() {
     }, [])
 
 
-    console.log(incident);
-
     const navigate = useNavigate();
 
+    const handleChange = async () => {
+
+        const body = {
+            incidentId: parseInt(incident.id),
+            countermeasure: countermeasure
+        }
+        console.log(JSON.stringify(body))
+        await putModel(INCIDENT_URL, body)
+            .then(res => console.log(res.statusCode))
+            .catch(res => console.log(res))
+
+    }
 
     return (
         <div className={"log-screen"}>
@@ -70,7 +79,7 @@ function Log() {
                 </div>
                 <div>
                     <h4 className={"text-area-title"}>Description</h4>
-                    <textarea className={"textarea-log textarea-context"} value={description} onChange={e => setDescription(e.target.value)}>
+                    <textarea className={"textarea-log textarea-context"} value={description}>
                     </textarea>
                 </div>
             </div>
@@ -79,23 +88,31 @@ function Log() {
                     <h4 className={"text-area-title tag-title"}>Tags</h4>
                     <div className={"tag-input textarea-small"}>
                         {incident.tag ?  <TagsInput setTagsFunc={setTags}
-                                           data={incident.tag}/> : null}
+                                                    data={incident.tag}
+                                                    changeable={false}
+                        /> : null}
 
                     </div>
                 </div>
 
                 <div>
                     <h4 className={"text-area-title"}>Countermeasures</h4>
-                    <textarea className={"textarea-log textarea-countermeasure"} value={countermeasure} onChange={e => setCountermeasure(e.target.value)}>
+                    <textarea className={"textarea-log textarea-countermeasure"} value={countermeasure} onChange={e => {
+                        setChanged(true)
+                        setCountermeasure(e.target.value)
+                    }}>
                     </textarea>
                 </div>
 
             </div>
             <div className={"log-btn"}>
-                <button className={"btn cancel-btn"}>Cancel</button>
-                <button className={"btn"}>Save</button>
+                <button className={"btn cancel-btn"} onClick={() => setCountermeasure(backup)}>Cancel</button>
+                {changed ? <button onClick={handleChange} className={"btn"}>Save</button> : <button  className={"disabled-btn"}>Save</button> }
 
             </div>
+
+
+
         </div>
     );
 }

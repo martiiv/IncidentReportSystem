@@ -44,37 +44,36 @@ class WarningReceiver extends Component {
         const {value} = this.state;
         // eslint-disable-next-line no-restricted-globals
         if (confirm('Are you sure you want to save this thing into the database?')) {
-            // Save it!
-            await deleteData(RECEIVER_URL, value)
+            await deleteData(RECEIVER_URL, value).then(window.location.reload)
         }
     }
 
 
     render() {
-         const {value, data} = this.state;
+        const {value, data} = this.state;
         return (
-             <div>
-                 <h1>Warning Receiver</h1>
-                 <Table
-                     type={"WR"}
-                     data={data}
-                     row={RowWR}
-                     value={value}
-                     onChangeValue={this.onChangeValueHandler}
-                 />
-                 <div className={"button-group"} style={{display: "flex", justifyContent: "center"}}>
-                     <button className={"btn btnGroup"} onClick={this.deleteWarningReceivers}>Delete</button>
-                     <Link to={RECEIVER_URL + "/new"}>
-                         <button className={"btn btnGroup"}>Create</button>
-                     </Link>
+            <div>
+                <h1>Warning Receiver</h1>
+                <Table
+                    type={"WR"}
+                    data={data}
+                    row={RowWR}
+                    value={value}
+                    onChangeValue={this.onChangeValueHandler}
+                />
+                <div className={"button-group"} style={{display: "flex", justifyContent: "center"}}>
+                    <button className={"btn btnGroup"} onClick={this.deleteWarningReceivers}>Delete</button>
+                    <Link to={RECEIVER_URL + "/new"}>
+                        <button className={"btn btnGroup"}>Create</button>
+                    </Link>
 
-                     <Link to={RECEIVER_URL + "/group"}>
-                         <button className={"btn btnGroup"}>Group</button>
-                     </Link>
-                 </div>
-             </div>
-         );
-     }
+                    <Link to={RECEIVER_URL + "/group"}>
+                        <button className={"btn btnGroup"}>Group</button>
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 }
 
 export default WarningReceiver;

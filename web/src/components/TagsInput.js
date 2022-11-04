@@ -9,7 +9,7 @@ import dummyData from "../constants/DummyData";
  * @returns {JSX.Element}
  * @constructor
  */
-function TagsInput({setTagsFunc, data}){
+function TagsInput({setTagsFunc, data, changeable}){
     const test = data
     const [tags, setTags] = useState([test])
     console.log(test);
@@ -33,14 +33,18 @@ function TagsInput({setTagsFunc, data}){
     return (
         <div className={"tag-container"}>
             {tags.map((tag, index) => (
-                    tag !== undefined &&
+                tag !== undefined &&
                 <div className="tag-item" key={index}>
                     <span className="text-output">{tag}</span>
-                    <span className="close" onClick={() => removeTag(index)}>&times;</span>
+                    {
+                        changeable ?  <span className="close" onClick={() => removeTag(index)}>&times;</span> : null
+                    }
                 </div>
-
-            )) }
-            <input onKeyDown={handleKeyDown} type="text" className={"tags-input"} placeholder="Type somthing" />
+            ))
+            }
+            {changeable ?
+                <input onKeyDown={handleKeyDown} type="text" className={"tags-input"} placeholder="Type somthing" /> : null
+            }
         </div>
     )
 }
