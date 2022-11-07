@@ -20,7 +20,8 @@ func main() {
 	r.Path("/groups").HandlerFunc(endpoints.HandleReceivingGroup)                       //GET, POST
 
 	//Log endpoint
-	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest).Queries("id", "{id}") //GET PUT
+	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest).Queries("id", "{id}")   //GET PUT
+	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest).Queries("tag", "{tag}") //GET PUT
 	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest)
 
 	// Send email

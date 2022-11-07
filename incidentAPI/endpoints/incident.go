@@ -59,12 +59,15 @@ Function does forward the request to the appropriate endpoint based on wether or
 func getIncident(w http.ResponseWriter, r *http.Request, url string) {
 	variables := mux.Vars(r)
 	id := variables["id"]
+	tag := variables["tag"]
 
 	if variables["id"] == "" {
 		getAllIncidents(w, r) //If the url doesnt contain an id: /incident we want to return all the incidents in the table
 
 	} else if variables["id"] != "" {
 		getOneIncident(w, r, id) //If the url contains an id: /incident?ìd=3 we want to return a spesific incident
+	} else if tag == "true" {
+		getAvailableTags(w, r)
 	} else {
 		json.NewEncoder(w).Encode("Please send in an acceptable endpoint URL!")
 	}
@@ -156,4 +159,8 @@ func deleteIncident(w http.ResponseWriter, r *http.Request, url string) {
 		params = append(params, incident[i].IncidentId, incident[i].IncidentName)
 		databasefunctions.Delete(w, "Incident", params)
 	}
+}
+
+func getAvailableTags(w http.ResponseWriter, r *http.Request) {
+	databasefunctions.SelecTags(w)
 }

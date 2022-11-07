@@ -1,7 +1,6 @@
 package endpoints
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	apitools "incidentAPI/apiTools"
@@ -28,7 +27,6 @@ func HandleReceivingGroup(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
-
 
 	url := r.URL.String()
 	method := r.Method
@@ -62,10 +60,6 @@ func getReceivingGroups(w http.ResponseWriter, r *http.Request, url string) {
 }
 
 func getAllReceivingGroups(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
 
 	var rcList []structs.GetReceivingGroups
 
@@ -97,10 +91,6 @@ func getAllReceivingGroups(w http.ResponseWriter, r *http.Request) {
 }
 
 func getOneReceivingGroup(w http.ResponseWriter, r *http.Request, id string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
 
 	var receiverGroup structs.GetReceivingGroups
 
@@ -130,36 +120,20 @@ func getOneReceivingGroup(w http.ResponseWriter, r *http.Request, id string) {
 }
 
 func createReceivingGroups(w http.ResponseWriter, r *http.Request, url string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
 
 	var receiverGroup structs.CreateReceivingGroup
+
 	err := json.NewDecoder(r.Body).Decode(&receiverGroup)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
+	var receiverList []string
+	receiverList = append(receiverList, receiverGroup.Name, receiverGroup.Info)
+	databasefunctions.Insrt(w, "ReceiverGroups", receiverList)
 
-	object, err := databasefunctions.Db.Exec("INSERT INTO `ReceiverGroups` (`Name`, `Info`) VALUES(?,?)",
-		receiverGroup.Name,
-		receiverGroup.Info,
-	)
-
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
-	id, err := object.LastInsertId()
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintf(w, "New receiver group added with id: %v", id)
+	w.WriteHeader(201)
+	fmt.Fprintf(w, "New incident added with name: %v", receiverGroup.Name)
 }
 
 func deleteReceivingGroups(w http.ResponseWriter, r *http.Request, url string) {
@@ -171,60 +145,12 @@ func deleteReceivingGroups(w http.ResponseWriter, r *http.Request, url string) {
 		return
 	}
 
-	// Create a new context, and begin a transaction
-	ctx := context.Background()
-	tx, err := databasefunctions.Db.BeginTx(ctx, nil)
-	if err != nil {
-		http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
-		log.Println(err.Error())
-		return
-	}
-
 	//For each of receiverGroup struct objects passed in
 	for i := 0; i < len(receivingGroup); i++ {
 		//If the id field is left as an empty string this means the function should delete based on name instead
-		if receivingGroup[i].Id == "" {
-			_, err = tx.ExecContext(ctx, "DELETE FROM `ReceiverGroups` WHERE Name = ?", receivingGroup[i].Name)
-			if err != nil {
-				// In case we find any error in the query execution, rollback the transaction
-				if rollbackErr := tx.Rollback(); rollbackErr != nil {
-					http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
-					log.Println(rollbackErr.Error())
-
-					return
-				}
-				http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
-				log.Println(err.Error())
-				return
-			}
-			//If the id field isnt empty we delete using the id
-		} else {
-			_, err = tx.ExecContext(ctx, "DELETE FROM `ReceiverGroups` WHERE Groupid = ?", receivingGroup[i].Id)
-			if err != nil {
-				// Incase we find any error in the query execution, rollback the transaction
-				if rollbackErr := tx.Rollback(); rollbackErr != nil {
-					http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
-					log.Println(rollbackErr.Error())
-
-					return
-				}
-				http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
-				log.Println(err.Error())
-				return
-			}
-		}
+		var passingGroup []string
+		passingGroup = append(passingGroup, receivingGroup[i].Id)
+		passingGroup = append(passingGroup, receivingGroup[i].Name)
+		databasefunctions.Delete(w, "ReceiverGroups", passingGroup)
 	}
-
-	// Finally, if no errors are recieved from the queries, commit the transaction
-	// this applies the above changes to our database
-	err = tx.Commit()
-	if err != nil {
-		http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
-		log.Println(err.Error())
-		return
-	}
-
-	wrId := fmt.Sprintf("%#v", receivingGroup)
-	w.WriteHeader(http.StatusOK)
-	http.Error(w, "Successfully deleted Receiver group with id "+wrId, http.StatusOK)
 }
