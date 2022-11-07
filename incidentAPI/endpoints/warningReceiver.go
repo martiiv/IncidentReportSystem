@@ -1,7 +1,6 @@
 package endpoints
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	apitools "incidentAPI/apiTools"
@@ -128,36 +127,22 @@ func createReceiver(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		return
 	}
-
+	//checks for existing groups based on name
 	if !(databasefunctions.CheckExisting("ReceiverGroups", "Name", warningReceiver.ReceiverGroup)) {
 		http.Error(w, apitools.UnexpectedError, http.StatusNotImplemented)
 		fmt.Fprintf(w, "This receiverGroup does not exist, please use an existing group or create a new one!")
 		return
 	}
+	var emailarr []string
+	emailarr = append(emailarr, warningReceiver.ReceiverEmail)
+	databasefunctions.Insrt(w, "Emails", emailarr)
 
-	_, err = databasefunctions.Db.Exec("INSERT INTO `Emails`(`Email`) VALUES (?)", warningReceiver.ReceiverEmail)
-	if err != nil {
-		http.Error(w, apitools.UnexpectedError, http.StatusServiceUnavailable)
-		log.Println(err.Error())
-		return
-	}
-
-	result, err := databasefunctions.Db.Exec("INSERT INTO `WarningReceiver`(`Name`, `PhoneNumber`, `Company`, `ReceiverGroup`, `ReceiverEmail`) VALUES (?,?,?,?,?)", warningReceiver.Name, warningReceiver.PhoneNumber, warningReceiver.Company, warningReceiver.ReceiverGroup, warningReceiver.ReceiverEmail)
-	if err != nil {
-		http.Error(w, apitools.UnexpectedError, http.StatusServiceUnavailable)
-		log.Println(err.Error())
-		return
-	}
-
-	id, err := result.LastInsertId()
-	if err != nil {
-		http.Error(w, apitools.UnexpectedError, http.StatusServiceUnavailable)
-		log.Println(err.Error())
-		return
-	}
+	var warning_receiver_array []string
+	warning_receiver_array = append(warning_receiver_array, warningReceiver.Name, warningReceiver.PhoneNumber, warningReceiver.Company, warningReceiver.ReceiverGroup, warningReceiver.ReceiverEmail)
+	databasefunctions.Insrt(w, "WarningReceiver", warning_receiver_array)
 
 	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintf(w, "added with id %v", id)
+	fmt.Fprintf(w, "WarningReceiver added with name: %v", warningReceiver.Name)
 }
 
 func deleteReceiver(w http.ResponseWriter, r *http.Request) {
@@ -169,62 +154,22 @@ func deleteReceiver(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create a new context, and begin a transaction
-	ctx := context.Background()
-	tx, err := databasefunctions.Db.BeginTx(ctx, nil)
-	if err != nil {
-		http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
-		log.Println(err.Error())
-		return
-	}
+	/*	// Create a new context, and begin a transaction
+		ctx := context.Background()
+		tx, err := databasefunctions.Db.BeginTx(ctx, nil)
+		if err != nil {
+			http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+			log.Println(err.Error())
+			return
+		}*/
 	// `tx` is an instance of `*sql.Tx` through which we can execute our queries
 
 	for i := 0; i < len(warningReceiver); i++ {
+		var warningreceiverdata []string
+		warningreceiverdata = append(warningreceiverdata, warningReceiver[i].Id)
+		warningreceiverdata = append(warningreceiverdata, warningReceiver[i].Email)
 
-		if !(warningReceiver[i].Email == "") {
-			// Here, the query is executed on the transaction instance, and not applied to the database yet
-			_, err = tx.ExecContext(ctx, "DELETE FROM `WarningReceiver` WHERE ReceiverEmail = ?", warningReceiver[i].Email)
-			if err != nil {
-				// Incase we find any error in the query execution, rollback the transaction
-				if rollbackErr := tx.Rollback(); rollbackErr != nil {
-					http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
-					log.Println(rollbackErr.Error())
+		databasefunctions.Delete(w, "ReceiverGroups", warningreceiverdata)
 
-					return
-				}
-				http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
-				log.Println(err.Error())
-				return
-			}
-		} else {
-			// Here, the query is executed on the transaction instance, and not applied to the database yet
-			_, err = tx.ExecContext(ctx, "DELETE FROM `WarningReceiver` WHERE WriD = ?", warningReceiver[i].Id)
-			if err != nil {
-				// Incase we find any error in the query execution, rollback the transaction
-				if rollbackErr := tx.Rollback(); rollbackErr != nil {
-					http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
-					log.Println(rollbackErr.Error())
-
-					return
-				}
-				http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
-				log.Println(err.Error())
-				return
-			}
-		}
 	}
-
-	// Finally, if no errors are recieved from the queries, commit the transaction
-	// this applies the above changes to our database
-	err = tx.Commit()
-	if err != nil {
-		http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
-		log.Println(err.Error())
-		return
-	}
-
-	wrId := fmt.Sprintf("%#v", warningReceiver)
-	w.WriteHeader(http.StatusOK)
-
-	http.Error(w, "Successfully deleted Warning receiver with id "+wrId, http.StatusOK)
 }

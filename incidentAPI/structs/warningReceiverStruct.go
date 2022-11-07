@@ -18,7 +18,7 @@ type GetWarningReceiver struct {
 }
 
 type DeleteWarningReceiver []struct {
-	Id    int    `json:"id"`
+	Id    string `json:"id"`
 	Email string `json:"email"`
 }
 

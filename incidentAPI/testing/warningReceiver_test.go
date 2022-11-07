@@ -70,12 +70,6 @@ func Test_createReceiver(t *testing.T) {
 
 }
 
-/*
-func Test_updateReceiver(t *testing.T) {
-	? not implemented yet
-}
-*/
-
 func Test_deleteReceiver(t *testing.T) {
 	databasefunctions.EstablishConnection()
 	r := mux.NewRouter()
@@ -87,7 +81,7 @@ func Test_deleteReceiver(t *testing.T) {
 			Handler(r).
 			Delete("/receiver").
 			Body(`[{
-				"id": 0,
+				"id": "",
 				"email":"APITEST@gmail.com"
 			}]`).
 			Expect(t).
