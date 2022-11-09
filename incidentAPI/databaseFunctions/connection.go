@@ -24,6 +24,7 @@ type Configuration struct {
 }
 
 var Db *sql.DB
+var salt = "saltOne"
 
 // in case of further help is need https://github.com/golangbot/mysqltutorial/blob/master/select/main.go
 func EstablishConnection() {
@@ -87,8 +88,10 @@ func CreateNewUser(w http.ResponseWriter, newEmail string, newPassword string) i
 		log.Fatal(err.Error())
 	}
 
+	password := Hashingsalted(newPassword, salt)
+
 	//Then we create the credentials table because it is connected to the email
-	credentials, err := Db.Exec("INSERT INTO `Credentials` set `Email`=(SELECT `Email` FROM `Emails` WHERE `Email`=?) , `Password`=? ;", newEmail, newPassword)
+	credentials, err := Db.Exec("INSERT INTO `Credentials` set `Email`=(SELECT `Email` FROM `Emails` WHERE `Email`=?) , `Password`=? ;", newEmail, password)
 	if err != nil {
 		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
 		log.Println(err.Error())
