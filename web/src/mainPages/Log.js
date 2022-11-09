@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react"
-import DummyData from "../constants/DummyData";
 import { useNavigate } from 'react-router-dom';
 import "./Log.css"
 import TagsInput from "../components/TagsInput";
@@ -49,6 +48,7 @@ function Log() {
 
 
     const navigate = useNavigate();
+     console.log(incident)
 
     const handleChange = async () => {
 
@@ -58,7 +58,10 @@ function Log() {
         }
         console.log(JSON.stringify(body))
         await putModel(INCIDENT_URL, body)
-            .then(res => console.log(res.statusCode))
+            .then(res => {
+                console.log(res.statusCode)
+                navigate(-1)
+            })
             .catch(res => console.log(res))
 
     }

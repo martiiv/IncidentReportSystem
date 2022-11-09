@@ -2,6 +2,7 @@
 import './TagsInput.css';
 import {useEffect, useState} from 'react'
 import CreatableSelect from 'react-select/creatable';
+import Select from "react-select";
 
 /**
  * TODO: Add API connection after Tags-table is created in the DB
@@ -11,26 +12,33 @@ import CreatableSelect from 'react-select/creatable';
  * @returns {JSX.Element}
  * @constructor
  */
-function TagsInput({setTagsFunc, data}){
-    const [tags, setTags] = useState([])
 
+function TagsInput({setTagsFunc, data}){
+    const [tags, setTags] = useState("")
+
+    console.log(data)
     const [options, setOptions] = useState([])
 
     useEffect(() => {
-        setOptions(data.map(item => ({value: item.id, label: item.name})))
+        if (typeof data === 'string'){
+            setOptions([{value: 0, label: data}])
+        }else{
+            setOptions(data.map(item => ({value: item.id, label: item.name})))
+        }
     }, [tags])
 
     function handleChangeOptions(e) {
-        const tag = (e.map(item => item.value).join(","))
-        setTags({
-            ...tags, "receiverGroup": tag
-        })
-        setTagsFunc(tag)
+        setTagsFunc(e.label)
     }
 
     return (
         <div className={"tag-container"}>
-            <CreatableSelect isMulti options={options} onChange={handleChangeOptions} className={"input-group"}/>
+            {typeof data === 'string' ?
+                <Select isClearable defaultValue={{ label: data, value: 0 }} options={options} onChange={handleChangeOptions} className={"input-group"}/>:
+                <CreatableSelect isClearable options={options} onChange={handleChangeOptions} className={"input-group"}/>
+
+            }
+
         </div>
     )
 }
