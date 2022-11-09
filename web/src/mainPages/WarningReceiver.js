@@ -22,7 +22,7 @@ class WarningReceiver extends Component {
     onChangeValueHandler = val => {
         if (val.target.checked){
             this.setState(prevState =>( {
-                    value: [...prevState.value, {id: parseInt(val.target.value)}]
+                    value: [...prevState.value, {id: (val.target.value)}]
                 })
             )
         }else{
@@ -42,6 +42,7 @@ class WarningReceiver extends Component {
 
     deleteWarningReceivers = async () => {
         const {value} = this.state;
+        console.log(value)
         // eslint-disable-next-line no-restricted-globals
         if (confirm('Are you sure you want to save this thing into the database?')) {
             await deleteData(RECEIVER_URL, value).then(window.location.reload)

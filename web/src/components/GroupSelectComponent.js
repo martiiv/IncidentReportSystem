@@ -3,8 +3,10 @@ import {useEffect, useState} from "react";
 import "../constants/DummyGroups.js"
 import Select from "react-select"
 
+
+//TODO if changed make select to isMulti
 function GroupSelectComponent({ data, setSelectedFunc }) {
-    const [warning, setWarning] = useState([])
+    const [warning, setWarning] = useState("")
 
     const [options, setOptions] = useState([])
 
@@ -13,17 +15,18 @@ function GroupSelectComponent({ data, setSelectedFunc }) {
     }, [])
 
     function handleChangeOptions(e) {
-        const group = (e.map(item => item.value).join(","))
+        /*const group = (e.map(item => item.value).join(","))
         setWarning({
             ...warning, "receiverGroup": group
-        })
+        })*/
+        const group = e.label
         setSelectedFunc(group)
     }
 
     return (
         <div>
             <label>Receiver Group:
-                <Select isMulti options={options} onChange={handleChangeOptions} className={"input-group"}/>
+                <Select options={options} onChange={handleChangeOptions} className={"input-group"}/>
             </label>
 
         </div>

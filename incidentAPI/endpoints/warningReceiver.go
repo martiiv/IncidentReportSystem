@@ -169,7 +169,7 @@ func deleteReceiver(w http.ResponseWriter, r *http.Request) {
 		warningreceiverdata = append(warningreceiverdata, warningReceiver[i].Id)
 		warningreceiverdata = append(warningreceiverdata, warningReceiver[i].Email)
 
-		databasefunctions.Delete(w, "ReceiverGroups", warningreceiverdata)
+		databasefunctions.Delete(w, "WarningReceiver", warningreceiverdata)
 
 	}
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"incidentAPI/communication"
 	databasefunctions "incidentAPI/databaseFunctions"
 	"incidentAPI/endpoints"
 	"net/http"
@@ -27,10 +26,6 @@ func main() {
 	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest).Queries("id", "{id}")   //GET PUT
 	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest).Queries("tag", "{tag}") //GET PUT
 	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest)
-
-	// Send email
-	//r.Path("/incident/sendMail/").HandlerFunc(communication.SendMail)
-	r.HandleFunc("/incident/sendMail/", communication.SendMail)
 
 	//System Manager endpoint
 	r.Path("/manager").HandlerFunc(endpoints.HandleSystemManagerRequest).Queries("id", "{id}") //PUT

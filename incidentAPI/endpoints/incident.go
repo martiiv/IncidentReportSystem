@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	apitools "incidentAPI/apiTools"
+	"incidentAPI/communication"
 	databasefunctions "incidentAPI/databaseFunctions"
 	"incidentAPI/structs"
 	"log"
@@ -61,10 +62,10 @@ func getIncident(w http.ResponseWriter, r *http.Request, url string) {
 	id := variables["id"]
 	tag := variables["tag"]
 
-	if variables["id"] == "" {
+	if id == "" && tag == "" {
 		getAllIncidents(w, r) //If the url doesnt contain an id: /incident we want to return all the incidents in the table
 
-	} else if variables["id"] != "" {
+	} else if id != "" && tag == "" {
 		getOneIncident(w, r, id) //If the url contains an id: /incident?ìd=3 we want to return a spesific incident
 	} else if tag == "true" {
 		getAvailableTags(w, r)
@@ -114,6 +115,9 @@ func createIncident(w http.ResponseWriter, r *http.Request, url string) {
 
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintf(w, "New incident added with name: %v", incident.Name)
+
+	//TODO check if error
+	communication.SendMail(incident)
 }
 
 /*

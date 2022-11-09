@@ -8,6 +8,7 @@ import (
 	"incidentAPI/structs"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func Insrt(w http.ResponseWriter, tblname string, params []string) { //if more values are needed adjust accordingly
@@ -154,7 +155,14 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 				return
 			}
 
-			_, queryError := stmt.Exec(params[1])
+			if err != nil {
+				http.Error(w, apitools.QueryError, http.StatusBadRequest)
+				log.Println(err.Error())
+
+				return
+			}
+
+			_, queryError := stmt.Exec(params[0])
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
 				log.Println(queryError.Error())
@@ -194,7 +202,8 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 
 			}
 
-			_, queryError := stmt.Exec(params[0])
+			wID, err := strconv.Atoi(params[0])
+			_, queryError := stmt.Exec(wID)
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
 				log.Println(queryError.Error())
@@ -356,9 +365,9 @@ func Select_warning_receivers(w http.ResponseWriter) {
 }
 
 func SelecTags(w http.ResponseWriter) {
-	var tags []string
+	var tags []structs.TagsStruct
 	var statementtext = "SELECT "
-	stmt, err := Db.Prepare(statementtext + " " + " `Tag` FROM `Incident` GROUP BY `Tag")
+	stmt, err := Db.Prepare(statementtext + " " + " `Tag` FROM `Incident` GROUP BY `Tag`")
 	if err != nil {
 		http.Error(w, apitools.QueryError, http.StatusBadRequest)
 		log.Println(err.Error())
@@ -376,11 +385,15 @@ func SelecTags(w http.ResponseWriter) {
 
 	for results.Next() {
 		var dbResponse string
+
 		if err := results.Scan(&dbResponse); err != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
 			log.Println(err.Error())
 		}
-		tags = append(tags, dbResponse)
+
+		result := structs.TagsStruct{Tag: dbResponse}
+
+		tags = append(tags, result)
 	}
 	json.NewEncoder(w).Encode(tags)
 }
