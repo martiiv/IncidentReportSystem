@@ -15,6 +15,10 @@ func main() {
 	r := mux.NewRouter()
 
 	databasefunctions.EstablishConnection()
+
+	//Login
+	r.Path("/login").HandlerFunc(endpoints.LoginSystemManager)
+
 	//Group endpoint
 	r.Path("/groups").HandlerFunc(endpoints.HandleReceivingGroup).Queries("id", "{id}") //PUT
 	r.Path("/groups").HandlerFunc(endpoints.HandleReceivingGroup)                       //GET, POST
@@ -41,7 +45,7 @@ func main() {
 
 	err := http.ListenAndServe(getPort(), nil)
 	if err != nil {
-		fmt.Printf(err.Error())
+		fmt.Printf("%v", err.Error())
 	}
 }
 
