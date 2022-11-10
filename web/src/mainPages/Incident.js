@@ -118,8 +118,8 @@ function Incident() {
                     onChange={handleChange}
                 />
             </label>
-            {!isPending && <button className={"bnt"}>SEND INCIDENT</button>}
-            {isPending && <button className={"bnt"} disabled>Sending mail...</button>}
+            {!isPending && <button className={"btn"}>SEND INCIDENT</button>}
+            {isPending && <button className={"btn"} disabled>Sending mail...</button>}
             </form>
         </div>
     )
