@@ -2,6 +2,8 @@ import "./GroupSelectComponent.css";
 import {useEffect, useState} from "react";
 import "../constants/DummyGroups.js"
 import Select from "react-select"
+import {grey} from "@mui/material/colors";
+import customStyles from "./SelectStyle";
 
 
 //TODO if changed make select to isMulti
@@ -23,10 +25,12 @@ function GroupSelectComponent({ data, setSelectedFunc }) {
         setSelectedFunc(group)
     }
 
+
+
     return (
         <div>
             <label>Receiver Group:
-                <Select options={options} onChange={handleChangeOptions} className={"input-group"}/>
+                <Select styles={customStyles} options={options} onChange={handleChangeOptions} className={"input-group"}/>
             </label>
 
         </div>

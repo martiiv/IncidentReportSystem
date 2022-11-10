@@ -1,9 +1,29 @@
 :root {
-  --blueDesign: #386ccc;
-  --blueDisabled: #627cad;
-  --hoverColor: #054dd2;
+  --topbarColor: #302b27;
+  --topbarColorText: #8d8d8d;
+  --topbarColorHoverText: #e1e1e1;
+  --secondaryColor: #ff9900;
+  --blueDisabled: #fab952;
+  --hoverColor: #fab438;
+  --colorText: white;
+  --mainBarHeight: 65px;
+  --btnBorderRadius: 8px;
 }
 
+.mainAppBar{
+  background: var(--topbarColor) !important;
+  max-height: var(--mainBarHeight) !important;
+}
+
+.link{
+  text-decoration: none !important;
+}
+
+.toolbar{
+  display: flex ;
+  gap: 15%;
+  justify-content: center !important;
+}
 
 body {
   margin: 0;
@@ -21,14 +41,40 @@ code {
 
 .topBarBtn{
   background-color: white;
+  color: var(--topbarColorText) !important;
+  font-size: 16px !important;
+  height: var(--mainBarHeight) !important;
+}
+
+.topBarBtn:hover{
+  height: var(--mainBarHeight) !important;
+  color: var(--topbarColorHoverText) !important;
+}
+
+.topBarBtn:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: var(--secondaryColor);
+  transform-origin: bottom right;
+  transition: transform 0.25s ease-out;
+}
+
+.topBarBtn:hover:after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
 }
 
 #table th {
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: left;
-  background-color: var(--blueDesign) ;
-  color: white;
+  background-color: var(--secondaryColor) ;
+  color: var(--colorText);
 }
 
 #table {
@@ -56,6 +102,11 @@ input[type=text] {
   font-size: 16px;
 }
 
+input[type=text]:focus {
+  outline: #ff9900 !important;
+  border-bottom: 2px solid orange;
+}
+
 input[type=password] {
   padding: 12px 20px;
   margin: 8px 0;
@@ -76,30 +127,36 @@ input[type=password] {
   text-decoration: none;
   font-size: 16px;
   transition-duration: 0.4s;
+  border-radius: var(--btnBorderRadius);
 }
 
 
 .btn{
-  background-color: var(--blueDesign) ;
-  color: white;
-  border: none;
+  background-color: var(--secondaryColor) !important;
+  color: white !important;
+  font-weight: bold;
+  border: none !important;
   cursor: pointer;
   padding: 15px 32px;
   text-align: center;
   text-decoration: none;
   font-size: 16px;
   transition-duration: 0.4s;
+  border-radius: var(--btnBorderRadius);
 }
 
 .btn:hover{
-  background-color: var(--hoverColor);
+  background-color: var(--hoverColor) !important;
   color: white;
+
 }
 
 .cancel-btn{
   background-color: white;
   border: none;
-  color: var(--blueDesign);
+  color: var(--secondaryColor);
+  border-radius: var(--btnBorderRadius);
+
 }
 
 .cancel-btn:hover{
@@ -108,15 +165,17 @@ input[type=password] {
   color: var(--hoverColor);
 }
 
+.input-group{
+  outline: none !important;
+}
 
 textarea{
   border-radius: 5px;
-  background-color: #eaeaea;
   font-size: 16px;
 }
 
 textarea:focus{
-  background-color: white;
-  border: none;
+  outline: none !important;
+  border-bottom: 2px solid orange !important;
 }
 

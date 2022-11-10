@@ -1,8 +1,9 @@
-// src/components/TagsInput.js
 import './TagsInput.css';
 import {useEffect, useState} from 'react'
 import CreatableSelect from 'react-select/creatable';
 import Select from "react-select";
+import "../index.css"
+import customStyles from "./SelectStyle";
 
 /**
  * TODO: Add API connection after Tags-table is created in the DB
@@ -34,8 +35,8 @@ function TagsInput({setTagsFunc, data}){
     return (
         <div className={"tag-container"}>
             {typeof data === 'string' ?
-                <Select isClearable defaultValue={{ label: data, value: 0 }} options={options} onChange={handleChangeOptions} className={"input-group"}/>:
-                <CreatableSelect isClearable options={options} onChange={handleChangeOptions} className={"input-group"}/>
+                <Select styles={customStyles} isClearable defaultValue={{ label: data, value: 0 }} options={options} onChange={handleChangeOptions} className={"input-group"}/>:
+                <CreatableSelect styles={customStyles} isClearable options={options} onChange={handleChangeOptions} className={"input-group"}/>
 
             }
 
