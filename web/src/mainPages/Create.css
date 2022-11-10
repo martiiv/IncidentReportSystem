@@ -1,0 +1,39 @@
+.create-warning-receiver{
+    display: flex;
+    flex-direction: column;
+}
+
+.create-forms{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+.create input, .create textarea, .create select {
+    text-align: left;
+    display: block;
+}
+
+label{
+    padding-bottom: 20px;
+}
+
+
+.create input, .create textarea, .create select {
+    margin: 5px 0;
+    display: block;
+    width: var(--formsWidth);
+}
+
+.create textarea{
+    height: var(--textAreaHeight);
+}
+
+.send-btn{
+    width: var(--fromsBtnWidth);
+}
+
+.select-group{
+    width: var(--formsWidth);
+}

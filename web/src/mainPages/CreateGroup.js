@@ -1,7 +1,8 @@
 import {useState} from "react";
 import postModel from "../middleware/postData";
-import {GROUPS_URL, RECEIVER_URL} from "../constants/WebURL";
+import {GROUPS_URL} from "../constants/WebURL";
 import {useNavigate} from "react-router-dom";
+import "./Create.css"
 
 
 function CreateGroup(){
@@ -33,10 +34,10 @@ function CreateGroup(){
 
 
     return(
-        <div className={"create-warning-receiver"}>
+        <div className={"create"}>
             {success ? null : <h1>Not added</h1>}
             <h2>New Group</h2>
-            <form className={"create-warning-receiver"} onSubmit={handleSubmit} onKeyDown={(e) => { e.key === 'Enter' && e.preventDefault(); }}>
+            <form className={"create-forms"} onSubmit={handleSubmit} onKeyDown={(e) => { e.key === 'Enter' && e.preventDefault(); }}>
                 <label>Name:
                     <input
                         type={"text"}
@@ -55,7 +56,7 @@ function CreateGroup(){
                         onChange={handleChange}
                     />
                 </label>
-                <button className={"btn"}>SEND</button>
+                <button className={"btn send-btn"}>SEND</button>
             </form>
         </div>
     )

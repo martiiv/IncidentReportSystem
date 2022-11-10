@@ -2,10 +2,8 @@ import {useEffect, useState} from "react";
 import postModel from "../middleware/postData";
 import {GROUPS_URL, INCIDENT_URL, Mail, TAG_Query} from "../constants/WebURL";
 import TagsInput from "../components/TagsInput";
-import DummyTags from "../constants/DummyTags";
 import GroupSelectComponent from "../components/GroupSelectComponent";
-import DummyGroups from "../constants/DummyGroups";
-import "../components/IncidentReporting.css";
+import "./Create.css";
 import fetchData from "../middleware/FetchData";
 
 function Incident() {
@@ -73,8 +71,8 @@ function Incident() {
 
 
     return (
-        <div className={"incidentCreate"}>
-            <form onSubmit={handleSubmit} onKeyDown={(e) => { e.key === 'Enter' && e.preventDefault(); }}>
+        <div className={"create"}>
+            <form className={"create-forms"} onSubmit={handleSubmit} onKeyDown={(e) => { e.key === 'Enter' && e.preventDefault(); }}>
             <h2>New Incident</h2>
 
             <label>Incident Title:
@@ -98,6 +96,7 @@ function Incident() {
                     <GroupSelectComponent
                         data={groupsOption}
                         setSelectedFunc={setSelectedGroups}
+
                     />: null
                 }
 
@@ -118,8 +117,8 @@ function Incident() {
                     onChange={handleChange}
                 />
             </label>
-            {!isPending && <button className={"btn"}>SEND INCIDENT</button>}
-            {isPending && <button className={"btn"} disabled>Sending mail...</button>}
+            {!isPending && <button className={"btn send-btn"}>SEND</button>}
+            {isPending && <button className={"btn send-btn"} disabled>Sending mail...</button>}
             </form>
         </div>
     )

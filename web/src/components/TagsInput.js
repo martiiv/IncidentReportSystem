@@ -3,6 +3,7 @@ import {useEffect, useState} from 'react'
 import CreatableSelect from 'react-select/creatable';
 import Select from "react-select";
 import "../index.css"
+import "../mainPages/Create.css"
 import customStyles from "./SelectStyle";
 
 /**
@@ -35,8 +36,8 @@ function TagsInput({setTagsFunc, data}){
     return (
         <div className={"tag-container"}>
             {typeof data === 'string' ?
-                <Select styles={customStyles} isClearable defaultValue={{ label: data, value: 0 }} options={options} onChange={handleChangeOptions} className={"input-group"}/>:
-                <CreatableSelect styles={customStyles} isClearable options={options} onChange={handleChangeOptions} className={"input-group"}/>
+                <Select styles={customStyles} isClearable defaultValue={{ label: data, value: 0 }} options={options} onChange={handleChangeOptions} className={"input-group select-group"}/>:
+                <CreatableSelect styles={customStyles} isClearable options={options} onChange={handleChangeOptions} className={"input-group select-group"}/>
 
             }
 

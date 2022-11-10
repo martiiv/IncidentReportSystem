@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import postModel from "../middleware/postData";
 import {GROUPS_URL, RECEIVER_URL} from "../constants/WebURL";
 import Select from 'react-select'
-import "./CreateWarningReceiver.css"
+import "./Create.css"
 import fetchData from "../middleware/FetchData";
 import {useNavigate} from "react-router-dom";
 
@@ -73,9 +73,9 @@ function CreateWarningReceiver(){
 
     console.log(warning)
     return(
-        <div className={"create-warning-receiver"}>
+        <div className={"create"}>
             <h2>New Warning Receiver</h2>
-            <form className={"create-warning-receiver"} onSubmit={handleSubmit} onKeyDown={(e) => { e.key === 'Enter' && e.preventDefault(); }}>
+            <form className={"create-forms"} onSubmit={handleSubmit} onKeyDown={(e) => { e.key === 'Enter' && e.preventDefault(); }}>
                 <label>Name:
                     <input
                         type={"text"}
@@ -106,7 +106,7 @@ function CreateWarningReceiver(){
                 </label>
 
                 <label>Receiver Group:
-                    <Select options={options} onChange={handleChangeOptions} className={"input-group"}/>
+                    <Select options={options} onChange={handleChangeOptions} className={"input-group select-group"}/>
                 </label>
 
                 <label>Email:
@@ -117,7 +117,7 @@ function CreateWarningReceiver(){
                         onChange={handleChange}
                     />
                 </label>
-                <button className={"btn"}>SEND</button>
+                <button className={"btn send-btn"}>SEND</button>
             </form>
         </div>
     )

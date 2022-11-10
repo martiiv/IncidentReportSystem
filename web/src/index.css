@@ -3,11 +3,16 @@
   --topbarColorText: #8d8d8d;
   --topbarColorHoverText: #e1e1e1;
   --secondaryColor: #ff9900;
-  --blueDisabled: #fab952;
-  --hoverColor: #fab438;
+  --btnDisabled: #fab952;
+  --btnHoverColor: #fab438;
   --colorText: white;
   --mainBarHeight: 65px;
   --btnBorderRadius: 8px;
+
+  /*Used in forms like new warning receiver, create incident/groups */
+  --formsWidth: 500px;
+  --fromsBtnWidth: 150px;
+  --textAreaHeight: 100px;
 }
 
 .mainAppBar{
@@ -102,6 +107,22 @@ input[type=text] {
   font-size: 16px;
 }
 
+input[type=email] {
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+input[type=email]:focus {
+  outline: #ff9900 !important;
+  border-bottom: 2px solid orange;
+}
+
+
 input[type=text]:focus {
   outline: #ff9900 !important;
   border-bottom: 2px solid orange;
@@ -117,9 +138,8 @@ input[type=password] {
   font-size: 16px;
 }
 
-
 .disabled-btn{
-  background-color: var(--blueDisabled) ;
+  background-color: var(--btnDisabled) ;
   color: white;
   border: none;
   padding: 15px 32px;
@@ -146,7 +166,7 @@ input[type=password] {
 }
 
 .btn:hover{
-  background-color: var(--hoverColor) !important;
+  background-color: var(--btnHoverColor) !important;
   color: white;
 
 }
@@ -162,7 +182,7 @@ input[type=password] {
 .cancel-btn:hover{
   background-color: white;
   border: none;
-  color: var(--hoverColor);
+  color: var(--btnHoverColor);
 }
 
 .input-group{
