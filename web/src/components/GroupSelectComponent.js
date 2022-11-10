@@ -30,7 +30,7 @@ function GroupSelectComponent({ data, setSelectedFunc }) {
     return (
         <div>
             <label>Receiver Group:
-                <Select styles={customStyles} options={options} onChange={handleChangeOptions} className={"input-group"}/>
+                <Select styles={customStyles} options={options} onChange={handleChangeOptions} className={"input-group select-group"}/>
             </label>
 
         </div>
