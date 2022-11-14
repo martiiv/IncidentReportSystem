@@ -1,6 +1,13 @@
 package endpoints
 
-import "net/http"
+import (
+	"encoding/json"
+	apitools "incidentAPI/apiTools"
+	databasefunctions "incidentAPI/databaseFunctions"
+	"incidentAPI/structs"
+	"log"
+	"net/http"
+)
 
 func HandleLogRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -24,6 +31,22 @@ func HandleLogRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func returnAccosiatedCountermeasure(w http.ResponseWriter, r *http.Request) {
+	var accTag structs.TagsStruct
+	err := json.NewDecoder(r.Body).Decode(&accTag)
+	if err != nil {
+		http.Error(w, apitools.DecodeError, http.StatusBadRequest)
+		log.Fatal(err.Error())
+		return
+	}
+
+	results, err := databasefunctions.Db.Query("SELECT `Countermeasure` FROM `Incident` WHERE `Tag` = ?", accTag.Tag)
+	if err != nil {
+		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+		log.Fatalf(err.Error())
+		return
+	}
+
+	defer results.Close()
 
 }
 
