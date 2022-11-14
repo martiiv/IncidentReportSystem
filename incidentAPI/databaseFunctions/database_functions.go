@@ -203,6 +203,11 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 			}
 
 			wID, err := strconv.Atoi(params[0])
+			if err != nil {
+				http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+				log.Fatal(err.Error())
+			}
+
 			_, queryError := stmt.Exec(wID)
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
@@ -268,6 +273,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 
 		for results.Next() {
 			var incident structs.GetIncident
+
 			if err := results.Scan(&incident.IncidentId, &incident.Tag, &incident.Name, &incident.Description, &incident.Company, &incident.ReceivingGroup, &incident.Countermeasure, &incident.Sendbymanager, &incident.Date); err != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
 				log.Println(err.Error())
@@ -275,7 +281,23 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 				return
 			}
 
-			incidentList = append(incidentList, incident)
+			groupsName, err := Db.Query("SELECT `Name` FROM `ReceiverGroups` WHERE `GroupId` = ? ;", incident.ReceivingGroup)
+			if err != nil {
+				http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+				return
+			}
+			for groupsName.Next() {
+				var name string
+
+				if err := groupsName.Scan(&name); err != nil {
+					http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+					log.Fatal(err.Error())
+					return
+				}
+				incident.ReceivingGroup = name
+
+				incidentList = append(incidentList, incident)
+			}
 		}
 
 		if err := results.Err(); err != nil {
@@ -286,6 +308,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 		}
 
 		json.NewEncoder(w).Encode(incidentList) //Sends the defined list as a response
+
 	} else {
 
 		stmt, err := Db.Prepare(statementtext + " " + "IncidentId, Tag, Name, Description, Company, Receiving_group, Countermeasure, Sendbymanager, Date" + " from Incident WHERE `IncidentId` = " + incidentId + " ;")
@@ -314,6 +337,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 			if err != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
 				log.Println(queryError.Error())
+				return
 			}
 		}
 
@@ -321,9 +345,28 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 		if err != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
 			log.Println(queryError.Error())
+			return
 		}
 
 		results.Close()
+
+		groupsName, err := Db.Query("SELECT `Name` FROM `ReceiverGroups` WHERE `GroupId` = ? ;", incident.ReceivingGroup)
+		if err != nil {
+			http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+			return
+		}
+
+		var name string
+		for groupsName.Next() {
+			if err := groupsName.Scan(&name); err != nil {
+				http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+				log.Fatal(err.Error())
+				return
+			}
+
+			incident.ReceivingGroup = name
+		}
+
 		json.NewEncoder(w).Encode(incident) //Sends the defined list as a response
 	}
 }

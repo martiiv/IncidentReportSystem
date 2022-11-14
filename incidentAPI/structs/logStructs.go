@@ -2,15 +2,15 @@ package structs
 
 // Struct method for getting incidents Endpoint /incident Method GET
 type GetIncident struct {
-	IncidentId     *int    `json:"id"`
-	Tag            *string `json:"tag"`
-	Name           *string `json:"name"`
-	Description    *string `json:"description"`
-	Company        *string `json:"company"`
-	ReceivingGroup *string `json:"receivingGroup"`
-	Countermeasure *string `json:"countermeasure"`
-	Sendbymanager  *string `json:"sendbymanager"`
-	Date           *string `json:"date"`
+	IncidentId     int    `json:"id"`
+	Tag            string `json:"tag"`
+	Name           string `json:"name"`
+	Description    string `json:"description"`
+	Company        string `json:"company"`
+	ReceivingGroup string `json:"receivingGroup"`
+	Countermeasure string `json:"countermeasure"`
+	Sendbymanager  string `json:"sendbymanager"`
+	Date           string `json:"date"`
 }
 
 // Struct method for creating incidents endpoint: /incident Method POST
