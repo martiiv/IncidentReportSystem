@@ -18,6 +18,5 @@ type GetSystemManager struct {
 
 // Method for deleting system managers /manager
 type DeleteSystemManager []struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+	Email string `json:"email"`
 }

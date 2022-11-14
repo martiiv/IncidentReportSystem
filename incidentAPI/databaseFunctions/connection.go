@@ -2,16 +2,15 @@ package databasefunctions
 
 /*
 File connection.go, contains basic database functionality for the software
-
-TODO Implement PUT Request
-TODO Error handle
 */
 import (
 	"database/sql"
 	_ "errors"
 	"fmt"
+	apitools "incidentAPI/apiTools"
 	"incidentAPI/config"
 	"log"
+	"net/http"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -25,6 +24,7 @@ type Configuration struct {
 }
 
 var Db *sql.DB
+var salt = "saltOne"
 
 // in case of further help is need https://github.com/golangbot/mysqltutorial/blob/master/select/main.go
 func EstablishConnection() {
@@ -76,33 +76,44 @@ func CheckExisting(tableName string, columnName string, entityID string) bool {
 }
 
 /*
-*Function createNewUser will insert a new email and password into the email and password table
+* Function createNewUser will insert a new email and password into the email and password table
 * And create a new credentials entity using the email and password
-! Something wrong with foreign key stuff when using this function
-*/
-func CreateNewUser(newEmail string, newPassword string) int {
+ */
+func CreateNewUser(w http.ResponseWriter, newEmail string, newPassword string) int {
+	//Because of DB structure this function is structured very specifically
 	Db.Begin()
-	_, err := Db.Exec("INSERT INTO `Emails`(`Email`) VALUES (?)", newEmail)
+
+	_, err := Db.Exec("INSERT INTO `Emails`(`Email`) VALUES (?)", newEmail) //Firstly we need to insert the email since everything is connected to it
 	if err != nil {
 		log.Fatal(err.Error())
+		return 0
 	}
 
-	_, err = Db.Exec("INSERT INTO `Passwords`(`Password`) VALUES (?);", newPassword)
+	password := Hashingsalted(newPassword, salt)
+
+	//Then we create the credentials table because it is connected to the email
+	credentials, err := Db.Exec("INSERT INTO `Credentials` set `Email`=(SELECT `Email` FROM `Emails` WHERE `Email`=?) , `Password`=? ;", newEmail, password)
 	if err != nil {
-		log.Fatal(err.Error())
+		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+		log.Println(err.Error())
+		return 0
 	}
 
-	credentials, err := Db.Exec("INSERT INTO `Credentials`(`Email`, `Password`) VALUES(?, ?)", newEmail, newPassword)
+	//Lastly we create the password which relies on the Credentials table
+	_, err = Db.Exec("INSERT INTO `Passwords` set `Password`=(SELECT `Password` FROM `Credentials` WHERE `Password`=?) ;", password)
 	if err != nil {
-		log.Fatal(err.Error())
+		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+		log.Println(err.Error())
+		return 0
 	}
 
 	id, err := credentials.LastInsertId()
 	if err != nil {
-		log.Fatal(err.Error())
+		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+		log.Println(err.Error())
+		return 0
 	}
 
 	fmt.Printf("Successfully created credential row with id: %v", int(id))
-
 	return int(id)
 }

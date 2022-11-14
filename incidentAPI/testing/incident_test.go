@@ -39,7 +39,7 @@ func Test_getOneIncident(t *testing.T) {
 			Get("/incident").
 			Query("id", "2").
 			Expect(t).
-			Body(`{"id":2,"tag":"Phishing","name":"Hack attack!","description":"An email from an unknown party has sent out a malicious email containing malware!","company":"IncidentCorp","credential":null,"receivingGroup":"2","countermeasure":"Do not open email, Block sender ","sendbymanager":"OdaManager","date":"2022-10-18 11:49:55"}`).
+			Body(`{"id":2,"tag":"Phishing","name":"Hack attack!","description":"An email from an unknown party has sent out a malicious email containing malware!","company":"IncidentCorp","receivingGroup":"2","countermeasure":"Do not open email, Block sender ","sendbymanager":"OdaManager","date":"2022-10-18 11:49:55"}`).
 			Status(http.StatusOK).
 			End()
 	})
@@ -60,14 +60,16 @@ func Test_createIncident(t *testing.T) {
 			"name":  "TestIncidentAPITEST",
 			"description": "I am testing an incident",
 			"company": "IncidentCorp",
-			"receivingGroup": "1",
+			"receivingGroup": "Marketing",
 			"countermeasure": "Send help",
-			"sendByManager": "OdaManager",
-			"date": "2022-10-19"
+			"sendByManager": "OdaManager"
 		}`).
 			Expect(t).
-			Status(http.StatusCreated).
+			Status(http.StatusCreated).Body("New incident added with name: TestIncidentAPITEST").
 			End()
+
+		stmt, _ := databasefunctions.Db.Prepare("DELETE FROM `Incident` ORDER BY `IncidentId` desc limit 1;")
+		_, _ = stmt.Exec()
 	})
 }
 
@@ -109,16 +111,34 @@ func Test_deleteIncident(t *testing.T) {
 	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest)
 	ts := httptest.NewServer(r)
 	defer ts.Close()
-	t.Run("Deleting testIncident incident with name TestIncidentAPITEST", func(t *testing.T) {
+
+	t.Run("Deleting testIncident incident with name Broken door", func(t *testing.T) {
 		apitest.New().
 			Handler(r).
 			Delete("/incident").
 			Body(`[{
-		"incidentId": "",
-		"incidentName" : "TestIncidentAPITEST"
+		"incidentId": "45",
+		"incidentName" : "Broken door"
 		}]`).
 			Expect(t).
 			Status(http.StatusOK).
+			End()
+	})
+
+	t.Run("Recreating the incident we deleted", func(t *testing.T) {
+		apitest.New().Handler(r).
+			Post("/incident").
+			Body(`{ 
+			"tag": "Hazard",
+			"name":  "Broken door",
+			"description": "A door has been broken in office five",
+			"company": "IncidentCorp",
+			"receivingGroup": "Human Resources",
+			"countermeasure": "Contact janitor, Fix door",
+			"sendByManager": "OdaManager"
+		}`).
+			Expect(t).
+			Status(http.StatusCreated).Body("New incident added with name: Broken door").
 			End()
 	})
 }

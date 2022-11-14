@@ -9,11 +9,7 @@
     display: block;
 }
 
-.incidentCreate h2 {
-    font-size: 20px;
-    color: #f1356d;
-    margin-bottom: 30px;
-}
+
 
 .incidentCreate input, .incidentCreate textarea, .incidentCreate select {
     width: 100%;
@@ -24,20 +20,5 @@
     display: block;
 }
 
-.incidentCreate button {
-    background: #f1356d;
-    color: #fff;
-    border: 0;
-    padding: 8px;
-    border-radius: 8px;
-    cursor: pointer;
-}
 
-.incidentCreate button:hover{
-    background: #c72b5b;
-    color: #fff;
-    border: 0;
-    padding: 8px;
-    border-radius: 8px;
-    cursor: pointer;
-}
+

@@ -16,12 +16,16 @@ import (
 /*
 Class systemManager will handle all communication with the SystemManager entity in the database
 Will handle GET, POST and DELETE
-TODO Implement DELETE SystemManager
-TODO Error handle
 */
 
 // Handler for forwarding request to appropriate function based on HTTP method
 func HandleSystemManagerRequest(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
+	w.Header().Set("Access-Control-Request-Method", "POST, GET, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
+
 	url := r.URL.String()
 	method := r.Method
 
@@ -33,6 +37,7 @@ func HandleSystemManagerRequest(w http.ResponseWriter, r *http.Request) {
 		createSystemManagers(w, r, url)
 
 	case "PUT":
+		LoginSystemManager(w, r)
 
 	case "DELETE":
 		deleteSystemManagers(w, r, url)
@@ -44,10 +49,6 @@ func HandleSystemManagerRequest(w http.ResponseWriter, r *http.Request) {
  * Function getSystemManager will forward the GET request based on wether or not the user sends in an id or not
  */
 func getSystemManager(w http.ResponseWriter, r *http.Request, url string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
 
 	variables := mux.Vars(r)
 	id := variables["id"]
@@ -66,10 +67,6 @@ func getSystemManager(w http.ResponseWriter, r *http.Request, url string) {
 * Function fetches al system managers in the database and returns them to the user
  */
 func getAllSystemManagers(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
 
 	var smList []structs.GetSystemManager
 
@@ -106,10 +103,6 @@ func getAllSystemManagers(w http.ResponseWriter, r *http.Request) {
 *Function returns a specific system manager accosiated with the passed in id
  */
 func getOneSystemManager(w http.ResponseWriter, r *http.Request, id string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
 
 	systemManager := structs.GetSystemManager{}
 
@@ -139,38 +132,54 @@ func getOneSystemManager(w http.ResponseWriter, r *http.Request, id string) {
 	json.NewEncoder(w).Encode(systemManager) //Sends the defined list as a response
 }
 
+/*
+Function for creating system Manager
+* Creates an email row
+*					->A credentials row
+*									->Password row
+*												->SystemManager row
+* Reason for this workflow is the foreign key constraints it makes deletion alot more efficent
+*/
 func createSystemManagers(w http.ResponseWriter, r *http.Request, url string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
 
 	var systemManager structs.CreateSystemManager
 	err := json.NewDecoder(r.Body).Decode(&systemManager)
 	if err != nil {
-		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
+		http.Error(w, apitools.DecodeError, http.StatusBadRequest)
+		log.Println(err.Error())
+		return
 	}
 
-	credentialId := databasefunctions.CreateNewUser(systemManager.Email, systemManager.Password)
+	//Creates email, credentials and password
+	credentialId := databasefunctions.CreateNewUser(w, systemManager.Email, systemManager.Password)
 
-	object, err := databasefunctions.Db.Exec("INSERT INTO `SystemManager`(`UserName`,`Company`,`Credential`) VALUES (?,?,?)",
-		systemManager.UserName,
-		systemManager.Company,
-		credentialId)
-
+	//Creates the system manager
+	object, err := databasefunctions.Db.Exec("INSERT INTO `SystemManager` set `UserName`=? ,`Company`=? ,`Credential`= (SELECT `CiD` FROM `Credentials` WHERE `Cid`=?) ;", systemManager.UserName, systemManager.Company, credentialId)
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
 	}
 
-	id, err := object.LastInsertId()
+	//Fetches the id of the systemManager
+	_, err = object.LastInsertId()
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintf(w, "New System manager added with id: %v", id)
+	w.WriteHeader(http.StatusCreated) //Returns the appropriate status code
+	fmt.Fprintf(w, "New System manager added with name: %v", systemManager.UserName)
 }
 
+/*
+Function will delete the system manager
+* Deletes the Email
+*				-> Deletes the credentials
+*										-> Deletes the password
+*										-> Deletes the system manager
+*/
 func deleteSystemManagers(w http.ResponseWriter, r *http.Request, url string) {
 	var systemManager structs.DeleteSystemManager
 	err := json.NewDecoder(r.Body).Decode(&systemManager) //Decodes the requests body into the structure defined above
@@ -191,36 +200,21 @@ func deleteSystemManagers(w http.ResponseWriter, r *http.Request, url string) {
 
 	//For each of receiverGroup struct objects passed in
 	for i := 0; i < len(systemManager); i++ {
-		//If the id field is left as an empty string this means the function should delete based on name instead
-		if systemManager[i].Id == "" {
-			_, err = tx.ExecContext(ctx, "DELETE FROM `SystemManager` WHERE Username = ?", systemManager[i].Name)
-			if err != nil {
-				// In case we find any error in the query execution, rollback the transaction
-				if rollbackErr := tx.Rollback(); rollbackErr != nil {
-					http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
-					log.Println(rollbackErr.Error())
 
-					return
-				}
-				http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
-				log.Println(err.Error())
+		//Since there is a foreign key constraint on Emails we simply delete the email and the systemManager will be deleted along with the credentials and the password
+		_, err = tx.ExecContext(ctx, "DELETE FROM `Emails` WHERE `Email` =?", systemManager[i].Email)
+		if err != nil {
+			// In case we find any error in the query execution, rollback the transaction
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+				log.Println(rollbackErr.Error())
+
 				return
 			}
-			//If the id field isnt empty we delete using the id
-		} else {
-			_, err = tx.ExecContext(ctx, "DELETE FROM `SystemManager` WHERE SMiD = ?", systemManager[i].Id)
-			if err != nil {
-				// Incase we find any error in the query execution, rollback the transaction
-				if rollbackErr := tx.Rollback(); rollbackErr != nil {
-					http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
-					log.Println(rollbackErr.Error())
 
-					return
-				}
-				http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
-				log.Println(err.Error())
-				return
-			}
+			http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+			log.Println(err.Error())
+			return
 		}
 	}
 
@@ -228,12 +222,12 @@ func deleteSystemManagers(w http.ResponseWriter, r *http.Request, url string) {
 	// this applies the above changes to our database
 	err = tx.Commit()
 	if err != nil {
-		http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
+		http.Error(w, apitools.QueryError, http.StatusServiceUnavailable)
 		log.Println(err.Error())
 		return
 	}
 
 	wrId := fmt.Sprintf("%#v", systemManager)
 	w.WriteHeader(http.StatusOK)
-	http.Error(w, "Successfully deleted Receiver group with id "+wrId, http.StatusOK)
+	fmt.Fprint(w, "Successfully deleted Receiver group with id "+wrId, http.StatusOK)
 }

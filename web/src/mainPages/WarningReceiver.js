@@ -3,7 +3,7 @@ import RowWR from "../constants/RowWR";
 import {Component} from "react";
 import "./WarningReceiver.css"
 import fetchData from "../middleware/FetchData";
-import {INCIDENT_URL, RECEIVER_URL} from "../constants/WebURL";
+import {RECEIVER_URL} from "../constants/WebURL";
 import deleteData from "../middleware/deleteData";
 import {Link} from "react-router-dom";
 
@@ -22,7 +22,7 @@ class WarningReceiver extends Component {
     onChangeValueHandler = val => {
         if (val.target.checked){
             this.setState(prevState =>( {
-                    value: [...prevState.value, {id: parseInt(val.target.value)}]
+                    value: [...prevState.value, {id: (val.target.value)}]
                 })
             )
         }else{
@@ -42,37 +42,39 @@ class WarningReceiver extends Component {
 
     deleteWarningReceivers = async () => {
         const {value} = this.state;
+        console.log(value)
         // eslint-disable-next-line no-restricted-globals
         if (confirm('Are you sure you want to save this thing into the database?')) {
-            // Save it!
-            await deleteData(RECEIVER_URL, value)
+            await deleteData(RECEIVER_URL, value).then(window.location.reload)
         }
     }
 
 
     render() {
-         const {value, data} = this.state;
+        const {value, data} = this.state;
         return (
-             <div>
-                 <h1>Warning Receiver</h1>
-                 <Table
-                     type={"WR"}
-                     data={data}
-                     row={RowWR}
-                     value={value}
-                     onChangeValue={this.onChangeValueHandler}
-                 />
-                 <div className={"button-group"} style={{display: "flex", justifyContent: "center"}}>
-                     <button className={"btn btnGroup"} onClick={this.deleteWarningReceivers}>Delete</button>
-                     <Link to={INCIDENT_URL + "/new"}>
-                         <button className={"btn btnGroup"}>Create</button>
-                     </Link>
+            <div>
+                <h1>Warning Receiver</h1>
+                <Table
+                    type={"WR"}
+                    data={data}
+                    row={RowWR}
+                    value={value}
+                    onChangeValue={this.onChangeValueHandler}
+                />
+                <div className={"button-group"} style={{display: "flex", justifyContent: "center"}}>
+                    <button className={"btn btnGroup"} onClick={this.deleteWarningReceivers}>Delete</button>
+                    <Link to={RECEIVER_URL + "/new"}>
+                        <button className={"btn btnGroup"}>Create</button>
+                    </Link>
 
-                     <button className={"btn btnGroup"}>Group</button>
-                 </div>
-             </div>
-         );
-     }
+                    <Link to={RECEIVER_URL + "/group"}>
+                        <button className={"btn btnGroup"}>Group</button>
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 }
 
 export default WarningReceiver;

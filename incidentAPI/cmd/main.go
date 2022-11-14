@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"incidentAPI/communication"
 	databasefunctions "incidentAPI/databaseFunctions"
 	"incidentAPI/endpoints"
 	"net/http"
@@ -15,17 +14,18 @@ func main() {
 	r := mux.NewRouter()
 
 	databasefunctions.EstablishConnection()
+
+	//Login
+	r.Path("/login").HandlerFunc(endpoints.LoginSystemManager)
+
 	//Group endpoint
 	r.Path("/groups").HandlerFunc(endpoints.HandleReceivingGroup).Queries("id", "{id}") //PUT
 	r.Path("/groups").HandlerFunc(endpoints.HandleReceivingGroup)                       //GET, POST
 
 	//Log endpoint
-	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest).Queries("id", "{id}") //GET PUT
+	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest).Queries("id", "{id}")   //GET PUT
+	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest).Queries("tag", "{tag}") //GET PUT
 	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest)
-
-	// Send email
-	//r.Path("/incident/sendMail/").HandlerFunc(communication.SendMail)
-	r.HandleFunc("/incident/sendMail/", communication.SendMail)
 
 	//System Manager endpoint
 	r.Path("/manager").HandlerFunc(endpoints.HandleSystemManagerRequest).Queries("id", "{id}") //PUT
@@ -40,7 +40,7 @@ func main() {
 
 	err := http.ListenAndServe(getPort(), nil)
 	if err != nil {
-		fmt.Printf(err.Error())
+		fmt.Printf("%v", err.Error())
 	}
 }
 

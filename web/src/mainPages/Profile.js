@@ -4,32 +4,19 @@ import fetchData from "../middleware/FetchData";
 
 function Profile() {
 
-    const [profileData, setProfileData] = useState("")
-
-    useEffect(() => {
-        const fetch = async () => {
-            const data = await fetchData(MANAGER_URL + "?id=1");
-            setProfileData(data)
-        }
-
-        fetch()
-            // make sure to catch any error
-            .catch(console.error);
-    }, [])
-
-
-
-
-    console.log(profileData.data)
-    return (
-        <div className="App">
+        const credentials = JSON.parse(sessionStorage.getItem("credentials"))
+        return (
+            <div className="App">
             <span>
-                <p>Name: {profileData.data.userName}</p>
-                <p>Company: {profileData.data.company}</p>
+                <p>Name: {credentials.userName}</p>
+                <p>Company: {credentials.company}</p>
 
             </span>
-        </div>
-    );
+            </div>
+
+        );
+
+
 }
 
 export default Profile;
