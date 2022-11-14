@@ -86,6 +86,7 @@ func CreateNewUser(w http.ResponseWriter, newEmail string, newPassword string) i
 	_, err := Db.Exec("INSERT INTO `Emails`(`Email`) VALUES (?)", newEmail) //Firstly we need to insert the email since everything is connected to it
 	if err != nil {
 		log.Fatal(err.Error())
+		return 0
 	}
 
 	password := Hashingsalted(newPassword, salt)
@@ -99,7 +100,7 @@ func CreateNewUser(w http.ResponseWriter, newEmail string, newPassword string) i
 	}
 
 	//Lastly we create the password which relies on the Credentials table
-	_, err = Db.Exec("INSERT INTO `Passwords` set `Password`=(SELECT `Password` FROM `Credentials` WHERE `Password`=?) ;", newPassword)
+	_, err = Db.Exec("INSERT INTO `Passwords` set `Password`=(SELECT `Password` FROM `Credentials` WHERE `Password`=?) ;", password)
 	if err != nil {
 		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
 		log.Println(err.Error())

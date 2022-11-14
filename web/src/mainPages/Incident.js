@@ -1,19 +1,22 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState} from "react";
 import postModel from "../middleware/postData";
-import {GROUPS_URL, INCIDENT_URL, Mail, TAG_Query} from "../constants/WebURL";
+import {GROUPS_URL, INCIDENT_URL, TAG_Query} from "../constants/WebURL";
 import TagsInput from "../components/TagsInput";
 import GroupSelectComponent from "../components/GroupSelectComponent";
 import "./Create.css";
 import fetchData from "../middleware/FetchData";
 
 function Incident() {
-    const [stateTest, setStateTest] = useState({
+    const credentials = (JSON.parse(sessionStorage.getItem("credentials")))
 
+    const [stateTest, setStateTest] = useState({
         name: "",
         tag: "",
         description: "",
+        company: credentials.company,
         receivingGroup: "" ,
         countermeasure: "",
+        sendbymanager: credentials.userName
     })
 
     const [tags, setTags] = useState("")
@@ -46,14 +49,15 @@ function Incident() {
     }, [])
 
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (e) => {
+        e.preventDefault()
         setIsPending(true)
-        await postModel(INCIDENT_URL, stateTest)
+        await postModel(INCIDENT_URL, JSON.stringify(stateTest))
             .then(() => setIsPending(false))
             .catch((err) => console.log(err))
     }
 
-    console.log(groupsOption)
+    console.log(stateTest)
 
     function handleChange(evt) {
         const value = evt.target.value;
@@ -68,7 +72,6 @@ function Incident() {
         }))
 
     }
-
 
     return (
         <div className={"create"}>

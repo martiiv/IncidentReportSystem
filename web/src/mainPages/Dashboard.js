@@ -1,10 +1,8 @@
 import Table from "../components/Table"
-import Incident from "../constants/DummyData"
 import RowName from "../constants/RowName";
 import {useEffect, useState} from "react";
 import fetchData from "../middleware/FetchData";
 import {INCIDENT_URL} from "../constants/WebURL";
-
 
 function Dashboard() {
     const [incident, setIncident] = useState([])

@@ -18,7 +18,6 @@ import customStyles from "./SelectStyle";
 function TagsInput({setTagsFunc, data}){
     const [tags, setTags] = useState("")
 
-    console.log(data)
     const [options, setOptions] = useState([])
 
     useEffect(() => {
@@ -36,11 +35,9 @@ function TagsInput({setTagsFunc, data}){
     return (
         <div className={"tag-container"}>
             {typeof data === 'string' ?
-                <Select styles={customStyles} isClearable defaultValue={{ label: data, value: 0 }} options={options} onChange={handleChangeOptions} className={"input-group select-group"}/>:
+                <Select styles={customStyles} isClearable defaultValue={{ label: data, value: 0 }} options={options} onChange={handleChangeOptions} className={"input-group select-group-log"}/>:
                 <CreatableSelect styles={customStyles} isClearable options={options} onChange={handleChangeOptions} className={"input-group select-group"}/>
-
             }
-
         </div>
     )
 }
