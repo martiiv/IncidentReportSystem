@@ -28,6 +28,8 @@ func Hashing(givenText string) string {
 
 // method used to create salted hashes it is used when we do password check
 func Hashingsalted(givenText string, salt string) string {
+	salt = "saltOne"
+
 	var passwordBytes = []byte(givenText)
 	var saltbytes = []byte(salt)
 	// Create sha-512 hasher
@@ -54,19 +56,19 @@ func Passwdcheck(w http.ResponseWriter, giventext string, email string) int {
 
 	var statementtext = "select "
 
-	stmt, err := Db.Prepare(statementtext + " " + "Password , CiD where email=? Name from Credential;")
-	if err != nil {
+	results, queryError := Db.Query(statementtext+" "+"Password, CiD from Credentials WHERE Email=?", email)
+	if queryError != nil {
 		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
-		log.Println(err.Error())
+		log.Println(queryError.Error())
 		return 0
 	}
 
-	results, queryError := stmt.Query()
+	/*results, queryError := stmt.Query()
 	if queryError != nil {
 		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
 		log.Println(err.Error())
 		return 0
-	}
+	}*/
 
 	defer results.Close()
 	fmt.Println("Results from select query: ")
@@ -78,6 +80,10 @@ func Passwdcheck(w http.ResponseWriter, giventext string, email string) int {
 			log.Println(err.Error())
 			return 0
 		}
+	}
+
+	if len(Password) == 0 && len(CiD) == 0 {
+		return 0
 	}
 
 	if err := results.Err(); err != nil {

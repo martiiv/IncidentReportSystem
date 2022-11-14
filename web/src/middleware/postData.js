@@ -34,6 +34,6 @@ export default function postModel(url, body) {
                 );
             }
         });
-        xhr.send(JSON.stringify(body));
+        xhr.send((body));
     });
 }

@@ -1,10 +1,15 @@
 import React, {useEffect, useState} from "react"
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import "./Log.css"
-import TagsInput from "../components/TagsInput";
 import fetchData from "../middleware/FetchData";
 import {INCIDENT_URL} from "../constants/WebURL";
 import putModel from "../middleware/putData";
+import "./Create.css"
+import calender from "../images/calendar.png"
+import sender from "../images/postman.png"
+import tag from "../images/price-tag.png"
+import group from "../images/group.png"
+
 
 /**
  * Function that will get the project id form the url.
@@ -18,27 +23,33 @@ function getProjectID() {
 
 function Log() {
     const [incident, setIncident] = useState([])
-    const [tags, setTags] = useState([])
-    const [countermeasure, setCountermeasure] = useState("")
+    const [, setTags] = useState([])
+    const [countermeasure, setCountermeasure] = useState([])
     const [description, setDescription] = useState("")
     const [receiver, setReceiver] = useState("")
     const [changed, setChanged] = useState(false)
     const [backup, setBackup] = useState("")
+    const [newCountermeasure, setNewCountermeasure] = useState("")
 
 
     const id = getProjectID()
 
+    const splitCountermeasure = (input) => {
+        let array = input.split(';')
+        setCountermeasure(array)
+    }
 
-    useEffect( () => {
+    useEffect(() => {
         const fetch = async () => {
-            const data = await fetchData(INCIDENT_URL + "?id=" + id)
-            setIncident(data.data)
-            setCountermeasure(data.data.countermeasure)
-            setBackup(data.data.countermeasure)
+            await fetchData(INCIDENT_URL + "?id=" + id).then(data => {
+                setIncident(data.data)
+                splitCountermeasure(data.data.countermeasure)
+                setBackup(data.data.countermeasure)
+                setDescription(data.data.description)
+                setReceiver(data.data.receivingGroup)
+                setTags(data.data.tags)
+            })
 
-            setDescription(data.data.description)
-            setReceiver(data.data.receivingGroup)
-            setTags(data.data.tags)
         }
 
         fetch()
@@ -48,73 +59,111 @@ function Log() {
 
 
     const navigate = useNavigate();
-     console.log(incident)
-
     const handleChange = async () => {
-
+        const countermeasureString = countermeasure.join(';')
         const body = {
             incidentId: parseInt(incident.id),
-            countermeasure: countermeasure
+            countermeasure: countermeasureString
         }
-        console.log(JSON.stringify(body))
         await putModel(INCIDENT_URL, body)
-            .then(res => {
-                console.log(res.statusCode)
+            .then(() => {
                 navigate(-1)
             })
             .catch(res => console.log(res))
 
     }
 
+    const addCountermeasure = () => {
+        setChanged(true)
+        setCountermeasure(prevState => ([...prevState, newCountermeasure]))
+        setNewCountermeasure("")
+    }
+
+    const deleteCountermeasure = (e) => {
+        // eslint-disable-next-line no-restricted-globals
+        if (confirm("Do you want to delete item?")) {
+            setCountermeasure(countermeasure.filter(item => item !== e))
+        }
+    }
+
+
     return (
         <div className={"log-screen"}>
             <button className={"btn"} onClick={() => navigate(-1)}>Back</button>
-            <h1 className={"incident_title"}>{incident.name}</h1>
-            <div className={"date-sender"}>
-                <h3>Date: {incident.date}</h3>
-                <h3>Sender: {incident.sendbymanager}</h3>
-            </div>
-            <div className={"text-area-wr"}>
-                <div className={"warning-receiver"}>
-                    <h4 className={"text-area-title"}>Warning Receiver</h4>
-                    <textarea className={"textarea-small"} value={receiver}>
-                    </textarea>
-                </div>
-                <div>
-                    <h4 className={"text-area-title"}>Description</h4>
-                    <textarea className={"textarea-log textarea-context"} value={description}>
-                    </textarea>
-                </div>
-            </div>
-            <div className={"text-area-wr"}>
-                <div>
-                    <h4 className={"text-area-title tag-title"}>Tags</h4>
-                    <div className={"tag-input textarea-small"}>
-                        {incident.tag ?  <TagsInput setTagsFunc={setTags}
-                                                    data={incident.tag}
-                                                    changeable={false}
-                        /> : null}
+            <div className={"content"}>
+                <h1 className={"incident_title"}>Incident: {incident.name}</h1>
+                <div className={"side-by-side"}>
+                    <div className={"card card-small"}>
+                        <img src={calender} className={"image-style"} alt={""}/>
+                        <label className={"beside-image"}>{incident.date}</label>
+                    </div>
 
+                    <div className={"card card-small"}>
+                        <img src={sender} className={"image-style"} alt={""}/>
+                        <label className={"beside-image"}>{incident.sendbymanager}</label>
+                    </div>
+
+                    <div className={"card card-small"}>
+                        <img src={tag} className={"image-style"} alt={""}/>
+                        <label className={"beside-image"}>{incident.tag}</label>
+
+                    </div>
+                    <div className={"card card-small"}>
+                        <img src={group} className={"image-style"} alt={""}/>
+                        <label className={"beside-image"}>{receiver}</label>
                     </div>
                 </div>
 
-                <div>
-                    <h4 className={"text-area-title"}>Countermeasures</h4>
-                    <textarea className={"textarea-log textarea-countermeasure"} value={countermeasure} onChange={e => {
-                        setChanged(true)
-                        setCountermeasure(e.target.value)
-                    }}>
-                    </textarea>
+                <div className={"card"}>
+                    <h2 className={"text-area-title"}>Description</h2>
+                    <p>{description}</p>
+                </div>
+
+
+                <div className={"card"}>
+                    <h2 className={"text-area-title"}>Countermeasures</h2>
+                    <div className={"flex-div"}>
+                        <ul style={{width: "50%"}}>
+                            {countermeasure.map(item =>
+                                <li>
+                                    {item}
+                                    <button onClick={() => deleteCountermeasure(item)}>Delete</button>
+                                </li>
+                            )}
+                        </ul>
+
+
+
+                        <div className={"text-and-btn"}>
+                            <div style={{display: "flex", flexDirection: "column"}}>
+                        <textarea placeholder={"Enter new countermeasure"}
+                                  style={{ resize: "none", width: "600px" , minHeight: "100px", maxHeight: "100px"}}
+                                  className={"textarea-log"}
+                                  onChange={(e) => {
+                                      setNewCountermeasure(e.target.value)
+                                  }}
+                                  value={newCountermeasure}
+                                  onKeyDown={event => {
+                                      if (event.key === 'Enter') {
+                                          addCountermeasure()
+                                      }
+                                  }}
+                        />
+                            <button className={"btn send-btn"} onClick={addCountermeasure}>Add</button>
+                        </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
+
+
             <div className={"log-btn"}>
                 <button className={"btn cancel-btn"} onClick={() => setCountermeasure(backup)}>Cancel</button>
-                {changed ? <button onClick={handleChange} className={"btn"}>Save</button> : <button  className={"disabled-btn"}>Save</button> }
+                {changed ? <button onClick={handleChange} className={"btn"}>Save</button> :
+                    <button className={"disabled-btn"}>Save</button>}
 
             </div>
-
-
 
         </div>
     );
