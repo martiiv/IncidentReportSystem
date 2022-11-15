@@ -37,8 +37,8 @@ class Table extends Component {
                         {type !== "WR" &&
                             <td>
                                 <Link to={INCIDENT_URL + "/" + item.id}>
-                                    <button value={item.name}>
-                                        {item.name}
+                                    <button className={"btn tbl-btn"} value={item.name}>
+                                        Manage Incident
                                     </button>
                                 </Link>
                             </td>
@@ -53,53 +53,3 @@ class Table extends Component {
 }
 
 export default Table
-
-/*
-
-function Table(props) {
-
-    return (
-        <div className={"table-div"} style={{display: "flex", justifyContent: "center"}}>
-            <table id={"table"}>
-                <tr>
-                    {props.row.map(item =>
-                        <th key={item}>
-                            {item}
-                        </th>
-                    )}
-                </tr>
-
-                {props.data.map(item => <tr>
-                    {props.type === "WR" &&
-                        <td>
-                            <label>
-                                <input type="checkbox" name="css" value="css"/>
-                            </label>
-                        </td>
-                    }
-
-                    <td>{props.type !== "WR" ? item.date : item.name}</td>
-                    <td>{item.receivingGroup}</td>
-                    <td>{item.systemManager ? item.systemManager : item.department}</td>
-                    <td>{item.email ? item.email : "Tags"}</td>
-                    <td>{item.countermeasure ? item.countermeasure : item.phoneNumber}</td>
-
-
-                    {props.type !== "WR" &&
-                        <td>
-                            <Link to={INCIDENT_URL + "/" + item.id}>
-                                <button value={item.name}>
-                                    {item.name}
-                                </button>
-                            </Link>
-                        </td>
-                    }
-                </tr>)
-                }
-            </table>
-        </div>
-    )
-}
-
-export default Table
-*/
