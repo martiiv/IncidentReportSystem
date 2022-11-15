@@ -19,11 +19,6 @@ import ProtectedRoute from "./mainPages/ProtectedRoute";
  * @constructor
  */
 function App() {
-
-    const [loggedIn, setLoggedIn] = useState({})
-
-    console.log(loggedIn)
-
     return (
         <div>
             <TopBar/>
