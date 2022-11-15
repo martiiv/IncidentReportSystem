@@ -14,15 +14,13 @@ import (
 )
 
 /*
-Class incident, will handle
+*File incident.go, will handle
 - incident creation
 - insertion of countermeasures
 - fetching incidents from the database
 
 !You can only send in one recieverGroup when creating the incident
-
-Author Martin Iversen
-Last rev 02.11
+? Last revision Martin Iversen 15.11.2022
 */
 
 /*
@@ -37,6 +35,7 @@ func HandleIncidentRequest(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.String()
 	method := r.Method
 
+	//Switch case on http methods
 	switch method {
 	case "GET":
 		getIncident(w, r, url)
@@ -93,10 +92,12 @@ Function creaetIncident will create a new incident in the database
 */
 func createIncident(w http.ResponseWriter, r *http.Request, url string) {
 	var incident structs.CreateIncident
+	var incidentList []string
+
 	err := json.NewDecoder(r.Body).Decode(&incident)
 	if err != nil {
 		http.Error(w, apitools.DecodeError, http.StatusBadRequest)
-		log.Println(err.Error())
+		log.Fatal(err.Error())
 		return
 	}
 
@@ -104,20 +105,22 @@ func createIncident(w http.ResponseWriter, r *http.Request, url string) {
 	checkGroup := databasefunctions.CheckExisting("ReceiverGroups", "Groupid", incident.ReceivingGroup)
 
 	if !checkGroup {
-		//! Currently you can only pass in one recieving group, we need to be able to implement several groups
 		json.NewEncoder(w).Encode("Group does not exist! Please use an existing group or create one with this name!")
-		log.Print(checkGroup) //Remove this later
 	}
 
-	var incidentList []string
 	incidentList = append(incidentList, incident.Tag, incident.Name, incident.Description, incident.Company, incident.ReceivingGroup, incident.Countermeasure, incident.Sendbymanager)
 	databasefunctions.Insrt(w, "Incident", incidentList)
 
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintf(w, "New incident added with name: %v", incident.Name)
 
-	//TODO check if error
-	communication.SendMail(incident)
+	//?Check if error
+	err = communication.SendMail(w, incident)
+	if err != nil {
+		http.Error(w, "Error occurred when sending email!", http.StatusInternalServerError)
+		log.Fatal(err.Error())
+		return
+	}
 }
 
 /*
@@ -129,14 +132,14 @@ func updateCountermeasures(w http.ResponseWriter, r *http.Request, url string) {
 	err := json.NewDecoder(r.Body).Decode(&countermeasure)
 	if err != nil {
 		http.Error(w, apitools.DecodeError, http.StatusBadRequest)
-		log.Println(err.Error())
+		log.Fatal(err.Error())
 		return
 	}
 
 	_, err = databasefunctions.Db.Exec("UPDATE `Incident` SET `Countermeasure` = ? WHERE `IncidentId` = ?", countermeasure.Countermeasure, countermeasure.IncidentId)
 	if err != nil {
 		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
-		log.Println(err.Error())
+		log.Fatal(err.Error())
 		return
 	}
 
@@ -165,6 +168,7 @@ func deleteIncident(w http.ResponseWriter, r *http.Request, url string) {
 	}
 }
 
+// Function for return all tags in the database
 func getAvailableTags(w http.ResponseWriter, r *http.Request) {
 	databasefunctions.SelecTags(w)
 }
