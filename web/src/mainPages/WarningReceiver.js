@@ -6,6 +6,7 @@ import fetchData from "../middleware/FetchData";
 import {RECEIVER_URL} from "../constants/WebURL";
 import deleteData from "../middleware/deleteData";
 import {Link} from "react-router-dom";
+import {ReactNotifications, Store} from "react-notifications-component";
 
 
 class WarningReceiver extends Component {
@@ -45,7 +46,29 @@ class WarningReceiver extends Component {
         console.log(value)
         // eslint-disable-next-line no-restricted-globals
         if (confirm('Are you sure you want to save this thing into the database?')) {
-            await deleteData(RECEIVER_URL, value).then(window.location.reload)
+            await deleteData(RECEIVER_URL, value)
+                .then(() => {
+                    Store.addNotification({
+                        title: "Successfully Deleted!",
+                        message: "Warning Receiver is successfully deleted",
+                        type: "success",
+                        insert: "top",
+                        container: "top-right",
+                        animationIn: ["animate__animated", "animate__fadeIn"],
+                        animationOut: ["animate__animated", "animate__fadeOut"],
+                        dismiss: {
+                            duration: 2000,
+                            onScreen: true
+                        }
+                    });
+                })
+                .then(setTimeout(() => {
+                    window.location.reload(true)
+                }, 2000))
+                .catch(() => {
+                    alert("something went wrong. please try again")
+                })
+
         }
     }
 
@@ -55,6 +78,8 @@ class WarningReceiver extends Component {
         return (
             <div>
                 <h1>Warning Receiver</h1>
+                <ReactNotifications />
+
                 <Table
                     type={"WR"}
                     data={data}

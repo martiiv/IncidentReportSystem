@@ -1,7 +1,7 @@
 import "./Login.css"
 import React, {useState} from "react";
 import putModel from "../middleware/putData";
-import { MANAGER_URL} from "../constants/WebURL";
+import {DASHBOARD_URL, MANAGER_URL} from "../constants/WebURL";
 
 function Login() {
     const [credentials, setCredentials] = useState({
@@ -14,6 +14,7 @@ function Login() {
         await putModel(MANAGER_URL, credentials)
             .then(res=> {
                 sessionStorage.setItem("credentials", (res.text))
+               window.location.href = DASHBOARD_URL
             })
             .catch(res => console.log(res))
     }
