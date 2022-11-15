@@ -9,7 +9,14 @@ import (
 	"net/http"
 )
 
-// generic hashing method without salt if needed
+/*
+* File hashing.go
+* Made for hashing passwords and authenticating them
+! Configure salt properly it is now hard coded when creating password
+? Last revision Martin Iversen 15.11.2022
+*/
+
+// Generic hashing method without salt if needed
 func Hashing(givenText string) string {
 	// Here we start with a new hash.
 	hasher := sha512.New512_256()
@@ -28,7 +35,6 @@ func Hashing(givenText string) string {
 
 // method used to create salted hashes it is used when we do password check
 func Hashingsalted(givenText string, salt string) string {
-	salt = "saltOne"
 
 	var passwordBytes = []byte(givenText)
 	var saltbytes = []byte(salt)
@@ -48,36 +54,27 @@ func Hashingsalted(givenText string, salt string) string {
 	var hashedPasswordHex = hex.EncodeToString(hashedPasswordBytes)
 
 	return hashedPasswordHex
-
 }
 
 // gets the users password from db based on the email he entered and checks it with the password he entered as well after it is being hashed
 func Passwdcheck(w http.ResponseWriter, giventext string, email string) int {
 
 	var statementtext = "select "
+	var Password string
+	var CiD string
 
 	results, queryError := Db.Query(statementtext+" "+"Password, CiD from Credentials WHERE Email=?", email)
 	if queryError != nil {
 		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
-		log.Println(queryError.Error())
+		log.Fatal(queryError.Error())
 		return 0
 	}
-
-	/*results, queryError := stmt.Query()
-	if queryError != nil {
-		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
-		log.Println(err.Error())
-		return 0
-	}*/
-
 	defer results.Close()
-	fmt.Println("Results from select query: ")
-	var Password string
-	var CiD string
+
 	for results.Next() {
 		if err := results.Scan(&Password, &CiD); err != nil {
 			http.Error(w, apitools.DecodeError, http.StatusInternalServerError)
-			log.Println(err.Error())
+			log.Fatal(err.Error())
 			return 0
 		}
 	}
@@ -88,11 +85,11 @@ func Passwdcheck(w http.ResponseWriter, giventext string, email string) int {
 
 	if err := results.Err(); err != nil {
 		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
-		log.Println(err.Error())
+		log.Fatal(err.Error())
 		return 0
 	}
 
-	result := Hashingsalted(giventext, CiD)
+	result := Hashingsalted(giventext, CiD) //Hashes password
 
 	if result == Password {
 		return 1 //if password is correct

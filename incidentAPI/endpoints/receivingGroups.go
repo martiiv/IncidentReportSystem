@@ -13,12 +13,8 @@ import (
 )
 
 /*
-*Class receivingGroups will handle all requests related to the receiving group endpoint
-
-TODO Implement PUT Request
-TODO Implement DELETE Request
-TODO Error handle
-*
+*File receivingGroups.go will handle all requests related to the receiving group endpoint
+? Last revision Martin Iversen 15.11.2022
 */
 
 // Handling the request and forwarding it to the appropriate method
@@ -60,30 +56,25 @@ func getReceivingGroups(w http.ResponseWriter, r *http.Request, url string) {
 }
 
 func getAllReceivingGroups(w http.ResponseWriter, r *http.Request) {
-
 	var rcList []structs.GetReceivingGroups
 
-	rows, err := databasefunctions.Db.Query("SELECT * FROM `ReceiverGroups`")
+	rows, err := databasefunctions.Db.Query("SELECT `GroupId`, `Name`, `Info` FROM `ReceiverGroups`")
 	if err != nil {
-		fmt.Fprintf(w, "Error occurred when querying database, error: %v", err.Error())
+		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+		log.Fatal(err.Error())
+		return
 	}
 
 	for rows.Next() { //For all the rows in the database we convert the sql entity to a string and insert it into a struct
 		receiverGroup := structs.GetReceivingGroups{}
-		err = rows.Scan(
-			&receiverGroup.Id,
-			&receiverGroup.Name,
-			&receiverGroup.Info)
+		err = rows.Scan(&receiverGroup.Id, &receiverGroup.Name, &receiverGroup.Info)
 		if err != nil {
-			log.Fatal(err)
+			http.Error(w, apitools.EncodeError, http.StatusBadRequest)
+			log.Fatal(err.Error())
+			return
 		}
 
 		rcList = append(rcList, receiverGroup)
-	}
-
-	err = rows.Err()
-	if err != nil {
-		log.Fatal(err)
 	}
 	rows.Close()
 
@@ -91,57 +82,54 @@ func getAllReceivingGroups(w http.ResponseWriter, r *http.Request) {
 }
 
 func getOneReceivingGroup(w http.ResponseWriter, r *http.Request, id string) {
-
 	var receiverGroup structs.GetReceivingGroups
 
-	rows, err := databasefunctions.Db.Query("SELECT * FROM `ReceiverGroups` WHERE `Groupid` = ?", id)
+	rows, err := databasefunctions.Db.Query("SELECT `GroupId`, `Name`, `Info` FROM `ReceiverGroups` WHERE `Groupid` = ?", id)
 	if err != nil {
-		fmt.Fprintf(w, "Error occurred when querying database, error: %v", err.Error())
+		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+		log.Fatal(err.Error())
+		return
 	}
 
 	for rows.Next() { //For all the rows in the database we convert the sql entity to a string and insert it into a struct
-		err = rows.Scan(
-			&receiverGroup.Id,
-			&receiverGroup.Name,
-			&receiverGroup.Info,
-		)
+		err = rows.Scan(&receiverGroup.Id, &receiverGroup.Name, &receiverGroup.Info)
 		if err != nil {
-			log.Fatal(err)
+			http.Error(w, apitools.EncodeError, http.StatusBadRequest)
+			log.Fatal(err.Error())
+			return
 		}
-	}
-
-	err = rows.Err()
-	if err != nil {
-		log.Fatal(err)
 	}
 	rows.Close()
 
 	json.NewEncoder(w).Encode(receiverGroup) //Sends the defined list as a response
 }
 
+// Function creates a new receiving group
 func createReceivingGroups(w http.ResponseWriter, r *http.Request, url string) {
-
 	var receiverGroup structs.CreateReceivingGroup
+	var receiverList []string
 
-	err := json.NewDecoder(r.Body).Decode(&receiverGroup)
+	err := json.NewDecoder(r.Body).Decode(&receiverGroup) //Decodes request
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, apitools.DecodeError, http.StatusBadRequest)
+		log.Fatal(err.Error())
 		return
 	}
-	var receiverList []string
+
 	receiverList = append(receiverList, receiverGroup.Name, receiverGroup.Info)
-	databasefunctions.Insrt(w, "ReceiverGroups", receiverList)
+	databasefunctions.Insrt(w, "ReceiverGroups", receiverList) //Inserts the group into the database
 
 	w.WriteHeader(201)
 	fmt.Fprintf(w, "New incident added with name: %v", receiverGroup.Name)
 }
 
+// Function deletes a receiving group
 func deleteReceivingGroups(w http.ResponseWriter, r *http.Request, url string) {
 	var receivingGroup structs.DeleteReceivingGroup
 	err := json.NewDecoder(r.Body).Decode(&receivingGroup) //Decodes the requests body into the structure defined above
 	if err != nil {
 		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
-		log.Println(err.Error())
+		log.Fatal(err.Error())
 		return
 	}
 

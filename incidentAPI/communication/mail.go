@@ -2,22 +2,27 @@ package communication
 
 import (
 	"fmt"
-	_ "incidentAPI/apiTools"
+	apitools "incidentAPI/apiTools"
 	"incidentAPI/config"
 	databasefunctions "incidentAPI/databaseFunctions"
 	"incidentAPI/structs"
-	_ "io/ioutil"
+	_ "io"
 	"log"
+	"net/http"
 	"net/smtp"
 )
 
 /*
-*
-Function that will send mail
+* File mail.go
+* Lets a system manager send mails with information regarding incidents at the company
+* NB Predefined emails used for testing only if deployed another mail needs to be used
+? Last revision Martin Iversen 15.11.2022
 */
-func SendMail(inputStruct structs.CreateIncident) {
+
+// Function sendmail sends an email with information regarding an incident
+func SendMail(w http.ResponseWriter, inputStruct structs.CreateIncident) error {
 	// Sending data from email
-	from := "trakkemaskintrine@gmail.com"
+	from := "trakkemaskintrine@gmail.com" //! Predefined mail needs to be changed if system is deployed
 	password := config.SenderEmailAppPassword
 
 	//Array of email receivers
@@ -39,31 +44,23 @@ func SendMail(inputStruct structs.CreateIncident) {
 	// Sending email.
 	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
 	if err != nil {
+		http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
 		log.Println(err.Error())
-		return
+		return err
 	}
 
-	fmt.Println("Mail sent")
-
+	fmt.Fprint(w, "Mail sent")
+	return err
 }
 
 /*
-*
-Function that will retrieve the emails of a selected group
-*/
+* Function that will retrieve the emails of a selected group
+ */
 func getEmails(groups string) []string {
 	var emails []string
 
 	//Create SQL Query statement
-	var searchString string
-	/*	if len(groups) > 1 {
-		for i := 0; i < len(groups); i++ {
-			searchString += strconv.Itoa(groups[i]) + " AND "
-		}
-	}*/
-
-	searchString = groups
-	//searchString = searchString[:len(searchString)-5] //Will trim the last AND
+	searchString := groups
 
 	//Fetching from database
 	row, err := databasefunctions.Db.Query("SELECT Emails.Email FROM WarningReceiver INNER JOIN Emails ON WarningReceiver.ReceiverEmail = Emails.Email INNER JOIN ReceiverGroups ON WarningReceiver.ReceiverGroup = ReceiverGroups.Name WHERE ReceiverGroups.Name = ?", searchString)
@@ -85,5 +82,4 @@ func getEmails(groups string) []string {
 
 	}
 	return emails
-
 }

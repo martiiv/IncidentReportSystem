@@ -65,7 +65,7 @@ func Test_createIncident(t *testing.T) {
 			"sendByManager": "OdaManager"
 		}`).
 			Expect(t).
-			Status(http.StatusCreated).Body("New incident added with name: TestIncidentAPITEST").
+			Status(http.StatusCreated).Body("New incident added with name: TestIncidentAPITESTMail sent").
 			End()
 
 		stmt, _ := databasefunctions.Db.Prepare("DELETE FROM `Incident` ORDER BY `IncidentId` desc limit 1;")
@@ -107,6 +107,7 @@ func Test_updateCountermeasures(t *testing.T) {
 }
 
 func Test_deleteIncident(t *testing.T) {
+	databasefunctions.EstablishConnection()
 	r := mux.NewRouter()
 	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest)
 	ts := httptest.NewServer(r)
@@ -117,7 +118,7 @@ func Test_deleteIncident(t *testing.T) {
 			Handler(r).
 			Delete("/incident").
 			Body(`[{
-		"incidentId": "45",
+		"incidentId": "",
 		"incidentName" : "Broken door"
 		}]`).
 			Expect(t).
@@ -138,7 +139,7 @@ func Test_deleteIncident(t *testing.T) {
 			"sendByManager": "OdaManager"
 		}`).
 			Expect(t).
-			Status(http.StatusCreated).Body("New incident added with name: Broken door").
+			Status(http.StatusCreated).Body("New incident added with name: Broken doorMail sent").
 			End()
 	})
 }
