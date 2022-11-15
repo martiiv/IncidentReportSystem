@@ -1,10 +1,11 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import postModel from "../middleware/postData";
 import {GROUPS_URL, RECEIVER_URL} from "../constants/WebURL";
 import Select from 'react-select'
 import "./Create.css"
 import fetchData from "../middleware/FetchData";
 import {useNavigate} from "react-router-dom";
+import {ReactNotifications, Store} from "react-notifications-component";
 
 
 function CreateWarningReceiver(){
@@ -22,9 +23,26 @@ function CreateWarningReceiver(){
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        await postModel(RECEIVER_URL, warning)
-            .then(() => navigate(-1))
-
+        await postModel(RECEIVER_URL, JSON.stringify(warning))
+            .then(() => {
+                Store.addNotification({
+                    title: "Successfully Created!",
+                    message: "New Warning Receiver created",
+                    type: "success",
+                    insert: "top",
+                    container: "top-right",
+                    animationIn: ["animate__animated", "animate__fadeIn"],
+                    animationOut: ["animate__animated", "animate__fadeOut"],
+                    dismiss: {
+                        duration: 2000,
+                        onScreen: true
+                    }
+                });
+            })
+            .then(setTimeout(() => {
+            navigate(-1)
+        }, 2000))
+            .catch(() => alert("something went wrong. please try again"))
     }
 
     useEffect(() => {
@@ -75,6 +93,7 @@ function CreateWarningReceiver(){
     return(
         <div className={"create"}>
             <h2>New Warning Receiver</h2>
+            <ReactNotifications />
             <form className={"create-forms"} onSubmit={handleSubmit} onKeyDown={(e) => { e.key === 'Enter' && e.preventDefault(); }}>
                 <label>Name:
                     <input
@@ -117,7 +136,10 @@ function CreateWarningReceiver(){
                         onChange={handleChange}
                     />
                 </label>
+                <div className={"btn-group"}>
+                <button className={"btn"} onClick={() => navigate(-1)}>Back</button>
                 <button className={"btn send-btn"}>SEND</button>
+                </div>
             </form>
         </div>
     )

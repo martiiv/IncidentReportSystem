@@ -11,6 +11,7 @@ class Table extends Component {
         return (
             <div className={"table-div"} style={{display: "flex", justifyContent: "center"}}>
                 <table id={"table"}>
+                    <tbody>
                     <tr>
                         {row.map(item =>
                             <th key={item}>
@@ -19,7 +20,7 @@ class Table extends Component {
                         )}
                     </tr>
 
-                    {data.map(item => <tr>
+                    {data.map(item => <tr key={item.id}>
 
                         {type === "WR" &&
                             <td>
@@ -35,7 +36,7 @@ class Table extends Component {
                         <td>{type === "WR" ? item.receiverEmail : item.tag}</td>
                         <td>{type !== "WR" ? item.countermeasure : item.phoneNumber}</td>
                         {type !== "WR" &&
-                            <td>
+                            <td key={item}>
                                 <Link to={INCIDENT_URL + "/" + item.id}>
                                     <button className={"btn tbl-btn"} value={item.name}>
                                         Manage Incident
@@ -45,6 +46,7 @@ class Table extends Component {
                         }
                     </tr>)
                     }
+                    </tbody>
                 </table>
             </div>
         )

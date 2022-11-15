@@ -37,3 +37,13 @@ label{
 .select-group{
     width: var(--formsWidth);
 }
+
+.btn-group{
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+}
+
+.back-btn{
+
+}

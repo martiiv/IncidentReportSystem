@@ -27,7 +27,7 @@ export default function deleteData(url, body) {
             } else {
                 resolve({
                         statusCode: xhr.status,
-                        data: JSON.parse(xhr.responseText)
+                        data: (xhr.responseText)
                     }
                 );
             }
