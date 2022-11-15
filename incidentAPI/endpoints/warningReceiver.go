@@ -154,16 +154,6 @@ func deleteReceiver(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	/*	// Create a new context, and begin a transaction
-		ctx := context.Background()
-		tx, err := databasefunctions.Db.BeginTx(ctx, nil)
-		if err != nil {
-			http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
-			log.Println(err.Error())
-			return
-		}*/
-	// `tx` is an instance of `*sql.Tx` through which we can execute our queries
-
 	for i := 0; i < len(warningReceiver); i++ {
 		var warningreceiverdata []string
 		warningreceiverdata = append(warningreceiverdata, warningReceiver[i].Id)

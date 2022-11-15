@@ -39,7 +39,7 @@ func Test_getOneIncident(t *testing.T) {
 			Get("/incident").
 			Query("id", "2").
 			Expect(t).
-			Body(`{"id":2,"tag":"Phishing","name":"Hack attack!","description":"An email from an unknown party has sent out a malicious email containing malware!","company":"IncidentCorp","receivingGroup":"2","countermeasure":"Do not open email, Block sender ","sendbymanager":"OdaManager","date":"2022-10-18 11:49:55"}`).
+			Body(`{"id":2,"tag":"Phishing","name":"Hack attack!","description":"An email from an unknown party has sent out a malicious email containing malware!","company":"IncidentCorp","receivingGroup":"Information Security","countermeasure":"Do not open email, Block sender ","sendbymanager":"OdaManager","date":"2022-10-18 11:49:55"}`).
 			Status(http.StatusOK).
 			End()
 	})

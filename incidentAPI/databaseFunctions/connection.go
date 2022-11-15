@@ -85,6 +85,7 @@ func CreateNewUser(w http.ResponseWriter, newEmail string, newPassword string) i
 
 	_, err := Db.Exec("INSERT INTO `Emails`(`Email`) VALUES (?)", newEmail) //Firstly we need to insert the email since everything is connected to it
 	if err != nil {
+		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
 		log.Fatal(err.Error())
 		return 0
 	}
@@ -114,6 +115,5 @@ func CreateNewUser(w http.ResponseWriter, newEmail string, newPassword string) i
 		return 0
 	}
 
-	fmt.Printf("Successfully created credential row with id: %v", int(id))
 	return int(id)
 }

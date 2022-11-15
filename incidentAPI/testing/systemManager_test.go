@@ -70,6 +70,7 @@ func Test_createSystemManager(t *testing.T) {
 }
 
 func Test_deleteSystemManager(t *testing.T) {
+	databasefunctions.EstablishConnection()
 	r := mux.NewRouter()
 	r.Path("/manager").HandlerFunc(endpoints.HandleSystemManagerRequest)
 	ts := httptest.NewServer(r)
@@ -78,7 +79,9 @@ func Test_deleteSystemManager(t *testing.T) {
 		apitest.New().
 			Handler(r).
 			Delete("/manager").
-			Body(`[{"email" : "testManager@gmail.com"}]`).
+			Body(`[{
+				"email" : "testManager@gmail.com"
+				}]`).
 			Expect(t).
 			Status(http.StatusOK).
 			End()
