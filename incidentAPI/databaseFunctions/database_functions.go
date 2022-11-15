@@ -1,6 +1,7 @@
 package databasefunctions
 
 import (
+	"context"
 	"encoding/json"
 	_ "errors"
 	"fmt"
@@ -8,356 +9,250 @@ import (
 	"incidentAPI/structs"
 	"log"
 	"net/http"
-	"strconv"
 )
 
-func Insrt(w http.ResponseWriter, tblname string, params []string) { //if more values are needed adjust accordingly
-	var statementtext = "insert into"
+/*
+* File database_functions
+* Handles all generic transactions
+? Last revision Martin iversen 15.11.2022
+*/
 
-	//just for proof of concept
+// Function Insrt used when inserting data into the different tables in the database
+func Insrt(w http.ResponseWriter, tblname string, params []string) {
+	var statementtext = "INSERT INTO " //Predefined statement for inserting data
+	ctx := context.Background()        //Defining context for transaction integration
+	tx, err := Db.BeginTx(ctx, nil)    //Start DB transaction
+	if err != nil {
+		http.Error(w, "Error starting database transaction", http.StatusBadGateway)
+		log.Fatal(err.Error())
+		return
+	}
+
 	//According to the name of the table we go to the corresponding action and create the appropriate query
 	switch tblname {
+
 	case "Incident": //this is the case for the table of the Incidents
-		stmt, err := Db.Prepare(statementtext + " " + tblname + " set Tag=?, Name= ? , Description= ? , Company= ? , Receiving_group = (SELECT Groupid FROM ReceiverGroups WHERE Name = ?) , Countermeasure = ? , Sendbymanager=(SELECT Username FROM SystemManager WHERE Username = ?) ;")
-		if err != nil {
-			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(err.Error())
-
-			return
-		}
-
-		_, queryError := stmt.Exec(params[0], params[1], params[2], params[3], params[4], params[5], params[6])
+		//Executing query with parameters
+		_, queryError := tx.Exec(statementtext+"`Incident` set Tag=?, Name= ? , Description= ? , Company= ? , Receiving_group = (SELECT Groupid FROM ReceiverGroups WHERE Name = ?) , Countermeasure = ? , Sendbymanager=(SELECT Username FROM SystemManager WHERE Username = ?) ;", params[0], params[1], params[2], params[3], params[4], params[5], params[6])
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(queryError.Error())
-
+			log.Fatal(queryError.Error())
 			return
 		}
 
 	case "WarningReceiver": //this is the case for the table of the Incidents
-		stmt, err := Db.Prepare(statementtext + " " + tblname + " set Name= ? , PhoneNumber= ? , Company= ? , ReceiverGroup = (SELECT Name FROM ReceiverGroups WHERE Name = ?) , ReceiverEmail = (SELECT Email FROM Emails WHERE Email = ?) ;")
-		if err != nil {
-			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(err.Error())
-
-			return
-
-		}
-
-		_, queryError := stmt.Exec(params[0], params[1], params[2], params[3], params[4])
+		//Executing query
+		_, queryError := tx.Exec(statementtext+" "+tblname+" set Name= ? , PhoneNumber= ? , Company= ? , ReceiverGroup = (SELECT Name FROM ReceiverGroups WHERE Name = ?) , ReceiverEmail = (SELECT Email FROM Emails WHERE Email = ?) ;", params[0], params[1], params[2], params[3], params[4])
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(err.Error())
-
+			log.Fatal(queryError.Error())
+			return
 		}
 
 	case "ReceiverGroups":
-		stmt, err := Db.Prepare(statementtext + " " + tblname + " set Name= ? , Info= ? ;")
-		if err != nil {
-			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(err.Error())
-
-			return
-
-		}
-
-		_, queryError := stmt.Exec(params[0], params[1])
+		//Executing query
+		_, queryError := tx.Exec(statementtext+" "+tblname+" set Name= ? , Info= ? ;", params[0], params[1])
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(err.Error())
-
+			log.Println(queryError.Error())
 			return
 		}
 
 	case "Emails":
-		stmt, err := Db.Prepare(statementtext + " " + tblname + " set Email= ?;")
-		if err != nil {
-			fmt.Print("helper_methods.go : 118")
-			fmt.Println(err)
-
-		}
-
-		_, queryError := stmt.Exec(params[0])
+		_, queryError := tx.Exec(statementtext+" "+tblname+" set Email= ?;", params[0])
 		if queryError != nil {
-			fmt.Print("Something went wrong with the execution of the query")
-			fmt.Println(queryError)
-
+			http.Error(w, apitools.QueryError, http.StatusBadRequest)
+			log.Println(queryError.Error())
+			return
 		}
+	}
+
+	//If query goes through we commit the transactions
+	if err := tx.Commit(); err != nil {
+		http.Error(w, "Error encountered when inserting rows, rolling back transactions...", http.StatusInternalServerError)
+		log.Fatal(err)
+		return
 	}
 }
 
 // Delete method it can be adjusted to all the tables and parameters needed this is just if needed in the prototype
 func Delete(w http.ResponseWriter, tblname string, params []string) {
 	var statementtext = "delete from"
+	ctx := context.Background()     //Defining context for transaction integration
+	tx, err := Db.BeginTx(ctx, nil) //Start DB transaction
+	if err != nil {
+		http.Error(w, "Error starting database transaction", http.StatusBadGateway)
+		log.Fatal(err.Error())
+		return
+	}
 
 	//According to the name of the table we go to the corresponding action and create the appropriate query
 	switch tblname {
 
 	case "Incident": //this is the case for the table of the Incidents
-		if params[0] == "" {
-			stmt, err := Db.Prepare(statementtext + " " + tblname + " where Name=? ;")
-			if err != nil {
-				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Println(err.Error())
-
-				return
-			}
-
-			_, queryError := stmt.Exec(params[0], params[1])
+		if params[0] == "" { //If the id field is empty
+			_, queryError := tx.Exec(statementtext+" "+tblname+" where Name=? ;", params[1]) //We delete based on name of incident
 			if queryError != nil {
-				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Println(queryError.Error())
-
-				return
-			}
-		} else {
-			stmt, err := Db.Prepare(statementtext + " " + tblname + " where IncidentId=? ;")
-			if err != nil {
-				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Println(err.Error())
-
+				http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+				log.Fatal(queryError.Error())
 				return
 			}
 
-			_, queryError := stmt.Exec(params[0])
+		} else { //If the id field is defined
+			_, queryError := tx.Exec(statementtext+" "+tblname+" where IncidentId=? ;", params[0]) //We delete based on incidentId
 			if queryError != nil {
-				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Println(queryError.Error())
+				http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+				log.Fatal(queryError.Error())
 
 				return
 			}
-
 		}
 
 	case "ReceiverGroups": //this is the case for the table of the Incidents
-		if params[0] == "" {
-			stmt, err := Db.Prepare(statementtext + " " + "`ReceiverGroups`" + " where Name = ?;")
-			if err != nil {
-				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Println(err.Error())
-
-				return
-
-			}
-			_, queryError := stmt.Exec(params[1])
+		if params[0] == "" { //If Id is empty
+			_, queryError := tx.Exec(statementtext+" `ReceiverGroups`"+" where Name = ?;", params[1]) //We delete based on name
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Println(queryError.Error())
-
+				log.Fatal(queryError.Error())
 				return
-
 			}
 
 		} else {
-			stmt, err := Db.Prepare(statementtext + " " + tblname + " where Groupid=? ;")
-			if err != nil {
-				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Println(err.Error())
-
-				return
-			}
-
-			if err != nil {
-				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Println(err.Error())
-
-				return
-			}
-
-			_, queryError := stmt.Exec(params[0])
+			_, queryError := tx.Exec(statementtext+" "+tblname+" where Groupid=? ;", params[0])
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Println(queryError.Error())
-
+				log.Fatal(queryError.Error())
 				return
-
 			}
-
 		}
 
 	case "WarningReceiver": //this is the case for the table of the Incidents
-		if params[0] == "" {
-			stmt, err := Db.Prepare(statementtext + " " + tblname + " where Name=? ;")
-			if err != nil {
-				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Println(err.Error())
-
-				return
-
-			}
-
-			_, queryError := stmt.Exec(params[1])
-			if queryError != nil {
-				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Println(queryError.Error())
-
-				return
-
-			}
-		} else {
-			stmt, err := Db.Prepare(statementtext + " " + tblname + " where WriD=? ;")
-			if err != nil {
-				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Println(err.Error())
-
-				return
-
-			}
-
-			wID, err := strconv.Atoi(params[0])
-			if err != nil {
-				http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
-				log.Fatal(err.Error())
-			}
-
-			_, queryError := stmt.Exec(wID)
-			if queryError != nil {
-				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Println(queryError.Error())
-
-				return
-
-			}
+		_, queryError := tx.Exec(statementtext+" "+"`Emails`"+" where `Email`= ? ;", params[1])
+		if queryError != nil {
+			http.Error(w, apitools.QueryError, http.StatusBadRequest)
+			log.Fatal(queryError.Error())
+			return
 		}
+	}
+
+	//If query goes through we commit the transactions
+	if err := tx.Commit(); err != nil {
+		http.Error(w, "Error encountered when deleting rows, rolling back transactions...", http.StatusInternalServerError)
+		log.Fatal(err)
+		return
 	}
 }
 
 // Function to be used by the manager in case data needs to be altered
 func Update(w http.ResponseWriter, tblname string, params []string) {
-
 	var statementtext = "update "
+	ctx := context.Background()     //Defining context for transaction integration
+	tx, err := Db.BeginTx(ctx, nil) //Start DB transaction
+	if err != nil {
+		http.Error(w, "Error starting database transaction", http.StatusBadGateway)
+		log.Fatal(err.Error())
+		return
+	}
 
-	//just for proof of concept
 	//According to the name of the table we go to the corresponding action and create the appropriate query
 	switch tblname {
 	case "Incident": //this is the case for the table of the Incidents
-		stmt, err := Db.Prepare(statementtext + " " + tblname + " set Name= ? , Context= ? , Company= ? , Credential= ? ,Receiving_group = (SELECT Groupid FROM RecieverGroups WHERE Name = ?) , Countermeasure = ? , Sendbymanager=(SELECT Username FROM SystemManager WHERE Username = ?) " + "Where IncidentId=? ;")
-		if err != nil {
-			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(err.Error())
-
-			return
-		}
-
-		_, queryError := stmt.Exec(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7])
+		_, queryError := tx.Exec(statementtext+" "+tblname+" set Name= ? , Context= ? , Company= ? , Credential= ? ,Receiving_group = (SELECT Groupid FROM RecieverGroups WHERE Name = ?) , Countermeasure = ? , Sendbymanager=(SELECT Username FROM SystemManager WHERE Username = ?) "+"Where IncidentId=? ;", params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7])
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(queryError.Error())
-
+			log.Fatal(queryError.Error())
 			return
 		}
+		//TODO Implement more cases if necessary
+	}
+
+	//If query goes through we commit the transactions
+	if err := tx.Commit(); err != nil {
+		http.Error(w, "Error encountered when deleting rows, rolling back transactions...", http.StatusInternalServerError)
+		log.Fatal(err)
+		return
 	}
 }
 
+// Function for selecting incidents
+// ! Needs rewriting but we dont have time
 func IncidentSelect(w http.ResponseWriter, incidentId string) {
-	var incidentList []structs.GetIncident
-	var statementtext = "select "
+	var incidentList []structs.GetIncident //Defines incidentstruct
+	var statementtext = "select "          //Defines statement
 
 	if incidentId == "" {
 		//According to the name of the table we go to the corresponding action and create the appropriate query
-		stmt, err := Db.Prepare(statementtext + " " + "IncidentId, Tag, Name, Description, Company, Receiving_group, Countermeasure, Sendbymanager, Date" + " from Incident ;")
-		if err != nil {
-			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(err.Error())
-
-			return
-		}
-
-		results, queryError := stmt.Query()
+		results, queryError := Db.Query(statementtext + " " + "IncidentId, Tag, Name, Description, Company, Receiving_group, Countermeasure, Sendbymanager, Date" + " from Incident ;")
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(queryError.Error())
-
+			log.Fatal(queryError.Error())
 			return
 		}
-
 		defer results.Close()
 
-		for results.Next() {
-			var incident structs.GetIncident
+		for results.Next() { //Iterating through results
+			var incident structs.GetIncident //Defining ONE incident struct
 
 			if err := results.Scan(&incident.IncidentId, &incident.Tag, &incident.Name, &incident.Description, &incident.Company, &incident.ReceivingGroup, &incident.Countermeasure, &incident.Sendbymanager, &incident.Date); err != nil {
-				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Println(err.Error())
-
+				http.Error(w, "Error scanning results from DB", http.StatusBadRequest)
+				log.Fatal(err.Error())
 				return
 			}
 
+			//Finding appropriate Group name from ID in incident
 			groupsName, err := Db.Query("SELECT `Name` FROM `ReceiverGroups` WHERE `GroupId` = ? ;", incident.ReceivingGroup)
 			if err != nil {
 				http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+				log.Fatal(err.Error())
 				return
 			}
-			for groupsName.Next() {
-				var name string
 
+			for groupsName.Next() { //Iterating through these results
+				var name string
 				if err := groupsName.Scan(&name); err != nil {
 					http.Error(w, apitools.QueryError, http.StatusInternalServerError)
 					log.Fatal(err.Error())
 					return
 				}
+				//Defining the name of the group
 				incident.ReceivingGroup = name
-
-				incidentList = append(incidentList, incident)
+				incidentList = append(incidentList, incident) //Adding incident to the list
 			}
 		}
-
+		//All transactions done, we error handle the result
 		if err := results.Err(); err != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
 			log.Println(err.Error())
-
 			return
 		}
-
 		json.NewEncoder(w).Encode(incidentList) //Sends the defined list as a response
 
-	} else {
-
-		stmt, err := Db.Prepare(statementtext + " " + "IncidentId, Tag, Name, Description, Company, Receiving_group, Countermeasure, Sendbymanager, Date" + " from Incident WHERE `IncidentId` = " + incidentId + " ;")
-		if err != nil {
-			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(err.Error())
-
-			return
-		}
-
-		results, queryError := stmt.Query()
-		if queryError != nil {
-			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(queryError.Error())
-
-			return
-		}
-
-		defer results.Close()
-
+	} else { //An ID is passed in we get one specific incident
 		incident := structs.GetIncident{}
 
-		for results.Next() { //For all the rows in the database we convert the sql entity to a string and insert it into a struct
+		results, queryError := Db.Query(statementtext + " " + "IncidentId, Tag, Name, Description, Company, Receiving_group, Countermeasure, Sendbymanager, Date" + " from Incident WHERE `IncidentId` = " + incidentId + " ;")
+		if queryError != nil {
+			http.Error(w, apitools.QueryError, http.StatusBadRequest)
+			log.Fatal(queryError.Error())
+			return
+		}
+		defer results.Close()
 
-			err = results.Scan(&incident.IncidentId, &incident.Tag, &incident.Name, &incident.Description, &incident.Company, &incident.ReceivingGroup, &incident.Countermeasure, &incident.Sendbymanager, &incident.Date)
+		for results.Next() { //For all the rows in the database we convert the sql entity to a string and insert it into a struct
+			err := results.Scan(&incident.IncidentId, &incident.Tag, &incident.Name, &incident.Description, &incident.Company, &incident.ReceivingGroup, &incident.Countermeasure, &incident.Sendbymanager, &incident.Date)
 			if err != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Println(queryError.Error())
+				log.Fatal(err.Error())
 				return
 			}
 		}
 
-		err = results.Err()
-		if err != nil {
-			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(queryError.Error())
-			return
-		}
-
-		results.Close()
-
 		groupsName, err := Db.Query("SELECT `Name` FROM `ReceiverGroups` WHERE `GroupId` = ? ;", incident.ReceivingGroup)
 		if err != nil {
 			http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+			log.Fatal(err.Error())
 			return
 		}
-
 		var name string
 		for groupsName.Next() {
 			if err := groupsName.Scan(&name); err != nil {
@@ -365,79 +260,71 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 				log.Fatal(err.Error())
 				return
 			}
-
 			incident.ReceivingGroup = name
 		}
+
+		err = results.Err()
+		if err != nil {
+			http.Error(w, apitools.QueryError, http.StatusBadRequest)
+			log.Fatal(queryError.Error())
+			return
+		}
+		results.Close()
 
 		json.NewEncoder(w).Encode(incident) //Sends the defined list as a response
 	}
 }
 
+// Function for selecting warning receivers
 func Select_warning_receivers(w http.ResponseWriter) {
 	var statementtext = "select "
-	//just for proof of concept
-	//According to the name of the table we go to the corresponding action and create the appropriate query
-	stmt, err := Db.Prepare(statementtext + " " + "WriD , Name, PhoneNumber , Company , ReceiverGroup , ReceiverId " + " from WarningReceiver ;")
-	if err != nil {
-		fmt.Print("helper_methods.go : 118")
-		fmt.Println(err)
-
-	}
-	results, queryError := stmt.Query()
+	//Executing query
+	results, queryError := Db.Query(statementtext + " " + "WriD , Name, PhoneNumber , Company , ReceiverGroup , ReceiverId " + " from WarningReceiver ;")
 	if queryError != nil {
 		fmt.Print("Something went wrong with the execution of the query")
-		fmt.Println(queryError)
+		fmt.Println(queryError.Error())
+		return
 
 	}
+	defer results.Close() //Closing results
 
-	defer results.Close()
-	fmt.Println("Results from select query: ")
-
-	for results.Next() {
+	for results.Next() { //Scanning results
 		var datares [6]string
-
 		if err := results.Scan(&datares[0], &datares[1], &datares[2], &datares[3], &datares[4], &datares[5]); err != nil {
-			log.Fatal(err)
+			http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+			log.Fatal(err.Error())
+			return
 		}
-
-		fmt.Fprintf(w, "%s\n", datares)
-
+		fmt.Fprintf(w, "%s\n", datares) //Returning response
 	}
 
 	if err := results.Err(); err != nil {
-		log.Fatal(err)
+		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+		log.Fatal(err.Error())
+		return
 	}
 }
 
+// Function for selecting tags from incidents
 func SelecTags(w http.ResponseWriter) {
 	var tags []structs.TagsStruct
 	var statementtext = "SELECT "
-	stmt, err := Db.Prepare(statementtext + " " + " `Tag` FROM `Incident` GROUP BY `Tag`")
-	if err != nil {
-		http.Error(w, apitools.QueryError, http.StatusBadRequest)
-		log.Println(err.Error())
 
-		return
-	}
-
-	results, queryError := stmt.Query()
+	results, queryError := Db.Query(statementtext + " " + " `Tag` FROM `Incident` GROUP BY `Tag`")
 	if queryError != nil {
 		http.Error(w, apitools.QueryError, http.StatusBadRequest)
-		log.Println(err.Error())
-
+		log.Fatal(queryError.Error())
 		return
 	}
 
 	for results.Next() {
 		var dbResponse string
-
 		if err := results.Scan(&dbResponse); err != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(err.Error())
+			log.Fatal(err.Error())
 		}
 
 		result := structs.TagsStruct{Tag: dbResponse}
-
 		tags = append(tags, result)
 	}
 	json.NewEncoder(w).Encode(tags)

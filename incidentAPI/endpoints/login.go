@@ -9,6 +9,13 @@ import (
 	"net/http"
 )
 
+/*
+* File login.go
+* Used for logging into the front end application
+? Last revision Martin Iversen 15.11.2022
+*/
+
+// Function authenticates the user with an email and a password
 func LoginSystemManager(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -18,16 +25,17 @@ func LoginSystemManager(w http.ResponseWriter, r *http.Request) {
 
 	var loginStruct structs.LoginStructs
 
-	err := json.NewDecoder(r.Body).Decode(&loginStruct)
+	err := json.NewDecoder(r.Body).Decode(&loginStruct) //Decodes the request body
 	if err != nil {
 		http.Error(w, apitools.DecodeError, http.StatusBadRequest)
-		log.Println(err.Error())
+		log.Fatal(err.Error())
 		return
 	}
 
-	result := databasefunctions.Passwdcheck(w, loginStruct.Password, loginStruct.Email)
+	result := databasefunctions.Passwdcheck(w, loginStruct.Password, loginStruct.Email) //Authenticates the user
 	if result != 1 {
 		http.Error(w, "Logged in failed", http.StatusUnauthorized)
+		log.Fatal(err.Error())
 		return
 	} else {
 		credentials := loggedIn(loginStruct.Email)
@@ -35,9 +43,9 @@ func LoginSystemManager(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(credentials) //Sends the defined list as a response
 		return
 	}
-
 }
 
+// Function for session management
 func loggedIn(email string) structs.LoggedIn {
 
 	systemManager := structs.LoggedIn{}
@@ -65,5 +73,4 @@ func loggedIn(email string) structs.LoggedIn {
 	rows.Close()
 
 	return systemManager
-
 }

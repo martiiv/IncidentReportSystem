@@ -13,8 +13,9 @@ import (
 )
 
 /*
-Class systemManager will handle all communication with the SystemManager entity in the database
-Will handle GET, POST and DELETE
+* File systemManager.go will handle all communication with the SystemManager entity in the database
+* Will handle GET, POST and DELETE
+? Last revision Martin Iversen 15.11.2022
 */
 
 // Handler for forwarding request to appropriate function based on HTTP method
@@ -66,23 +67,22 @@ func getSystemManager(w http.ResponseWriter, r *http.Request, url string) {
 * Function fetches al system managers in the database and returns them to the user
  */
 func getAllSystemManagers(w http.ResponseWriter, r *http.Request) {
-
 	var smList []structs.GetSystemManager
 
-	rows, err := databasefunctions.Db.Query("SELECT * FROM `SystemManager`")
+	rows, err := databasefunctions.Db.Query("SELECT `SMiD`, `Username`, `Company`,`Credential` FROM `SystemManager`")
 	if err != nil {
-		fmt.Fprintf(w, "Error occurred when querying database, error: %v", err.Error())
+		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+		log.Fatal(err.Error())
+		return
 	}
 
 	for rows.Next() { //For all the rows in the database we convert the sql entity to a string and insert it into a struct
 		systemManager := structs.GetSystemManager{}
-		err = rows.Scan(
-			&systemManager.Id,
-			&systemManager.UserName,
-			&systemManager.Company,
-			&systemManager.Credential)
+		err = rows.Scan(&systemManager.Id, &systemManager.UserName, &systemManager.Company, &systemManager.Credential)
 		if err != nil {
-			log.Fatal(err)
+			http.Error(w, apitools.EncodeError, http.StatusBadRequest)
+			log.Fatal(err.Error())
+			return
 		}
 
 		smList = append(smList, systemManager)
@@ -90,12 +90,13 @@ func getAllSystemManagers(w http.ResponseWriter, r *http.Request) {
 
 	err = rows.Err()
 	if err != nil {
+		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
 		log.Fatal(err)
+		return
 	}
 	rows.Close()
 
 	json.NewEncoder(w).Encode(smList) //Sends the defined list as a response
-
 }
 
 /*
@@ -105,26 +106,28 @@ func getOneSystemManager(w http.ResponseWriter, r *http.Request, id string) {
 
 	systemManager := structs.GetSystemManager{}
 
-	rows, err := databasefunctions.Db.Query("SELECT * FROM `SystemManager` WHERE SMiD = ?", id)
+	rows, err := databasefunctions.Db.Query("SELECT `SMiD`, `Username`, `Company`,`Credential` FROM `SystemManager` WHERE SMiD = ?", id)
 	if err != nil {
-		fmt.Fprintf(w, "Error occurred when querying database, error: %v", err.Error())
+		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+		log.Fatal(err.Error())
+		return
 	}
 
 	for rows.Next() { //For all the rows in the database we convert the sql entity to a string and insert it into a struct
 		systemManager = structs.GetSystemManager{}
-		err = rows.Scan(
-			&systemManager.Id,
-			&systemManager.UserName,
-			&systemManager.Company,
-			&systemManager.Credential)
+		err = rows.Scan(&systemManager.Id, &systemManager.UserName, &systemManager.Company, &systemManager.Credential)
 		if err != nil {
-			log.Fatal(err)
+			http.Error(w, apitools.EncodeError, http.StatusBadRequest)
+			log.Fatal(err.Error())
+			return
 		}
 	}
 
 	err = rows.Err()
 	if err != nil {
+		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
 		log.Fatal(err)
+		return
 	}
 	rows.Close()
 
@@ -140,12 +143,12 @@ Function for creating system Manager
 * Reason for this workflow is the foreign key constraints it makes deletion alot more efficent
 */
 func createSystemManagers(w http.ResponseWriter, r *http.Request, url string) {
-
 	var systemManager structs.CreateSystemManager
+
 	err := json.NewDecoder(r.Body).Decode(&systemManager)
 	if err != nil {
 		http.Error(w, apitools.DecodeError, http.StatusBadRequest)
-		log.Println(err.Error())
+		log.Fatal(err.Error())
 		return
 	}
 
@@ -156,7 +159,7 @@ func createSystemManagers(w http.ResponseWriter, r *http.Request, url string) {
 	object, err := databasefunctions.Db.Exec("INSERT INTO `SystemManager` set `UserName`=? ,`Company`=? ,`Credential`= (SELECT `CiD` FROM `Credentials` WHERE `Cid`=?) ;", systemManager.UserName, systemManager.Company, credentialId)
 	if err != nil {
 		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
-		log.Println(err.Error())
+		log.Fatal(err.Error())
 		return
 	}
 
@@ -164,7 +167,7 @@ func createSystemManagers(w http.ResponseWriter, r *http.Request, url string) {
 	_, err = object.LastInsertId()
 	if err != nil {
 		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
-		log.Println(err.Error())
+		log.Fatal(err.Error())
 		return
 	}
 
@@ -184,7 +187,7 @@ func deleteSystemManagers(w http.ResponseWriter, r *http.Request, url string) {
 	err := json.NewDecoder(r.Body).Decode(&systemManager) //Decodes the requests body into the structure defined above
 	if err != nil {
 		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
-		log.Println(err.Error())
+		log.Fatal(err.Error())
 		return
 	}
 
