@@ -92,6 +92,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 
 	//According to the name of the table we go to the corresponding action and create the appropriate query
 	switch tblname {
+
 	case "Incident": //this is the case for the table of the Incidents
 		if params[0] == "" {
 			stmt, err := Db.Prepare(statementtext + " " + tblname + " where Name=? ;")
@@ -130,7 +131,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 
 	case "ReceiverGroups": //this is the case for the table of the Incidents
 		if params[0] == "" {
-			stmt, err := Db.Prepare(statementtext + " " + "Emails" + " where Email=? ;")
+			stmt, err := Db.Prepare(statementtext + " " + "`ReceiverGroups`" + " where Name = ?;")
 			if err != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
 				log.Println(err.Error())
@@ -146,6 +147,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 				return
 
 			}
+
 		} else {
 			stmt, err := Db.Prepare(statementtext + " " + tblname + " where Groupid=? ;")
 			if err != nil {
