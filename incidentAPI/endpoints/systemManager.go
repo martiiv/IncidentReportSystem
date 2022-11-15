@@ -1,7 +1,6 @@
 package endpoints
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	apitools "incidentAPI/apiTools"
@@ -189,45 +188,18 @@ func deleteSystemManagers(w http.ResponseWriter, r *http.Request, url string) {
 		return
 	}
 
-	// Create a new context, and begin a transaction
-	ctx := context.Background()
-	tx, err := databasefunctions.Db.BeginTx(ctx, nil)
-	if err != nil {
-		http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
-		log.Println(err.Error())
-		return
-	}
-
 	//For each of receiverGroup struct objects passed in
 	for i := 0; i < len(systemManager); i++ {
 
 		//Since there is a foreign key constraint on Emails we simply delete the email and the systemManager will be deleted along with the credentials and the password
-		_, err = tx.ExecContext(ctx, "DELETE FROM `Emails` WHERE `Email` =?", systemManager[i].Email)
+		_, err = databasefunctions.Db.Exec("DELETE FROM `Emails` WHERE `Email` =?", systemManager[i].Email)
 		if err != nil {
-			// In case we find any error in the query execution, rollback the transaction
-			if rollbackErr := tx.Rollback(); rollbackErr != nil {
-				http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
-				log.Println(rollbackErr.Error())
-
-				return
-			}
-
-			http.Error(w, apitools.EncodeError, http.StatusServiceUnavailable)
-			log.Println(err.Error())
+			http.Error(w, apitools.UnexpectedError, http.StatusInternalServerError)
+			log.Fatal(err.Error())
 			return
 		}
-	}
 
-	// Finally, if no errors are recieved from the queries, commit the transaction
-	// this applies the above changes to our database
-	err = tx.Commit()
-	if err != nil {
-		http.Error(w, apitools.QueryError, http.StatusServiceUnavailable)
-		log.Println(err.Error())
-		return
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "Successfully deleted System manager with email "+systemManager[i].Email, http.StatusOK)
 	}
-
-	wrId := fmt.Sprintf("%#v", systemManager)
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, "Successfully deleted Receiver group with id "+wrId, http.StatusOK)
 }

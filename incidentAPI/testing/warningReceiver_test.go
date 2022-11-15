@@ -33,13 +33,13 @@ func Test_getOneReceiver(t *testing.T) {
 	r.Path("/receiver").HandlerFunc(endpoints.HandleRequestWarningReceiver).Queries("id", "{id}")
 	ts := httptest.NewServer(r)
 	defer ts.Close()
-	t.Run("Getting warning receiver with id 1", func(t *testing.T) {
+	t.Run("Getting warning receiver with id 2", func(t *testing.T) {
 		apitest.New().
 			Handler(r).
 			Get("/receiver").
-			Query("id", "1").
+			Query("id", "2").
 			Expect(t).
-			Body(`{"id":1,"name":"Monica","phoneNumber":"58328261","company":"IncidentCorp","receiverGroup":"Marketing","receiverEmail":"cleetorres68@gmail.com"}`).
+			Body(`{"id":2,"name":"Ulrik","phoneNumber":"78590153","company":"IncidentCorp","receiverGroup":"Development","receiverEmail":"UlrikUtvikler@gmail.com"}`).
 			Status(http.StatusOK).
 			End()
 	})

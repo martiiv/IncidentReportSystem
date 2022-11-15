@@ -48,6 +48,9 @@ func returnAccosiatedCountermeasure(w http.ResponseWriter, r *http.Request) {
 
 	defer results.Close()
 
+	for results.Next() {
+
+	}
 }
 
 func createConnectionCountermeasure(w http.ResponseWriter, r *http.Request) {
