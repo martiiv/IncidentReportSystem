@@ -46,3 +46,7 @@ type DeleteIncident []struct {
 type TagsStruct struct {
 	Tag string `json:"tag"`
 }
+type Countermeasure struct {
+	Description string `json:"Description"`
+}
+
