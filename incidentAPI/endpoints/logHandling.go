@@ -22,7 +22,6 @@ func HandleLogRequest(w http.ResponseWriter, r *http.Request) {
 		returnAccosiatedCountermeasure(w, r)
 
 	case "POST":
-		createConnectionCountermeasure(w, r)
 
 	case "PUT":
 
@@ -51,8 +50,4 @@ func returnAccosiatedCountermeasure(w http.ResponseWriter, r *http.Request) {
 	for results.Next() {
 
 	}
-}
-
-func createConnectionCountermeasure(w http.ResponseWriter, r *http.Request) {
-
 }

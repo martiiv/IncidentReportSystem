@@ -38,6 +38,9 @@ func main() {
 	r.Path("/manager").HandlerFunc(endpoints.HandleSystemManagerRequest).Queries("id", "{id}") //PUT
 	r.Path("/manager").HandlerFunc(endpoints.HandleSystemManagerRequest)                       //GET, POST, DELETE
 
+	r.Path("/countermeasure").HandlerFunc(endpoints.HandlePDC).Queries("tag", "{tag}")
+	r.Path("/countermeasure").HandlerFunc(endpoints.HandlePDC)
+
 	//Warning Receiver endpoint
 	r.Path("/receiver").HandlerFunc(endpoints.HandleRequestWarningReceiver).Queries("id", "{id}") //PUT, GET
 	r.Path("/receiver").HandlerFunc(endpoints.HandleRequestWarningReceiver)                       //POST, DELETE, GET

@@ -11,6 +11,7 @@ type GetIncident struct {
 	Countermeasure string `json:"countermeasure"`
 	Sendbymanager  string `json:"sendbymanager"`
 	Date           string `json:"date"`
+	LessonLearned  string `json:"lessonlearned"`
 }
 
 // Struct method for creating incidents endpoint: /incident Method POST
@@ -20,8 +21,8 @@ type CreateIncident struct {
 	Description    string `json:"description"`
 	Company        string `json:"company"`
 	ReceivingGroup string `json:"receivingGroup"`
-	Countermeasure string `json:"countermeasure"`
 	Sendbymanager  string `json:"sendbymanager"`
+	LessonLearned  string `json:"lessonlearned"`
 }
 
 type SendIndividualIncident struct {
@@ -49,4 +50,3 @@ type TagsStruct struct {
 type Countermeasure struct {
 	Description string `json:"Description"`
 }
-

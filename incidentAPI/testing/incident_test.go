@@ -33,13 +33,13 @@ func Test_getOneIncident(t *testing.T) {
 	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest).Queries("id", "{id}")
 	ts := httptest.NewServer(r)
 	defer ts.Close()
-	t.Run("Getting incident with id 2", func(t *testing.T) {
+	t.Run("Getting incident with id 110", func(t *testing.T) {
 		apitest.New().
 			Handler(r).
 			Get("/incident").
-			Query("id", "2").
+			Query("id", "110").
 			Expect(t).
-			Body(`{"id":2,"tag":"Phishing","name":"Hack attack!","description":"An email from an unknown party has sent out a malicious email containing malware!","company":"IncidentCorp","receivingGroup":"Information Security","countermeasure":"Do not open email, Block sender ","sendbymanager":"OdaManager","date":"2022-10-18 11:49:55"}`).
+			Body(`{"id":110,"tag":"Malware","name":"Virus in the print Server","description":"Lorem ipsum dolor sit amet, consectetur adipiscing elit.","company":"NTNU","receivingGroup":"Information Security","countermeasure":"Disconect the affected devices from the network and start checking critical devices such as servers and Administration's machines.","sendbymanager":"aleksaab","date":"2022-11-15 16:06:10","lessonlearned":"test"}`).
 			Status(http.StatusOK).
 			End()
 	})
@@ -56,13 +56,13 @@ func Test_createIncident(t *testing.T) {
 			Handler(r).
 			Post("/incident").
 			Body(`{ 
-			"tag": "Test",
+			"tag": "Phishing",
 			"name":  "TestIncidentAPITEST",
 			"description": "I am testing an incident",
 			"company": "IncidentCorp",
-			"receivingGroup": "Marketing",
-			"countermeasure": "Send help",
-			"sendByManager": "OdaManager"
+			"receivingGroup": "Development",
+			"sendByManager": "OdaManager",
+			"lessonlearned": " "
 		}`).
 			Expect(t).
 			Status(http.StatusCreated).Body("New incident added with name: TestIncidentAPITESTMail sent").
@@ -119,7 +119,7 @@ func Test_deleteIncident(t *testing.T) {
 			Delete("/incident").
 			Body(`[{
 		"incidentId": "",
-		"incidentName" : "Broken door"
+		"incidentName" : "Room 3 is out of the network"
 		}]`).
 			Expect(t).
 			Status(http.StatusOK).
@@ -130,16 +130,16 @@ func Test_deleteIncident(t *testing.T) {
 		apitest.New().Handler(r).
 			Post("/incident").
 			Body(`{ 
-			"tag": "Hazard",
-			"name":  "Broken door",
-			"description": "A door has been broken in office five",
-			"company": "IncidentCorp",
-			"receivingGroup": "Human Resources",
-			"countermeasure": "Contact janitor, Fix door",
-			"sendByManager": "OdaManager"
+			"tag": "Technical Problem ",
+			"name":  "Room 3 is out of the network",
+			"description": "All of the PCs in room 3 are out of the network.",
+			"company": "NTNU",
+			"receivingGroup": "Development",
+			"sendByManager": "OdaManager",
+			"lessonLearned": "IDK lord have mercy"
 		}`).
 			Expect(t).
-			Status(http.StatusCreated).Body("New incident added with name: Broken doorMail sent").
+			Status(http.StatusCreated).Body("New incident added with name: Room 3 is out of the networkMail sent").
 			End()
 	})
 }
