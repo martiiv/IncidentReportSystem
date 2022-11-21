@@ -58,15 +58,21 @@ func Insrt(w http.ResponseWriter, tblname string, params []string) {
 			return
 		}
 
-	case "Emails":
-		_, queryError := tx.Exec(statementtext+" "+tblname+" set Email= ?;", params[0])
+	case "Tags":
+		_, queryError := tx.Exec(statementtext+" "+tblname+" set Tag= ?;", params[0])
+		if queryError != nil {
+			http.Error(w, apitools.QueryError, http.StatusBadRequest)
+			log.Println(queryError.Error())
+			return
+		}
+	case "PredefinedCounterMeasures":
+		_, queryError := tx.Exec(statementtext+" "+tblname+" set acTag= (SELECT Tag FROM Tags WHERE Tag = ?), Description = ?;", params[0], params[1])
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
 			log.Println(queryError.Error())
 			return
 		}
 	}
-
 	//If query goes through we commit the transactions
 	if err := tx.Commit(); err != nil {
 		http.Error(w, "Error encountered when inserting rows, rolling back transactions...", http.StatusInternalServerError)
@@ -74,7 +80,6 @@ func Insrt(w http.ResponseWriter, tblname string, params []string) {
 		return
 	}
 }
-
 // Delete method it can be adjusted to all the tables and parameters needed this is just if needed in the prototype
 func Delete(w http.ResponseWriter, tblname string, params []string) {
 	var statementtext = "delete from"
@@ -173,6 +178,35 @@ func Update(w http.ResponseWriter, tblname string, params []string) {
 		return
 	}
 }
+
+//Updates the text in lesson learned row of the table incidents in the DB according to the selected incident based on the ID
+func Updatelessonslearned(w http.ResponseWriter,params []string){
+	var statementtext = "update "
+	ctx := context.Background()     //Defining context for transaction integration
+	tx, err := Db.BeginTx(ctx, nil) //Start DB transaction
+	if err != nil {
+		http.Error(w, "Error starting database transaction", http.StatusBadGateway)
+		log.Fatal(err.Error())
+		return
+	}
+	//Query execution
+		_, queryError := tx.Exec(statementtext+" "+"Incident"+" set LessonLearned= '?' "+"Where IncidentId=? ;", params[0], params[1])
+		if queryError != nil {
+			http.Error(w, apitools.QueryError, http.StatusBadRequest)
+			log.Fatal(queryError.Error())
+			return
+		}
+		//TODO Implement more cases if necessary
+	}
+
+	//If query goes through we commit the transactions
+	if err := tx.Commit(); err != nil {
+		http.Error(w, "Error encountered when deleting rows, rolling back transactions...", http.StatusInternalServerError)
+		log.Fatal(err)
+		return
+	}
+}
+
 
 // Function for selecting incidents
 // ! Needs rewriting but we dont have time
@@ -328,4 +362,29 @@ func SelecTags(w http.ResponseWriter) {
 		tags = append(tags, result)
 	}
 	json.NewEncoder(w).Encode(tags)
+}
+
+// Function for selecting countermeasures with their tags from Predifined Countermeasures table
+func SelecCmeasures(w http.ResponseWriter , tag string) {
+	var description []structs.Countermeasure
+	var statementtext = "SELECT "
+//based on the tag selected from the UI the query will get the appropriate countermeasure
+	results, queryError := Db.Query(statementtext + " " + "Description FROM `PredefinedCounterMeasures` where acTag = '?' " , tag)
+	if queryError != nil {
+		http.Error(w, apitools.QueryError, http.StatusBadRequest)
+		log.Fatal(queryError.Error())
+		return
+	}
+
+	for results.Next() {
+		var dbResponse string
+		if err := results.Scan(&dbResponse); err != nil {
+			http.Error(w, apitools.QueryError, http.StatusBadRequest)
+			log.Fatal(err.Error())
+		}
+
+		result := structs.Countermeasure{Description: dbResponse}
+		description = append(description, result)
+	}
+	json.NewEncoder(w).Encode(description)
 }
