@@ -108,7 +108,7 @@ func createIncident(w http.ResponseWriter, r *http.Request, url string) {
 		json.NewEncoder(w).Encode("Group does not exist! Please use an existing group or create one with this name!")
 	}
 
-	incidentList = append(incidentList, incident.Tag, incident.Name, incident.Description, incident.Company, incident.ReceivingGroup, incident.Countermeasure, incident.Sendbymanager)
+	incidentList = append(incidentList, incident.Tag, incident.Name, incident.Description, incident.Company, incident.ReceivingGroup, incident.Sendbymanager, incident.LessonLearned)
 	databasefunctions.Insrt(w, "Incident", incidentList)
 
 	w.WriteHeader(http.StatusCreated)

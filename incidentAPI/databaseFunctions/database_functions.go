@@ -33,7 +33,7 @@ func Insrt(w http.ResponseWriter, tblname string, params []string) {
 
 	case "Incident": //this is the case for the table of the Incidents
 		//Executing query with parameters
-		_, queryError := tx.Exec(statementtext+"`Incident` set Tag=?, Name= ? , Description= ? , Company= ? , Receiving_group = (SELECT Groupid FROM ReceiverGroups WHERE Name = ?) , Countermeasure = ? , Sendbymanager=(SELECT Username FROM SystemManager WHERE Username = ?) ;", params[0], params[1], params[2], params[3], params[4], params[5], params[6])
+		_, queryError := tx.Exec(statementtext+"`Incident` set Tag=(SELECT Tag FROM Tags WHERE Tag = ?), Name= ? , Description= ? , Company= ? , Receiving_group = (SELECT Groupid FROM ReceiverGroups WHERE Name = ?) , Countermeasure = (SELECT Description FROM PredefinedCounterMeasures WHERE acTag = ?) , Sendbymanager=(SELECT Username FROM SystemManager WHERE Username = ?), LessonLearned = ?;", params[0], params[1], params[2], params[3], params[4], params[0], params[5], params[6])
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
 			log.Fatal(queryError.Error())
@@ -58,21 +58,15 @@ func Insrt(w http.ResponseWriter, tblname string, params []string) {
 			return
 		}
 
-	case "Tags":
-		_, queryError := tx.Exec(statementtext+" "+tblname+" set Tag= ?;", params[0])
-		if queryError != nil {
-			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(queryError.Error())
-			return
-		}
-	case "PredefinedCounterMeasures":
-		_, queryError := tx.Exec(statementtext+" "+tblname+" set acTag= (SELECT Tag FROM Tags WHERE Tag = ?), Description = ?;", params[0], params[1])
+	case "Emails":
+		_, queryError := tx.Exec(statementtext+" "+tblname+" set Email= ?;", params[0])
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
 			log.Println(queryError.Error())
 			return
 		}
 	}
+
 	//If query goes through we commit the transactions
 	if err := tx.Commit(); err != nil {
 		http.Error(w, "Error encountered when inserting rows, rolling back transactions...", http.StatusInternalServerError)
@@ -80,6 +74,7 @@ func Insrt(w http.ResponseWriter, tblname string, params []string) {
 		return
 	}
 }
+
 // Delete method it can be adjusted to all the tables and parameters needed this is just if needed in the prototype
 func Delete(w http.ResponseWriter, tblname string, params []string) {
 	var statementtext = "delete from"
@@ -179,8 +174,8 @@ func Update(w http.ResponseWriter, tblname string, params []string) {
 	}
 }
 
-//Updates the text in lesson learned row of the table incidents in the DB according to the selected incident based on the ID
-func Updatelessonslearned(w http.ResponseWriter,params []string){
+// Updates the text in lesson learned row of the table incidents in the DB according to the selected incident based on the ID
+func Updatelessonslearned(w http.ResponseWriter, params []string) {
 	var statementtext = "update "
 	ctx := context.Background()     //Defining context for transaction integration
 	tx, err := Db.BeginTx(ctx, nil) //Start DB transaction
@@ -190,14 +185,13 @@ func Updatelessonslearned(w http.ResponseWriter,params []string){
 		return
 	}
 	//Query execution
-		_, queryError := tx.Exec(statementtext+" "+"Incident"+" set LessonLearned= '?' "+"Where IncidentId=? ;", params[0], params[1])
-		if queryError != nil {
-			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Fatal(queryError.Error())
-			return
-		}
-		//TODO Implement more cases if necessary
+	_, queryError := tx.Exec(statementtext+" "+"Incident"+" set LessonLearned= '?' "+"Where IncidentId=? ;", params[0], params[1])
+	if queryError != nil {
+		http.Error(w, apitools.QueryError, http.StatusBadRequest)
+		log.Fatal(queryError.Error())
+		return
 	}
+	//TODO Implement more cases if necessary
 
 	//If query goes through we commit the transactions
 	if err := tx.Commit(); err != nil {
@@ -207,7 +201,6 @@ func Updatelessonslearned(w http.ResponseWriter,params []string){
 	}
 }
 
-
 // Function for selecting incidents
 // ! Needs rewriting but we dont have time
 func IncidentSelect(w http.ResponseWriter, incidentId string) {
@@ -216,7 +209,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 
 	if incidentId == "" {
 		//According to the name of the table we go to the corresponding action and create the appropriate query
-		results, queryError := Db.Query(statementtext + " " + "IncidentId, Tag, Name, Description, Company, Receiving_group, Countermeasure, Sendbymanager, Date" + " from Incident ;")
+		results, queryError := Db.Query(statementtext + " " + "IncidentId, Tag, Name, Description, Company, Receiving_group, Countermeasure, Sendbymanager, Date, LessonLearned" + " from Incident ;")
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
 			log.Fatal(queryError.Error())
@@ -227,7 +220,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 		for results.Next() { //Iterating through results
 			var incident structs.GetIncident //Defining ONE incident struct
 
-			if err := results.Scan(&incident.IncidentId, &incident.Tag, &incident.Name, &incident.Description, &incident.Company, &incident.ReceivingGroup, &incident.Countermeasure, &incident.Sendbymanager, &incident.Date); err != nil {
+			if err := results.Scan(&incident.IncidentId, &incident.Tag, &incident.Name, &incident.Description, &incident.Company, &incident.ReceivingGroup, &incident.Countermeasure, &incident.Sendbymanager, &incident.Date, &incident.LessonLearned); err != nil {
 				http.Error(w, "Error scanning results from DB", http.StatusBadRequest)
 				log.Fatal(err.Error())
 				return
@@ -264,7 +257,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 	} else { //An ID is passed in we get one specific incident
 		incident := structs.GetIncident{}
 
-		results, queryError := Db.Query(statementtext + " " + "IncidentId, Tag, Name, Description, Company, Receiving_group, Countermeasure, Sendbymanager, Date" + " from Incident WHERE `IncidentId` = " + incidentId + " ;")
+		results, queryError := Db.Query(statementtext + " " + "IncidentId, Tag, Name, Description, Company, Receiving_group, Countermeasure, Sendbymanager, Date, LessonLearned" + " from Incident WHERE `IncidentId` = " + incidentId + " ;")
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
 			log.Fatal(queryError.Error())
@@ -273,7 +266,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 		defer results.Close()
 
 		for results.Next() { //For all the rows in the database we convert the sql entity to a string and insert it into a struct
-			err := results.Scan(&incident.IncidentId, &incident.Tag, &incident.Name, &incident.Description, &incident.Company, &incident.ReceivingGroup, &incident.Countermeasure, &incident.Sendbymanager, &incident.Date)
+			err := results.Scan(&incident.IncidentId, &incident.Tag, &incident.Name, &incident.Description, &incident.Company, &incident.ReceivingGroup, &incident.Countermeasure, &incident.Sendbymanager, &incident.Date, &incident.LessonLearned)
 			if err != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
 				log.Fatal(err.Error())
@@ -365,11 +358,11 @@ func SelecTags(w http.ResponseWriter) {
 }
 
 // Function for selecting countermeasures with their tags from Predifined Countermeasures table
-func SelecCmeasures(w http.ResponseWriter , tag string) {
+func SelecCmeasures(w http.ResponseWriter, tag string) {
 	var description []structs.Countermeasure
 	var statementtext = "SELECT "
-//based on the tag selected from the UI the query will get the appropriate countermeasure
-	results, queryError := Db.Query(statementtext + " " + "Description FROM `PredefinedCounterMeasures` where acTag = '?' " , tag)
+	//based on the tag selected from the UI the query will get the appropriate countermeasure
+	results, queryError := Db.Query(statementtext+" "+"Description FROM `PredefinedCounterMeasures` where acTag = '?' ", tag)
 	if queryError != nil {
 		http.Error(w, apitools.QueryError, http.StatusBadRequest)
 		log.Fatal(queryError.Error())
