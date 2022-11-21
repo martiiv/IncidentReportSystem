@@ -33,7 +33,7 @@ func SendMail(w http.ResponseWriter, inputStruct structs.CreateIncident) error {
 	smtpPort := "587"
 
 	//Main mail body
-	messageString := "Subject: " + inputStruct.Tag + "\n\nInformation:\n" + inputStruct.Description + "\r\nCountermeasures:\n" + inputStruct.Countermeasure
+	messageString := "Subject: " + inputStruct.Tag + "\n\nInformation:\n" + inputStruct.Description
 
 	// Message.
 	message := []byte((messageString))
