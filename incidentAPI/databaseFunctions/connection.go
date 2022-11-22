@@ -58,6 +58,7 @@ func EstablishConnection() {
 /*
 Function checkExisting will check if a table contains an entity
 identical to a passed in one using an id or another identifier
+Even though database does not accept duplicates this method is added as an extra security measure
 */
 func CheckExisting(tableName string, columnName string, entityID string) bool {
 	//Queries the database
@@ -87,7 +88,7 @@ func CreateNewUser(w http.ResponseWriter, newEmail string, newPassword string) i
 	ctx := context.Background()
 	tx, err := Db.BeginTx(ctx, nil) //Reason being if even one of the three Queries crash none go through
 	if err != nil {
-		http.Error(w, "Erro starting database transaction", http.StatusBadGateway)
+		http.Error(w, "Error starting database transaction", http.StatusBadGateway)
 		log.Fatal(err.Error())
 		return 0
 	}

@@ -46,7 +46,7 @@ func HandleSystemManagerRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
- * Function getSystemManager will forward the GET request based on wether or not the user sends in an id or not
+ * Function getSystemManager will forward the GET request based on whether or not the user sends in an id or not
  */
 func getSystemManager(w http.ResponseWriter, r *http.Request, url string) {
 
@@ -57,7 +57,7 @@ func getSystemManager(w http.ResponseWriter, r *http.Request, url string) {
 		getAllSystemManagers(w, r) //If the url doesnt contain an id: /incident we want to return all the system managers in the table
 
 	} else if variables["id"] != "" {
-		getOneSystemManager(w, r, id) //If the url contains an id: /incident?ìd=3 we want to return a spesific systemManager
+		getOneSystemManager(w, r, id) //If the url contains an id: /incident?ìd=3 we want to return a specific systemManager
 	} else {
 		json.NewEncoder(w).Encode("Please send in an acceptable endpoint URL!")
 	}
@@ -100,7 +100,7 @@ func getAllSystemManagers(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-*Function returns a specific system manager accosiated with the passed in id
+*Function returns a specific system manager associated with the passed in id
  */
 func getOneSystemManager(w http.ResponseWriter, r *http.Request, id string) {
 
@@ -140,7 +140,7 @@ Function for creating system Manager
 *					->A credentials row
 *									->Password row
 *												->SystemManager row
-* Reason for this workflow is the foreign key constraints it makes deletion alot more efficent
+* Reason for this workflow is the foreign key constraints it makes deletion alot more efficient
 */
 func createSystemManagers(w http.ResponseWriter, r *http.Request, url string) {
 	var systemManager structs.CreateSystemManager
