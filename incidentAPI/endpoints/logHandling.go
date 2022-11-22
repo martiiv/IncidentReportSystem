@@ -9,6 +9,16 @@ import (
 	"net/http"
 )
 
+/*
+*File logHandling, will create log reports and similar functionality
+! THIS FILE IS PoC ONLY AS WE DONT HAVE TIME
+! Missing functionality:
+! - Creating a log report with incidents and one big lessons learned from those incidents
+! - Creating a report containing all incidents sent to one warning receiver
+? Last revision Martin Iversen 22.11.2022
+*/
+
+// Handler forwarding requests
 func HandleLogRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")

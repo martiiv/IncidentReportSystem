@@ -37,6 +37,7 @@ func Insrt(w http.ResponseWriter, tblname string, params []string) {
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
 			log.Fatal(queryError.Error())
+			tx.Rollback()
 			return
 		}
 
@@ -46,6 +47,7 @@ func Insrt(w http.ResponseWriter, tblname string, params []string) {
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
 			log.Fatal(queryError.Error())
+			tx.Rollback()
 			return
 		}
 
@@ -55,6 +57,7 @@ func Insrt(w http.ResponseWriter, tblname string, params []string) {
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
 			log.Println(queryError.Error())
+			tx.Rollback()
 			return
 		}
 
@@ -62,7 +65,8 @@ func Insrt(w http.ResponseWriter, tblname string, params []string) {
 		_, queryError := tx.Exec(statementtext+" "+tblname+" set Email= ?;", params[0])
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Println(queryError.Error())
+			log.Fatal(queryError.Error())
+			tx.Rollback()
 			return
 		}
 	}
@@ -95,6 +99,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusInternalServerError)
 				log.Fatal(queryError.Error())
+				tx.Rollback()
 				return
 			}
 
@@ -103,7 +108,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusInternalServerError)
 				log.Fatal(queryError.Error())
-
+				tx.Rollback()
 				return
 			}
 		}
@@ -114,6 +119,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
 				log.Fatal(queryError.Error())
+				tx.Rollback()
 				return
 			}
 
@@ -122,6 +128,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
 				log.Fatal(queryError.Error())
+				tx.Rollback()
 				return
 			}
 		}
@@ -131,6 +138,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
 			log.Fatal(queryError.Error())
+			tx.Rollback()
 			return
 		}
 	}
@@ -151,6 +159,7 @@ func Update(w http.ResponseWriter, tblname string, params []string) {
 	if err != nil {
 		http.Error(w, "Error starting database transaction", http.StatusBadGateway)
 		log.Fatal(err.Error())
+		tx.Rollback()
 		return
 	}
 
@@ -161,6 +170,7 @@ func Update(w http.ResponseWriter, tblname string, params []string) {
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
 			log.Fatal(queryError.Error())
+			tx.Rollback()
 			return
 		}
 		//TODO Implement more cases if necessary
@@ -182,6 +192,7 @@ func Updatelessonslearned(w http.ResponseWriter, params []string) {
 	if err != nil {
 		http.Error(w, "Error starting database transaction", http.StatusBadGateway)
 		log.Fatal(err.Error())
+		tx.Rollback()
 		return
 	}
 	//Query execution
@@ -189,6 +200,7 @@ func Updatelessonslearned(w http.ResponseWriter, params []string) {
 	if queryError != nil {
 		http.Error(w, apitools.QueryError, http.StatusBadRequest)
 		log.Fatal(queryError.Error())
+		tx.Rollback()
 		return
 	}
 	//TODO Implement more cases if necessary
