@@ -1,7 +1,5 @@
 import {BASE_URL} from "../constants/WebURL";
 
-
-
 /**
  * Function to fetch data from an api
  *
@@ -34,4 +32,3 @@ export default function fetchData(url) {
         xhr.send();
     });
 }
-

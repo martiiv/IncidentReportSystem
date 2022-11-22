@@ -89,7 +89,9 @@ func Passwdcheck(w http.ResponseWriter, giventext string, email string) int {
 		return 0
 	}
 
-	result := Hashingsalted(giventext, CiD) //Hashes password
+	var salt = "saltOne" //! Hard coded salt value change this later
+
+	result := Hashingsalted(giventext, salt) //Hashes password
 
 	if result == Password {
 		return 1 //if password is correct
