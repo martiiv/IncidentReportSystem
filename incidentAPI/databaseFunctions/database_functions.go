@@ -81,7 +81,7 @@ func Insrt(w http.ResponseWriter, tblname string, params []string) {
 
 // Delete method it can be adjusted to all the tables and parameters needed this is just if needed in the prototype
 func Delete(w http.ResponseWriter, tblname string, params []string) {
-	var statementtext = "delete from"
+	var statementtext = "DELETE FROM"
 	ctx := context.Background()     //Defining context for transaction integration
 	tx, err := Db.BeginTx(ctx, nil) //Start DB transaction
 	if err != nil {
@@ -113,7 +113,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 			}
 		}
 
-	case "ReceiverGroups": //this is the case for the table of the Incidents
+	case "ReceiverGroups": //this is the case for the table of the Receiver groups
 		if params[0] == "" { //If Id is empty
 			_, queryError := tx.Exec(statementtext+" `ReceiverGroups`"+" where Name = ?;", params[1]) //We delete based on name
 			if queryError != nil {
@@ -133,16 +133,25 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 			}
 		}
 
-	case "WarningReceiver": //this is the case for the table of the Incidents
-		_, queryError := tx.Exec(statementtext+" "+"`Emails`"+" where `Email`= ? ;", params[1])
-		if queryError != nil {
-			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Fatal(queryError.Error())
-			tx.Rollback()
-			return
+	case "WarningReceiver": //this is the case for the table of the warning receiver
+		if params[0] == "" { //If Id is empty
+			_, queryError := tx.Exec(statementtext+" "+tblname+" where `ReceiverEmail`= ? ;", params[1])
+			if queryError != nil {
+				http.Error(w, apitools.QueryError, http.StatusBadRequest)
+				log.Fatal(queryError.Error())
+				tx.Rollback()
+				return
+			}
+		}else {
+			_, queryError := tx.Exec(statementtext+" "+tblname+" where WriD=? ;", params[0])
+			if queryError != nil {
+				http.Error(w, apitools.QueryError, http.StatusBadRequest)
+				log.Fatal(queryError.Error())
+				tx.Rollback()
+				return
+			}
 		}
 	}
-
 	//If query goes through we commit the transactions
 	if err := tx.Commit(); err != nil {
 		http.Error(w, "Error encountered when deleting rows, rolling back transactions...", http.StatusInternalServerError)
@@ -153,7 +162,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 
 // Function to be used by the manager in case data needs to be altered
 func Update(w http.ResponseWriter, tblname string, params []string) {
-	var statementtext = "update "
+	var statementtext = "UPDATE "
 	ctx := context.Background()     //Defining context for transaction integration
 	tx, err := Db.BeginTx(ctx, nil) //Start DB transaction
 	if err != nil {
@@ -173,7 +182,6 @@ func Update(w http.ResponseWriter, tblname string, params []string) {
 			tx.Rollback()
 			return
 		}
-		//TODO Implement more cases if necessary
 	}
 
 	//If query goes through we commit the transactions
@@ -186,7 +194,7 @@ func Update(w http.ResponseWriter, tblname string, params []string) {
 
 // Updates the text in lesson learned row of the table incidents in the DB according to the selected incident based on the ID
 func Updatelessonslearned(w http.ResponseWriter, params []string) {
-	var statementtext = "update "
+	var statementtext = "UPDATE "
 	ctx := context.Background()     //Defining context for transaction integration
 	tx, err := Db.BeginTx(ctx, nil) //Start DB transaction
 	if err != nil {
@@ -203,7 +211,7 @@ func Updatelessonslearned(w http.ResponseWriter, params []string) {
 		tx.Rollback()
 		return
 	}
-	//TODO Implement more cases if necessary
+
 
 	//If query goes through we commit the transactions
 	if err := tx.Commit(); err != nil {
@@ -217,7 +225,7 @@ func Updatelessonslearned(w http.ResponseWriter, params []string) {
 // ! Needs rewriting but we dont have time
 func IncidentSelect(w http.ResponseWriter, incidentId string) {
 	var incidentList []structs.GetIncident //Defines incidentstruct
-	var statementtext = "select "          //Defines statement
+	var statementtext = "SELECT "          //Defines statement
 
 	if incidentId == "" {
 		//According to the name of the table we go to the corresponding action and create the appropriate query
@@ -316,7 +324,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 
 // Function for selecting warning receivers
 func Select_warning_receivers(w http.ResponseWriter) {
-	var statementtext = "select "
+	var statementtext = "SELECT "
 	//Executing query
 	results, queryError := Db.Query(statementtext + " " + "WriD , Name, PhoneNumber , Company , ReceiverGroup , ReceiverId " + " from WarningReceiver ;")
 	if queryError != nil {

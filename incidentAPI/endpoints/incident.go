@@ -101,7 +101,7 @@ func createIncident(w http.ResponseWriter, r *http.Request, url string) {
 		return
 	}
 
-	//Checks wether or not the Recieving group exists
+	//Checks whether or not the Recieving group exists
 	checkGroup := databasefunctions.CheckExisting("ReceiverGroups", "Groupid", incident.ReceivingGroup)
 
 	if !checkGroup {
