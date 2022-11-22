@@ -12,7 +12,7 @@ import (
 /*
 * File login.go
 * Used for logging into the front end application
-? Last revision Martin Iversen 15.11.2022
+? Last revision Martin Iversen 22.11.2022
 */
 
 // Function authenticates the user with an email and a password

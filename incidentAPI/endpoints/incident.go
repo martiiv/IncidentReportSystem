@@ -44,7 +44,7 @@ func HandleIncidentRequest(w http.ResponseWriter, r *http.Request) {
 		createIncident(w, r, url)
 
 	case "PUT":
-		updateCountermeasures(w, r, url)
+		updateLessonsLearned(w, r, url)
 
 	case "DELETE":
 		deleteIncident(w, r, url)
@@ -126,17 +126,17 @@ func createIncident(w http.ResponseWriter, r *http.Request, url string) {
 /*
 Function updateCountermeasures will update the incidents suggested countermeasures in the database
 */
-func updateCountermeasures(w http.ResponseWriter, r *http.Request, url string) {
-	var countermeasure structs.UpdateCountermeasure
+func updateLessonsLearned(w http.ResponseWriter, r *http.Request, url string) {
+	var LessonLearned structs.UpdateLessonsLearned
 
-	err := json.NewDecoder(r.Body).Decode(&countermeasure)
+	err := json.NewDecoder(r.Body).Decode(&LessonLearned)
 	if err != nil {
 		http.Error(w, apitools.DecodeError, http.StatusBadRequest)
 		log.Fatal(err.Error())
 		return
 	}
 
-	_, err = databasefunctions.Db.Exec("UPDATE `Incident` SET `Countermeasure` = ? WHERE `IncidentId` = ?", countermeasure.Countermeasure, countermeasure.IncidentId)
+	_, err = databasefunctions.Db.Exec("UPDATE `Incident` SET `LessonLearned` = ? WHERE `IncidentId` = ?", LessonLearned.LessonLearned, LessonLearned.IncidentId)
 	if err != nil {
 		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
 		log.Fatal(err.Error())
@@ -144,7 +144,7 @@ func updateCountermeasures(w http.ResponseWriter, r *http.Request, url string) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Successfully updated Countermeasures in incident: %v", countermeasure.IncidentId)
+	fmt.Fprintf(w, "Successfully updated Countermeasures in incident: %v", LessonLearned.IncidentId)
 }
 
 /*

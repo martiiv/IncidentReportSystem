@@ -39,7 +39,7 @@ func Test_getOneIncident(t *testing.T) {
 			Get("/incident").
 			Query("id", "110").
 			Expect(t).
-			Body(`{"id":110,"tag":"Malware","name":"Virus in the print Server","description":"Lorem ipsum dolor sit amet, consectetur adipiscing elit.","company":"NTNU","receivingGroup":"Information Security","countermeasure":"Disconect the affected devices from the network and start checking critical devices such as servers and Administration's machines.","sendbymanager":"aleksaab","date":"2022-11-15 16:06:10","lessonlearned":"test"}`).
+			Body(`{"id":110,"tag":"Malware","name":"Virus in the print Server","description":"Lorem ipsum dolor sit amet, consectetur adipiscing elit.","company":"NTNU","receivingGroup":"Information Security","countermeasure":"Disconect the affected devices from the network and start checking critical devices such as servers and Administration's machines.","sendbymanager":"aleksaab","date":"2022-11-15 16:06:10","lessonlearned":"Burn the building to the ground."}`).
 			Status(http.StatusOK).
 			End()
 	})
@@ -73,18 +73,18 @@ func Test_createIncident(t *testing.T) {
 	})
 }
 
-func Test_updateCountermeasures(t *testing.T) {
+func Test_updateLessonLearned(t *testing.T) {
 	databasefunctions.EstablishConnection()
 	r := mux.NewRouter()
 	r.Path("/incident").HandlerFunc(endpoints.HandleIncidentRequest)
 	ts := httptest.NewServer(r)
 	defer ts.Close()
-	t.Run("Updating incident with id 1", func(t *testing.T) {
+	t.Run("Updating incident with id 110", func(t *testing.T) {
 		apitest.New().
 			Handler(r).Put("/incident").
 			Body(`{
-		"incidentId": 1,
-		"countermeasure" : "Updating countermeasures ins TestIncident"
+		"incidentId": 110,
+		"lessonlearned" : "Updating countermeasures ins TestIncident"
 		}`).
 			Expect(t).
 			Status(http.StatusOK).
@@ -96,8 +96,8 @@ func Test_updateCountermeasures(t *testing.T) {
 			Handler(r).
 			Put("/incident").
 			Body(`{
-				"incidentId": 1,
-				"countermeasure" : "Contact janitor, Fix door"
+				"incidentId": 110,
+				"lessonlearned" : "Burn the building to the ground."
 	}`).
 			Expect(t).
 			Status(http.StatusOK).

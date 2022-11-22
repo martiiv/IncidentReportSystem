@@ -34,9 +34,9 @@ type SendIndividualIncident struct {
 }
 
 // Struct method for updating countermeasures for an incident endpoint /incident?id=EX Method PUT
-type UpdateCountermeasure struct {
-	IncidentId     int    `json:"incidentId"`
-	Countermeasure string `json:"countermeasure"`
+type UpdateLessonsLearned struct {
+	IncidentId    int    `json:"incidentId"`
+	LessonLearned string `json:"lessonlearned"`
 }
 
 type DeleteIncident []struct {

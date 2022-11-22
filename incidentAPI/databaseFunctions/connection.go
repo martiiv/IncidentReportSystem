@@ -97,6 +97,7 @@ func CreateNewUser(w http.ResponseWriter, newEmail string, newPassword string) i
 		_ = tx.Rollback()
 		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
 		log.Fatal(execErr.Error())
+		tx.Rollback()
 		return 0
 	}
 
@@ -108,6 +109,7 @@ func CreateNewUser(w http.ResponseWriter, newEmail string, newPassword string) i
 		_ = tx.Rollback()
 		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
 		log.Fatal(execErr.Error())
+		tx.Rollback()
 		return 0
 	}
 
@@ -117,6 +119,7 @@ func CreateNewUser(w http.ResponseWriter, newEmail string, newPassword string) i
 		_ = tx.Rollback()
 		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
 		log.Fatal(execErr.Error())
+		tx.Rollback()
 		return 0
 	}
 
