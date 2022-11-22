@@ -3,6 +3,7 @@ package endpoints
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	apitools "incidentAPI/apiTools"
 	databasefunctions "incidentAPI/databaseFunctions"
 	"incidentAPI/structs"
@@ -15,8 +16,7 @@ import (
 /*
 * File predefinedCountermeasure
 * Used for defining and handling predefined countermeasures for incidents
-TODO Implement PUT and DELETE
-? Last revision Martin Iversen 21.11.2022
+? Last revision Martin Iversen 22.11.2022
 */
 
 func HandlePDC(w http.ResponseWriter, r *http.Request) {
@@ -58,6 +58,7 @@ func getPDTCounterM(w http.ResponseWriter, r *http.Request, url string) {
 	}
 }
 
+// FUnction for getting all countermeasures
 func getAllCounterM(w http.ResponseWriter, r *http.Request) {
 	var cmList []structs.PDCountermeasure
 
@@ -72,7 +73,7 @@ func getAllCounterM(w http.ResponseWriter, r *http.Request) {
 	for results.Next() { //Iterating through results
 		var countermeasure structs.PDCountermeasure //Defining ONE incident struct
 
-		if err := results.Scan(&countermeasure.AcTag, &countermeasure.Description); err != nil {
+		if err := results.Scan(&countermeasure.Tag, &countermeasure.Description); err != nil {
 			http.Error(w, "Error scanning results from DB", http.StatusBadRequest)
 			log.Fatal(err.Error())
 			return
@@ -87,10 +88,12 @@ func getAllCounterM(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		return
 	}
-	json.NewEncoder(w).Encode(cmList) //Sends the defined list as a response
 
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(cmList) //Sends the defined list as a response
 }
 
+// Function for getting one countermeasure
 func getOneCounterM(w http.ResponseWriter, r *http.Request, tag string) {
 	var countermeasure structs.PDCountermeasure
 
@@ -103,7 +106,7 @@ func getOneCounterM(w http.ResponseWriter, r *http.Request, tag string) {
 	defer results.Close()
 
 	for results.Next() { //Iterating through results
-		if err := results.Scan(&countermeasure.AcTag, &countermeasure.Description); err != nil {
+		if err := results.Scan(&countermeasure.Tag, &countermeasure.Description); err != nil {
 			http.Error(w, "Error scanning results from DB", http.StatusBadRequest)
 			log.Fatal(err.Error())
 			return
@@ -116,9 +119,12 @@ func getOneCounterM(w http.ResponseWriter, r *http.Request, tag string) {
 		log.Println(err.Error())
 		return
 	}
+
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(countermeasure) //Sends the defined list as a response
 }
 
+// Function for creating new countermeasures
 func createPDCounterM(w http.ResponseWriter, r *http.Request, url string) {
 	var countermeasure structs.PDCountermeasure
 
@@ -137,17 +143,22 @@ func createPDCounterM(w http.ResponseWriter, r *http.Request, url string) {
 		return
 	}
 
-	_, queryError := tx.Exec("INSERT INTO Tags SET acTag = ?")
-	if queryError != nil {
-		http.Error(w, apitools.QueryError, http.StatusBadRequest)
-		log.Fatal(queryError.Error())
-		return
+	//If the tag already exists we update it instead of creating a duplicate tag/an error gets thrown
+	if !databasefunctions.CheckExisting("Tags", "Tag", countermeasure.Tag) {
+		_, queryError := tx.Exec("INSERT INTO Tags SET Tag = ?", countermeasure.Tag)
+		if queryError != nil {
+			http.Error(w, apitools.QueryError, http.StatusBadRequest)
+			log.Fatal(queryError.Error())
+			tx.Rollback()
+			return
+		}
 	}
 
-	_, queryError = tx.Exec("INSERT INTO `PredefinedCounterMeasures` set acTag=(SELECT Tag FROM Tags WHERE Tag = ?), Description= ?", countermeasure.AcTag, countermeasure.Description)
+	_, queryError := tx.Exec("INSERT INTO `PredefinedCounterMeasures` set acTag=(SELECT Tag FROM Tags WHERE Tag = ?), Description= ? ;", countermeasure.Tag, countermeasure.Description)
 	if queryError != nil {
 		http.Error(w, apitools.QueryError, http.StatusBadRequest)
 		log.Fatal(queryError.Error())
+		tx.Rollback()
 		return
 	}
 
@@ -158,9 +169,11 @@ func createPDCounterM(w http.ResponseWriter, r *http.Request, url string) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(countermeasure)
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprintf(w, "New countermeasure added with tag: %v", countermeasure.Tag)
 }
 
+// Function for updating countermeasures
 func updatePDCounterM(w http.ResponseWriter, r *http.Request, url string) {
 	var countermeasure structs.PDCountermeasure
 
@@ -171,16 +184,73 @@ func updatePDCounterM(w http.ResponseWriter, r *http.Request, url string) {
 		return
 	}
 
-	_, queryError := databasefunctions.Db.Exec("ALTER TABLE `PredefinedCounterMeasures` set Description= ? WHERE acTag=?", countermeasure.Description, countermeasure.AcTag)
+	_, queryError := databasefunctions.Db.Exec("UPDATE `PredefinedCounterMeasures` set Description= ? WHERE acTag=?", countermeasure.Description, countermeasure.Tag)
 	if queryError != nil {
 		http.Error(w, apitools.QueryError, http.StatusBadRequest)
 		log.Fatal(queryError.Error())
 		return
 	}
 
-	json.NewEncoder(w).Encode("Succsessfully updated countermeasure with tag " + countermeasure.AcTag)
+	w.WriteHeader(http.StatusAccepted)
+	fmt.Fprintf(w, "Succsessfully updated countermeasure with tag %v", countermeasure.Tag)
 }
 
+// Function for deleteing predefined countermeasures
+// ! This wont be implemented due to product logic, for deletion we set the description to an empty string instead
 func deletePDCounterM(w http.ResponseWriter, r *http.Request, url string) {
+	var countermeasure []structs.DeleteCountermeasure
 
+	err := json.NewDecoder(r.Body).Decode(&countermeasure) //Decodes the requests body into the structure defined above
+	if err != nil {
+		http.Error(w, apitools.EncodeError, http.StatusInternalServerError)
+		log.Println(err.Error())
+		return
+	}
+
+	ctx := context.Background()                       //Defining context for transaction integration
+	tx, err := databasefunctions.Db.BeginTx(ctx, nil) //Start DB transaction
+	if err != nil {
+		http.Error(w, "Error starting database transaction", http.StatusBadGateway)
+		log.Fatal(err.Error())
+		return
+	}
+
+	//For each of incident struct objects passed in
+	for i := 0; i < len(countermeasure); i++ {
+		if countermeasure[i].Cascade == "Yes" {
+			_, queryError := tx.Exec("DELETE FROM Tags WHERE Tag = ?", countermeasure[i].Tag)
+			if queryError != nil {
+				http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+				log.Fatal(queryError.Error())
+				return
+			}
+
+			_, queryError = tx.Exec("DELETE FROM PredefinedCounterMeasures WHERE acTag = ?", countermeasure[i].Tag)
+			if queryError != nil {
+				http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+				log.Fatal(queryError.Error())
+				return
+			}
+
+		} else if countermeasure[i].Cascade == "No" {
+			_, queryError := tx.Exec("DELETE FROM PredefinedCounterMeasures WHERE acTag = ?", countermeasure[i].Tag)
+			if queryError != nil {
+				http.Error(w, apitools.QueryError, http.StatusInternalServerError)
+				log.Fatal(queryError.Error())
+				return
+			}
+		} else {
+			fmt.Fprint(w, "Please pass in either Yes or No in the cascade field in the request body!")
+			return
+		}
+
+		//If query goes through we commit the transactions
+		if err := tx.Commit(); err != nil {
+			http.Error(w, "Error encountered when deleting rows, rolling back transactions...", http.StatusInternalServerError)
+			log.Fatal(err)
+			return
+		}
+
+		w.WriteHeader(http.StatusAccepted)
+	}
 }

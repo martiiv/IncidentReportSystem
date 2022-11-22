@@ -1,6 +1,11 @@
 package structs
 
 type PDCountermeasure struct {
-	AcTag       string `json:"actag"`
+	Tag         string `json:"tag"`
 	Description string `json:"description"`
+}
+
+type DeleteCountermeasure struct {
+	Tag     string `json:"tag"`
+	Cascade string `json:"cascade"`
 }
