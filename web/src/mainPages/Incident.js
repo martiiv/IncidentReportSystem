@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import postModel from "../middleware/postData";
-import {DASHBOARD_URL, GROUPS_URL, INCIDENT_URL, TAG_Query} from "../constants/WebURL";
+import {COUNTERMEASURE, DASHBOARD_URL, GROUPS_URL, INCIDENT_URL, TAG_Query} from "../constants/WebURL";
 import TagsInput from "../components/TagsInput";
 import GroupSelectComponent from "../components/GroupSelectComponent";
 import "./Create.css";
@@ -13,14 +13,15 @@ import {useNavigate} from "react-router-dom";
 
 function Incident() {
     const credentials = (JSON.parse(sessionStorage.getItem("credentials")))
+    const [countermeasureText, setCountermeasureText] = useState("")
 
     const [stateTest, setStateTest] = useState({
         name: "",
         tag: "",
         description: "",
         company: credentials.company,
-        receivingGroup: "",
         countermeasure: "",
+        receivingGroup: "",
         sendbymanager: credentials.userName
     })
 
@@ -29,16 +30,19 @@ function Incident() {
     const [isPending, setIsPending] = useState(false);
     const [tagsOption, setTagsOption] = useState([])
     const [groupsOption, setgroupsOption] = useState([])
+
     const navigate = useNavigate();
 
 
     useEffect(() => {
         const fetchTags = async () => {
             let counter = 0
+            await fetchData(COUNTERMEASURE)
+                .then(res => {
+                    (setTagsOption(res.data.map(item => ({id: counter++, name: item.tag, description: item.description}))))
+                    console.log(res.data)
 
-            await fetchData(INCIDENT_URL + TAG_Query)
-                .then(res =>
-                    (setTagsOption(res.data.map(item => ({id: counter++, name: item.tag})))))
+                })
                 .catch(e => console.log(e))
         }
 
@@ -53,7 +57,6 @@ function Incident() {
         fetchTags().catch(e => console.log(e))
         fetchGroups().catch(e => console.log(e))
     }, [])
-
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -84,8 +87,6 @@ function Incident() {
             })
     }
 
-    console.log(stateTest)
-
     function handleChange(evt) {
         const value = evt.target.value;
         setStateTest({
@@ -100,6 +101,8 @@ function Incident() {
 
     }
 
+    console.log(stateTest)
+
     return (
         <div className={"create"}>
             <form className={"create-forms"} onSubmit={handleSubmit} onKeyDown={(e) => {
@@ -107,7 +110,6 @@ function Incident() {
             }}>
                 <h2>New Incident</h2>
                 <ReactNotifications/>
-
                 <label>Incident Title:
                     <input
                         type={"text"}
@@ -119,10 +121,12 @@ function Incident() {
                 </label>
 
                 <label>Tags:
-                    {tagsOption.length > 0 ? <TagsInput
+                    {tagsOption.length > 0 ?
+                        <TagsInput
                         setTagsFunc={setTags}
                         data={tagsOption}
-                    /> : null}
+                        setStateTestFunc={setStateTest}
+                        /> : null}
                 </label>
 
                 {groupsOption.length > 0 ?
@@ -142,9 +146,9 @@ function Incident() {
                     />
                 </label>
 
+
                 <label>Countermeasures
-                    <input
-                        type={"text"}
+                    <textarea
                         name={"countermeasure"}
                         value={stateTest.countermeasure}
                         onChange={handleChange}

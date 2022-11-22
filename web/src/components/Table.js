@@ -31,9 +31,9 @@ class Table extends Component {
                         }
 
                         <td>{type !== "WR" ? item.date : item.name}</td>
-                        <td>{item.receiverGroup}</td>
+                        <td>{type !== "WR" ? item.receivingGroup : item.receiverGroup}</td>
                         <td>{type !== "WR"  ? item.name : item.company}</td>
-                        <td>{type === "WR" ? item.receiverEmail : item.tag}</td>
+                        <td>{type !== "WR" ? item.tag : item.receiverEmail}</td>
                         <td>{type !== "WR" ? item.countermeasure : item.phoneNumber}</td>
                         {type !== "WR" &&
                             <td key={item}>

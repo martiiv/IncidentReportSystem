@@ -15,7 +15,7 @@ import customStyles from "./SelectStyle";
  * @constructor
  */
 
-function TagsInput({setTagsFunc, data}){
+function TagsInput({setTagsFunc, data, setStateTestFunc}){
     const [tags, setTags] = useState("")
 
     const [options, setOptions] = useState([])
@@ -30,6 +30,14 @@ function TagsInput({setTagsFunc, data}){
 
     function handleChangeOptions(e) {
         setTagsFunc(e.label)
+        if (setTagsFunc.length > 0) {
+            console.log(data.filter(item => item.name === e.label).map(res => (res.description))[0])
+            setStateTestFunc(prevState => ({
+                ...prevState,
+                "countermeasure": data.filter(item => item.name === e.label).map(res => (res.description))[0],
+                "tag": tags,
+            }))
+        }
     }
 
     return (

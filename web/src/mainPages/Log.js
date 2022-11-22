@@ -20,7 +20,7 @@ function getProjectID() {
 function Log() {
     const [incident, setIncident] = useState([])
     const [tags, setTags] = useState([])
-    const [countermeasure, setCountermeasure] = useState([])
+    const [lessonsLearned, setLessonsLearned] = useState([])
     const [description, setDescription] = useState("")
     const [receiver, setReceiver] = useState("")
     const [changed, setChanged] = useState(false)
@@ -31,16 +31,20 @@ function Log() {
     const id = getProjectID()
 
     const splitCountermeasure = (input) => {
-        let array = input.split(';')
-        setCountermeasure(array)
+        if(input.length > 0){
+            let array = input.split(';')
+            setLessonsLearned(array)
+        }
     }
 
+    console.log(lessonsLearned)
     useEffect(() => {
         const fetch = async () => {
             await fetchData(INCIDENT_URL + "?id=" + id).then(data => {
+                console.log(data)
                 setIncident(data.data)
-                splitCountermeasure(data.data.countermeasure)
-                setBackup(data.data.countermeasure)
+                splitCountermeasure(data.data.lessonlearned)
+                setBackup(data.data.lessonlearned)
                 setDescription(data.data.description)
                 setReceiver(data.data.receivingGroup)
                 setTags(data.data.tags)
@@ -56,10 +60,11 @@ function Log() {
 
     const navigate = useNavigate();
     const handleChange = async () => {
-        const countermeasureString = countermeasure.join(';')
+        const lessonLearnedString = lessonsLearned.join(';')
         const body = {
             incidentId: parseInt(incident.id),
-            countermeasure: countermeasureString
+            lessonlearned: lessonLearnedString
+
         }
         await putModel(INCIDENT_URL, body)
             .then(() => {
@@ -71,14 +76,15 @@ function Log() {
 
     const addCountermeasure = () => {
         setChanged(true)
-        setCountermeasure(prevState => ([...prevState, newCountermeasure]))
+        setLessonsLearned(prevState => ([...prevState, newCountermeasure]))
         setNewCountermeasure("")
     }
 
     const deleteCountermeasure = (e) => {
         // eslint-disable-next-line no-restricted-globals
         if (confirm("Do you want to delete item?")) {
-            setCountermeasure(countermeasure.filter(item => item !== e))
+            setLessonsLearned(lessonsLearned.filter(item => item !== e))
+            setChanged(true)
         }
     }
 
@@ -139,7 +145,7 @@ function Log() {
 
                     <div className={"wrapper countermeasures"}>
                         <ul className={"countermeasure-list"}>
-                            {countermeasure.map(item =>
+                            {lessonsLearned.length > 0 ? lessonsLearned.map(item =>
                                 <div className={"countermeasure-list-outer"}>
                                     <li className={"countermeasure-list-element"}>
                                         {item}
@@ -149,7 +155,9 @@ function Log() {
                                         Delete
                                     </button>
                                 </div>
-                            )}
+                            ) : <div className={"countermeasure-list-outer"}>
+                                    No "lessons learned" in system
+                            </div>}
                         </ul>
                     </div>
                 </div>
@@ -157,7 +165,7 @@ function Log() {
 
 
             <div className={"log-btn"}>
-                <button className={"btn cancel-btn"} onClick={() => setCountermeasure(backup)}>Cancel</button>
+                <button className={"btn cancel-btn"} onClick={() => setLessonsLearned(backup)}>Cancel</button>
                 {changed ? <button onClick={handleChange} className={"btn"}>Save</button> :
                     <button className={"disabled-btn"}>Save</button>}
 

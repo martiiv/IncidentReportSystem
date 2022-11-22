@@ -22,6 +22,7 @@ type CreateIncident struct {
 	Company        string `json:"company"`
 	ReceivingGroup string `json:"receivingGroup"`
 	Sendbymanager  string `json:"sendbymanager"`
+	Countermeasure string `json:"countermeasure"`
 	LessonLearned  string `json:"lessonlearned"`
 }
 
