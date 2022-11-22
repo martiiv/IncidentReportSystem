@@ -5,11 +5,7 @@ import fetchData from "../middleware/FetchData";
 import {INCIDENT_URL} from "../constants/WebURL";
 import putModel from "../middleware/putData";
 import "./Create.css"
-import calender from "../images/calendar.png"
-import sender from "../images/postman.png"
-import tag from "../images/price-tag.png"
-import group from "../images/group.png"
-
+import trash_can from "../images/trash_can.png";
 
 /**
  * Function that will get the project id form the url.
@@ -23,7 +19,7 @@ function getProjectID() {
 
 function Log() {
     const [incident, setIncident] = useState([])
-    const [, setTags] = useState([])
+    const [tags, setTags] = useState([])
     const [countermeasure, setCountermeasure] = useState([])
     const [description, setDescription] = useState("")
     const [receiver, setReceiver] = useState("")
@@ -93,68 +89,70 @@ function Log() {
             <div className={"content"}>
                 <h1 className={"incident_title"}>Incident: {incident.name}</h1>
                 <div className={"side-by-side"}>
-                    <div className={"card card-small"}>
-                        <img src={calender} className={"image-style"} alt={""}/>
-                        <label className={"beside-image"}>{incident.date}</label>
+                    <div className={"wrapper calendar"}>
+                        <div className={"opacity-layer"}/>
+                        <div className={"content-incident calendar"}>{incident.date}</div>
                     </div>
 
-                    <div className={"card card-small"}>
-                        <img src={sender} className={"image-style"} alt={""}/>
-                        <label className={"beside-image"}>{incident.sendbymanager}</label>
+                    <div className="wrapper management">
+                        <div className="opacity-layer"/>
+                        <div className={"content-incident sender"}>{incident.sendbymanager}</div>
                     </div>
 
-                    <div className={"card card-small"}>
-                        <img src={tag} className={"image-style"} alt={""}/>
-                        <label className={"beside-image"}>{incident.tag}</label>
-
+                    <div className={"wrapper incident-tag"}>
+                        <div className={"opacity-layer"}/>
+                        <div className={"content-incident tag"}>{incident.tag}</div>
                     </div>
-                    <div className={"card card-small"}>
-                        <img src={group} className={"image-style"} alt={""}/>
-                        <label className={"beside-image"}>{receiver}</label>
+
+                    <div className={"wrapper department"}>
+                        <div className={"opacity-layer"}/>
+                        <div className={"content-incident department-1"}>{receiver}</div>
                     </div>
                 </div>
 
-                <div className={"card"}>
-                    <h2 className={"text-area-title"}>Description</h2>
-                    <p>{description}</p>
+                <div className={"card-description"}>
+                    <div className={"wrapper description-b"}>
+                        <div className={"opacity-layer"}/>
+                        <div className={"content-incident description-b"}>{description}</div>
+                    </div>
                 </div>
 
-
-                <div className={"card"}>
-                    <h2 className={"text-area-title"}>Countermeasures</h2>
-                    <div className={"flex-div"}>
-                        <ul style={{width: "50%"}}>
-                            {countermeasure.map(item =>
-                                <li>
-                                    {item}
-                                    <button onClick={() => deleteCountermeasure(item)}>Delete</button>
-                                </li>
-                            )}
-                        </ul>
-
-
-
-                        <div className={"text-and-btn"}>
-                            <div style={{display: "flex", flexDirection: "column"}}>
-                        <textarea placeholder={"Enter new countermeasure"}
-                                  style={{ resize: "none", width: "600px" , minHeight: "100px", maxHeight: "100px"}}
-                                  className={"textarea-log"}
-                                  onChange={(e) => {
-                                      setNewCountermeasure(e.target.value)
-                                  }}
-                                  value={newCountermeasure}
-                                  onKeyDown={event => {
-                                      if (event.key === 'Enter') {
-                                          addCountermeasure()
-                                      }
-                                  }}
-                        />
+                <div className={"countermeasures-outer"}>
+                    <div className={"wrapper countermeasures"}>
+                        <div className={"countermeasure-block"}>
+                            <textarea placeholder={"Enter new countermeasure"}
+                                      className={"textarea-log"}
+                                      onChange={(e) => {
+                                          setNewCountermeasure(e.target.value)
+                                      }}
+                                      value={newCountermeasure}
+                                      onKeyDown={event => {
+                                          if (event.key === 'Enter' && !event.shiftKey) {
+                                              event.preventDefault()
+                                              addCountermeasure()
+                                          }
+                                      }}
+                            />
                             <button className={"btn send-btn"} onClick={addCountermeasure}>Add</button>
                         </div>
-                        </div>
+                    </div>
+
+                    <div className={"wrapper countermeasures"}>
+                        <ul className={"countermeasure-list"}>
+                            {countermeasure.map(item =>
+                                <div className={"countermeasure-list-outer"}>
+                                    <li className={"countermeasure-list-element"}>
+                                        {item}
+                                    </li>
+                                    <button className={"btn delete-button img"} onClick={() => deleteCountermeasure(item)}>
+                                        <img src={trash_can}/>
+                                        Delete
+                                    </button>
+                                </div>
+                            )}
+                        </ul>
                     </div>
                 </div>
-
             </div>
 
 
