@@ -10,10 +10,6 @@ import { Navigate } from "react-router-dom";
 const ProtectedRoute = ({ children }) => {
     const credentials = (sessionStorage.getItem("credentials"))
 
-
-    console.log("Check user in Private: ", credentials);
-
-
     if (!credentials) {
         return <Navigate to={"/"} />;
     }

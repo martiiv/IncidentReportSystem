@@ -9,6 +9,9 @@ import {Link} from "react-router-dom";
 import {ReactNotifications, Store} from "react-notifications-component";
 
 
+/**
+ * Class warningReceiver, will display a table with warning receivers.
+ */
 class WarningReceiver extends Component {
     state = {
         value: [],
@@ -21,29 +24,48 @@ class WarningReceiver extends Component {
      * @param val person to be checked or unchecked.
      */
     onChangeValueHandler = val => {
-        if (val.target.checked){
-            this.setState(prevState =>( {
+        const { checked } = val.target;
+        console.log(val.target.value)
+        if (checked) {
+            this.setState(prevState => ({
                     value: [...prevState.value, {id: (val.target.value)}]
                 })
             )
         }else{
-            let filteredArray = this.state.value.filter(item => item !== val.target.value)
+            let filteredArray = this.state.value.filter(item =>  item.id !== val.target.value)
             this.setState({value: filteredArray});
+            console.log(this.state.value)
         }
     };
 
+
+
+
+    /**
+     * Function that will run when the class first is initialized.
+     * Function will fetch data from the API, and store it in the data array.
+     * This is an async function, so this will be run as a new thread.
+     * @returns {Promise<void>} the response of the promise.
+     */
     async componentDidMount() {
         await fetchData(RECEIVER_URL)
             .then((warningReceiver) => {
-                console.log(warningReceiver.data)
                 this.setState({data: warningReceiver.data})
             })
+            .catch(() => alert("No connection, try again later"))
     }
 
 
+    /**
+     * Function that will delete warning receivers.
+     * The function will call on the API, and changes will happen in the database.
+     * When the selected receivers is deleted, the user will get a notification on the screen.
+     * If the API call does fail, the user will get an alert.
+     *
+     * @returns {Promise<void>} the status of the promise. Either rejection or resolve.
+     */
     deleteWarningReceivers = async () => {
         const {value} = this.state;
-        console.log(value)
         // eslint-disable-next-line no-restricted-globals
         if (confirm('Are you sure you want to save this thing into the database?')) {
             await deleteData(RECEIVER_URL, value)
@@ -71,6 +93,7 @@ class WarningReceiver extends Component {
 
         }
     }
+
 
 
     render() {

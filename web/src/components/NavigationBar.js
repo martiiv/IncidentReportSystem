@@ -7,12 +7,15 @@ import {DASHBOARD_URL, INCIDENT_URL, MANAGER_URL, RECEIVER_URL} from "../constan
 import "../index.css"
 
 /**
- Component that will be used as a top bar for the user to navigate throughout the application.
  */
 
-
+/**
+ * Component that will be used as a top bar for the user to navigate throughout the application.
+ * The component uses Appbar from MaterialUI
+ *
+ * @returns {JSX.Element} the Top bar
+ */
 const TopBar = () => {
-        //Top bar with interactive buttons to navigate.
         return (
             <AppBar position="sticky" className={"mainAppBar"}>
                 <Toolbar className="toolbar">

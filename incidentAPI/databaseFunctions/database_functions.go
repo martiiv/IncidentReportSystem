@@ -142,7 +142,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 				tx.Rollback()
 				return
 			}
-		}else {
+		} else {
 			_, queryError := tx.Exec(statementtext+" "+tblname+" where WriD=? ;", params[0])
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
@@ -212,7 +212,6 @@ func Updatelessonslearned(w http.ResponseWriter, params []string) {
 		return
 	}
 
-
 	//If query goes through we commit the transactions
 	if err := tx.Commit(); err != nil {
 		http.Error(w, "Error encountered when deleting rows, rolling back transactions...", http.StatusInternalServerError)
@@ -229,7 +228,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 
 	if incidentId == "" {
 		//According to the name of the table we go to the corresponding action and create the appropriate query
-		results, queryError := Db.Query(statementtext + " " + "IncidentId, Tag, Name, Description, Company, Receiving_group, Countermeasure, Sendbymanager, Date, LessonLearned" + " from Incident ;")
+		results, queryError := Db.Query(statementtext + " " + "IncidentId, Tag, Name, Description, Company, Receiving_group, Countermeasure, Sendbymanager, Date, LessonLearned" + " from Incident ORDER BY `Incident`.`Date` DESC;")
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
 			log.Fatal(queryError.Error())

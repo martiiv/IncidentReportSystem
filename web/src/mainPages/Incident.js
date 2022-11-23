@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import postModel from "../middleware/postData";
-import {COUNTERMEASURE, DASHBOARD_URL, GROUPS_URL, INCIDENT_URL, TAG_Query} from "../constants/WebURL";
+import {COUNTERMEASURE, DASHBOARD_URL, GROUPS_URL, INCIDENT_URL} from "../constants/WebURL";
 import TagsInput from "../components/TagsInput";
 import GroupSelectComponent from "../components/GroupSelectComponent";
 import "./Create.css";
@@ -10,10 +10,13 @@ import 'react-notifications-component/dist/theme.css'
 import {Store} from 'react-notifications-component';
 import {useNavigate} from "react-router-dom";
 
-
+/**
+ * Incident page, to create and send new incident.
+ * @returns {JSX.Element}
+ * @constructor
+ */
 function Incident() {
     const credentials = (JSON.parse(sessionStorage.getItem("credentials")))
-    const [countermeasureText, setCountermeasureText] = useState("")
 
     const [stateTest, setStateTest] = useState({
         name: "",
@@ -25,8 +28,7 @@ function Incident() {
         sendbymanager: credentials.userName
     })
 
-    const [tags, setTags] = useState("")
-    const [selectedGroups, setSelectedGroups] = useState(0)
+    const [setTags] = useState("")
     const [isPending, setIsPending] = useState(false);
     const [tagsOption, setTagsOption] = useState([])
     const [groupsOption, setgroupsOption] = useState([])
@@ -34,16 +36,17 @@ function Incident() {
     const navigate = useNavigate();
 
 
+    /**
+     * Function to fetch countermeasures, and groups, from database.
+     */
     useEffect(() => {
         const fetchTags = async () => {
             let counter = 0
             await fetchData(COUNTERMEASURE)
                 .then(res => {
                     (setTagsOption(res.data.map(item => ({id: counter++, name: item.tag, description: item.description}))))
-                    console.log(res.data)
 
                 })
-                .catch(e => console.log(e))
         }
 
         const fetchGroups = async () => {
@@ -51,13 +54,20 @@ function Incident() {
             await fetchData(GROUPS_URL)
                 .then(res =>
                     (setgroupsOption(res.data.map(item => ({id: counter++, name: item.name})))))
-                .catch(e => console.log(e))
         }
 
-        fetchTags().catch(e => console.log(e))
-        fetchGroups().catch(e => console.log(e))
+        fetchTags().catch(() => alert("No connection, try again later"))
+        fetchGroups().catch(() => alert("No connection, try again later"))
     }, [])
 
+
+    /**
+     * Function that will submit the Incident to the database.
+     * Will Send confirmation notification on success and rejection.
+     *
+     * @param e data sent from forms
+     * @returns {Promise<void>}
+     */
     const handleSubmit = async (e) => {
         e.preventDefault()
         setIsPending(true)
@@ -87,21 +97,17 @@ function Incident() {
             })
     }
 
+    /**
+     * Function that will set the given value to the Incident.
+     *
+     * @param evt input from input field.
+     */
     function handleChange(evt) {
         const value = evt.target.value;
         setStateTest({
             ...stateTest, [evt.target.name]: value
         })
-
-        setStateTest(prevState => ({
-            ...prevState,
-            "tag": tags,
-            "receivingGroup": selectedGroups,
-        }))
-
     }
-
-    console.log(stateTest)
 
     return (
         <div className={"create"}>
@@ -132,7 +138,7 @@ function Incident() {
                 {groupsOption.length > 0 ?
                     <GroupSelectComponent
                         data={groupsOption}
-                        setSelectedFunc={setSelectedGroups}
+                        setStateTestFunc={setStateTest}
 
                     /> : null
                 }

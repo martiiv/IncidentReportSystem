@@ -6,17 +6,27 @@ import "./Create.css"
 import {Store} from "react-notifications-component";
 
 
+/**
+ * Page that will make it possible for the user to create a new Group
+ * @returns {JSX.Element}
+ * @constructor
+ */
 function CreateGroup() {
-
     const [group, setGroup] = useState({
         name: "",
         info: "",
     })
 
     const [success, setSuccess] = useState(true)
-
     const navigate = useNavigate()
 
+    /**
+     * Function that will submit the new group into the database.
+     * Will Send confirmation notification on success and rejection.
+     *
+     * @param event data to be submitted.
+     * @returns {Promise<void>}
+     */
     const handleSubmit = async (event) => {
         event.preventDefault();
         await postModel(GROUPS_URL, JSON.stringify(group))
@@ -44,15 +54,16 @@ function CreateGroup() {
             })
     }
 
+    /**
+     * Will set the group name and information.
+     * @param evt data sent from input field.
+     */
     function handleChange(evt) {
         const value = evt.target.value;
         setGroup({
             ...group, [evt.target.name]: value
         })
     }
-
-    console.log(group)
-
 
     return (
         <div className={"create"}>

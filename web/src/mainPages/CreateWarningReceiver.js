@@ -7,9 +7,12 @@ import fetchData from "../middleware/FetchData";
 import {useNavigate} from "react-router-dom";
 import {ReactNotifications, Store} from "react-notifications-component";
 
-
+/**
+ * Page to add new warning receiver.
+ * @returns {JSX.Element}
+ * @constructor
+ */
 function CreateWarningReceiver(){
-
     const [warning, setWarning] = useState({
         name: "",
         phoneNumber: "",
@@ -21,6 +24,13 @@ function CreateWarningReceiver(){
     const [options, setOptions] = useState([])
     const navigate = useNavigate()
 
+    /**
+     * Function that will submit the warning receiver to the database.
+     * Will Send confirmation notification on success and rejection.
+     *
+     * @param event data sent from forms
+     * @returns {Promise<void>}
+     */
     const handleSubmit = async (event) => {
         event.preventDefault();
         await postModel(RECEIVER_URL, JSON.stringify(warning))
@@ -45,27 +55,34 @@ function CreateWarningReceiver(){
             .catch(() => alert("something went wrong. please try again"))
     }
 
+    /**
+     * Function that will be called when the page is loaded.
+     * Function will fetch data of group.
+     */
     useEffect(() => {
         const fetch = async () => {
             const data = await fetchData(GROUPS_URL)
-            console.log(data.data)
-
             setOptions(data.data.map(item => ({value: item.name, label: item.name})))
         }
-
-        fetch().catch(e => console.log(e))
+        fetch().catch(() => alert("No connection, try again later"))
     }, [])
 
 
-
+    /**
+     * Function that will set the selected receiver group to warning receiver.
+     * @param e data from input field.
+     */
     function handleChangeOptions(e) {
-        console.log(e.value)
         setWarning({
-            ...warning, ["receiverGroup"]: e.value
+            ...warning, "receiverGroup": e.value
         })
     }
 
 
+    /**
+     * Function that will set the given value to warning receiver.
+     * @param evt from input field.
+     * */
     function handleChange(evt) {
         const value = evt.target.value;
         setWarning({
@@ -74,22 +91,6 @@ function CreateWarningReceiver(){
     }
 
 
-    const customStyles = {
-        control: (base, state) => ({
-            ...base,
-            background: "#023950",
-            // Overwrittes the different states of border
-            borderColor: state.isFocused ? "yellow" : "green",
-            // Removes weird border around container
-            boxShadow: state.isFocused ? null : null,
-            "&:hover": {
-                // Overwrittes the different states of border
-                borderColor: state.isFocused ? "red" : "blue"
-            }
-        })
-    };
-
-    console.log(warning)
     return(
         <div className={"create"}>
             <h2>New Warning Receiver</h2>

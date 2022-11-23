@@ -3,13 +3,23 @@ import React, {useState} from "react";
 import putModel from "../middleware/putData";
 import {DASHBOARD_URL, MANAGER_URL} from "../constants/WebURL";
 
+
+/**
+ * Login screen
+ * @returns {JSX.Element}
+ * @constructor
+ */
 function Login() {
     const [credentials, setCredentials] = useState({
         userName : "",
         password : ""
     })
 
-
+    /**
+     * Function that will check the credentials.
+     *
+     * @returns {Promise<void>}
+     */
     const login = async () => {
         await putModel(MANAGER_URL, credentials)
             .then(res=> {
