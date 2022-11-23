@@ -16,49 +16,58 @@ function getProjectID() {
     return pathSplit[pathSplit.length - 1]
 }
 
-
+/**
+ * Log screen to get information about a specific Incident.
+ * @returns {JSX.Element}
+ * @constructor
+ */
 function Log() {
     const [incident, setIncident] = useState([])
-    const [tags, setTags] = useState([])
     const [lessonsLearned, setLessonsLearned] = useState([])
     const [description, setDescription] = useState("")
     const [receiver, setReceiver] = useState("")
     const [changed, setChanged] = useState(false)
     const [backup, setBackup] = useState("")
-    const [newCountermeasure, setNewCountermeasure] = useState("")
-
-
+    const [newLessonsLearned, setNewLessonsLearned] = useState("")
     const id = getProjectID()
+    const navigate = useNavigate();
 
-    const splitCountermeasure = (input) => {
+    /**
+     * Function that will split the lessons learned from given format.
+     * @param input lessons learned.
+     */
+    const splitLessonsLearned = (input) => {
         if(input.length > 0){
             let array = input.split(';')
             setLessonsLearned(array)
         }
     }
 
-    console.log(lessonsLearned)
+    /**
+     * Function that will fetch given incident.
+     */
     useEffect(() => {
         const fetch = async () => {
             await fetchData(INCIDENT_URL + "?id=" + id).then(data => {
-                console.log(data)
                 setIncident(data.data)
-                splitCountermeasure(data.data.lessonlearned)
+                splitLessonsLearned(data.data.lessonlearned)
                 setBackup(data.data.lessonlearned)
                 setDescription(data.data.description)
                 setReceiver(data.data.receivingGroup)
-                setTags(data.data.tags)
             })
 
         }
 
         fetch()
             // make sure to catch any error
-            .catch(console.error);
+            .catch(() => alert("No connection, try again later"));
     }, [])
 
 
-    const navigate = useNavigate();
+    /**
+     * Function that will update the lessons learned of the incident.
+     * @returns {Promise<void>} result of the promise function.
+     */
     const handleChange = async () => {
         const lessonLearnedString = lessonsLearned.join(';')
         const body = {
@@ -74,13 +83,21 @@ function Log() {
 
     }
 
-    const addCountermeasure = () => {
+    /**
+     * Function that will add the new lessons learned.
+     */
+    const addLesson = () => {
         setChanged(true)
-        setLessonsLearned(prevState => ([...prevState, newCountermeasure]))
-        setNewCountermeasure("")
+        setLessonsLearned(prevState => ([...prevState, newLessonsLearned]))
+        setNewLessonsLearned("")
     }
 
-    const deleteCountermeasure = (e) => {
+    /**
+     * Function that will delete a specific lessons learned.
+     *
+     * @param e the specific lesson
+     */
+    const deleteLesson = (e) => {
         // eslint-disable-next-line no-restricted-globals
         if (confirm("Do you want to delete item?")) {
             setLessonsLearned(lessonsLearned.filter(item => item !== e))
@@ -129,17 +146,17 @@ function Log() {
                             <textarea placeholder={"Enter new countermeasure"}
                                       className={"textarea-log"}
                                       onChange={(e) => {
-                                          setNewCountermeasure(e.target.value)
+                                          setNewLessonsLearned(e.target.value)
                                       }}
-                                      value={newCountermeasure}
+                                      value={newLessonsLearned}
                                       onKeyDown={event => {
                                           if (event.key === 'Enter' && !event.shiftKey) {
                                               event.preventDefault()
-                                              addCountermeasure()
+                                              addLesson()
                                           }
                                       }}
                             />
-                            <button className={"btn send-btn"} onClick={addCountermeasure}>Add</button>
+                            <button className={"btn send-btn"} onClick={addLesson}>Add</button>
                         </div>
                     </div>
 
@@ -150,8 +167,8 @@ function Log() {
                                     <li className={"countermeasure-list-element"}>
                                         {item}
                                     </li>
-                                    <button className={"btn delete-button img"} onClick={() => deleteCountermeasure(item)}>
-                                        <img src={trash_can}/>
+                                    <button className={"btn delete-button img"} onClick={() => deleteLesson(item)}>
+                                        <img src={trash_can} alt={"trash_icon"}/>
                                         Delete
                                     </button>
                                 </div>

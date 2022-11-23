@@ -289,6 +289,7 @@ h4 label, h4 ul{
     display: flex;
 }
 
+
 .btn.delete-button {
     position: relative;
     align-self: center;
@@ -302,7 +303,6 @@ h4 label, h4 ul{
     position:absolute;
     top: 50%;
     left: 20%;
-    -webkit-transform: translate(-50%, -50%);
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
 }

@@ -3,7 +3,6 @@ export const GROUPS_URL = "/groups"
 export const INCIDENT_URL = "/incident"
 export const TAG_Query = "?tag=true"
 export const MANAGER_URL = "/manager"
-export const LOGIN = "/login"
 export const COUNTERMEASURE = "/countermeasure"
 
 export const RECEIVER_URL = "/receiver"

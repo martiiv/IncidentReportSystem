@@ -1,7 +1,16 @@
 import "./Profile.css"
 
+/**
+ * Display the profile page
+ * @returns {JSX.Element}
+ * @constructor
+ */
 function Profile() {
 
+    /**
+     * Fetch the credentials data.
+     * @type {any}
+     */
     const credentials = JSON.parse(sessionStorage.getItem("credentials"))
 
     return (
