@@ -1,7 +1,6 @@
 package communication
 
 import (
-	"fmt"
 	apitools "incidentAPI/apiTools"
 	"incidentAPI/config"
 	databasefunctions "incidentAPI/databaseFunctions"
@@ -49,7 +48,7 @@ func SendMail(w http.ResponseWriter, inputStruct structs.CreateIncident) error {
 		return err
 	}
 
-	fmt.Fprint(w, "Mail sent")
+	log.Println("Mail sent")
 	return err
 }
 

@@ -103,6 +103,7 @@ function Incident() {
      * @param evt input from input field.
      */
     function handleChange(evt) {
+        console.log(stateTest)
         const value = evt.target.value;
         setStateTest({
             ...stateTest, [evt.target.name]: value

@@ -12,7 +12,7 @@ import customStyles from "./SelectStyle";
  * @returns {JSX.Element}
  * @constructor
  */
-function TagsInput({setTagsFunc, data, setStateTestFunc}){
+function TagsInput({data, setStateTestFunc}){
     const [options, setOptions] = useState([])
 
     /**
@@ -31,7 +31,7 @@ function TagsInput({setTagsFunc, data, setStateTestFunc}){
      * @param e values of the selected option.
      */
     function handleChangeOptions(e) {
-        if (setTagsFunc.length > 0) {
+        if (setStateTestFunc.length > 0) {
             setStateTestFunc(prevState => ({
                 ...prevState,
                 "countermeasure": data.filter(item => item.name === e.label).map(res => (res.description))[0],
