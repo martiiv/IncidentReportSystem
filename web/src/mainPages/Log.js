@@ -143,7 +143,7 @@ function Log() {
                 <div className={"countermeasures-outer"}>
                     <div className={"wrapper countermeasures"}>
                         <div className={"countermeasure-block"}>
-                            <textarea placeholder={"Enter new countermeasure"}
+                            <textarea placeholder={"Enter lesson learned"}
                                       className={"textarea-log"}
                                       onChange={(e) => {
                                           setNewLessonsLearned(e.target.value)

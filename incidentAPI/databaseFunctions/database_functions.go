@@ -24,7 +24,7 @@ func Insrt(w http.ResponseWriter, tblname string, params []string) {
 	tx, err := Db.BeginTx(ctx, nil)    //Start DB transaction
 	if err != nil {
 		http.Error(w, "Error starting database transaction", http.StatusBadGateway)
-		log.Fatal(err.Error())
+		log.Println(err.Error())
 		return
 	}
 
@@ -36,7 +36,7 @@ func Insrt(w http.ResponseWriter, tblname string, params []string) {
 		_, queryError := tx.Exec(statementtext+"`Incident` set Tag=(SELECT Tag FROM Tags WHERE Tag = ?), Name= ? , Description= ? , Company= ? , Receiving_group = (SELECT Groupid FROM ReceiverGroups WHERE Name = ?) , Countermeasure = (SELECT Description FROM PredefinedCounterMeasures WHERE acTag = ?) , Sendbymanager=(SELECT Username FROM SystemManager WHERE Username = ?), LessonLearned = ?;", params[0], params[1], params[2], params[3], params[4], params[0], params[5], params[6])
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Fatal(queryError.Error())
+			log.Println(queryError.Error())
 			tx.Rollback()
 			return
 		}
@@ -46,7 +46,7 @@ func Insrt(w http.ResponseWriter, tblname string, params []string) {
 		_, queryError := tx.Exec(statementtext+" "+tblname+" set Name= ? , PhoneNumber= ? , Company= ? , ReceiverGroup = (SELECT Name FROM ReceiverGroups WHERE Name = ?) , ReceiverEmail = (SELECT Email FROM Emails WHERE Email = ?) ;", params[0], params[1], params[2], params[3], params[4])
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Fatal(queryError.Error())
+			log.Println(queryError.Error())
 			tx.Rollback()
 			return
 		}
@@ -65,7 +65,7 @@ func Insrt(w http.ResponseWriter, tblname string, params []string) {
 		_, queryError := tx.Exec(statementtext+" "+tblname+" set Email= ?;", params[0])
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Fatal(queryError.Error())
+			log.Println(queryError.Error())
 			tx.Rollback()
 			return
 		}
@@ -74,7 +74,7 @@ func Insrt(w http.ResponseWriter, tblname string, params []string) {
 	//If query goes through we commit the transactions
 	if err := tx.Commit(); err != nil {
 		http.Error(w, "Error encountered when inserting rows, rolling back transactions...", http.StatusInternalServerError)
-		log.Fatal(err)
+		log.Println(err)
 		return
 	}
 }
@@ -86,7 +86,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 	tx, err := Db.BeginTx(ctx, nil) //Start DB transaction
 	if err != nil {
 		http.Error(w, "Error starting database transaction", http.StatusBadGateway)
-		log.Fatal(err.Error())
+		log.Println(err.Error())
 		return
 	}
 
@@ -98,7 +98,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 			_, queryError := tx.Exec(statementtext+" "+tblname+" where Name=? ;", params[1]) //We delete based on name of incident
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusInternalServerError)
-				log.Fatal(queryError.Error())
+				log.Println(queryError.Error())
 				tx.Rollback()
 				return
 			}
@@ -107,7 +107,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 			_, queryError := tx.Exec(statementtext+" "+tblname+" where IncidentId=? ;", params[0]) //We delete based on incidentId
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusInternalServerError)
-				log.Fatal(queryError.Error())
+				log.Println(queryError.Error())
 				tx.Rollback()
 				return
 			}
@@ -118,7 +118,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 			_, queryError := tx.Exec(statementtext+" `ReceiverGroups`"+" where Name = ?;", params[1]) //We delete based on name
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Fatal(queryError.Error())
+				log.Println(queryError.Error())
 				tx.Rollback()
 				return
 			}
@@ -127,7 +127,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 			_, queryError := tx.Exec(statementtext+" "+tblname+" where Groupid=? ;", params[0])
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Fatal(queryError.Error())
+				log.Println(queryError.Error())
 				tx.Rollback()
 				return
 			}
@@ -138,7 +138,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 			_, queryError := tx.Exec(statementtext+" "+tblname+" where `ReceiverEmail`= ? ;", params[1])
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Fatal(queryError.Error())
+				log.Println(queryError.Error())
 				tx.Rollback()
 				return
 			}
@@ -146,7 +146,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 			_, queryError := tx.Exec(statementtext+" "+tblname+" where WriD=? ;", params[0])
 			if queryError != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Fatal(queryError.Error())
+				log.Println(queryError.Error())
 				tx.Rollback()
 				return
 			}
@@ -155,7 +155,7 @@ func Delete(w http.ResponseWriter, tblname string, params []string) {
 	//If query goes through we commit the transactions
 	if err := tx.Commit(); err != nil {
 		http.Error(w, "Error encountered when deleting rows, rolling back transactions...", http.StatusInternalServerError)
-		log.Fatal(err)
+		log.Println(err)
 		return
 	}
 }
@@ -167,7 +167,7 @@ func Update(w http.ResponseWriter, tblname string, params []string) {
 	tx, err := Db.BeginTx(ctx, nil) //Start DB transaction
 	if err != nil {
 		http.Error(w, "Error starting database transaction", http.StatusBadGateway)
-		log.Fatal(err.Error())
+		log.Println(err.Error())
 		tx.Rollback()
 		return
 	}
@@ -178,7 +178,7 @@ func Update(w http.ResponseWriter, tblname string, params []string) {
 		_, queryError := tx.Exec(statementtext+" "+tblname+" set Name= ? , Context= ? , Company= ? , Credential= ? ,Receiving_group = (SELECT Groupid FROM RecieverGroups WHERE Name = ?) , Countermeasure = ? , Sendbymanager=(SELECT Username FROM SystemManager WHERE Username = ?) "+"Where IncidentId=? ;", params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7])
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Fatal(queryError.Error())
+			log.Println(queryError.Error())
 			tx.Rollback()
 			return
 		}
@@ -187,7 +187,7 @@ func Update(w http.ResponseWriter, tblname string, params []string) {
 	//If query goes through we commit the transactions
 	if err := tx.Commit(); err != nil {
 		http.Error(w, "Error encountered when deleting rows, rolling back transactions...", http.StatusInternalServerError)
-		log.Fatal(err)
+		log.Println(err)
 		return
 	}
 }
@@ -199,7 +199,7 @@ func Updatelessonslearned(w http.ResponseWriter, params []string) {
 	tx, err := Db.BeginTx(ctx, nil) //Start DB transaction
 	if err != nil {
 		http.Error(w, "Error starting database transaction", http.StatusBadGateway)
-		log.Fatal(err.Error())
+		log.Println(err.Error())
 		tx.Rollback()
 		return
 	}
@@ -207,7 +207,7 @@ func Updatelessonslearned(w http.ResponseWriter, params []string) {
 	_, queryError := tx.Exec(statementtext+" "+"Incident"+" set LessonLearned= '?' "+"Where IncidentId=? ;", params[0], params[1])
 	if queryError != nil {
 		http.Error(w, apitools.QueryError, http.StatusBadRequest)
-		log.Fatal(queryError.Error())
+		log.Println(queryError.Error())
 		tx.Rollback()
 		return
 	}
@@ -215,7 +215,7 @@ func Updatelessonslearned(w http.ResponseWriter, params []string) {
 	//If query goes through we commit the transactions
 	if err := tx.Commit(); err != nil {
 		http.Error(w, "Error encountered when deleting rows, rolling back transactions...", http.StatusInternalServerError)
-		log.Fatal(err)
+		log.Println(err)
 		return
 	}
 }
@@ -231,7 +231,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 		results, queryError := Db.Query(statementtext + " " + "IncidentId, Tag, Name, Description, Company, Receiving_group, Countermeasure, Sendbymanager, Date, LessonLearned" + " from Incident ORDER BY `Incident`.`Date` DESC;")
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Fatal(queryError.Error())
+			log.Println(queryError.Error())
 			return
 		}
 		defer results.Close()
@@ -241,7 +241,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 
 			if err := results.Scan(&incident.IncidentId, &incident.Tag, &incident.Name, &incident.Description, &incident.Company, &incident.ReceivingGroup, &incident.Countermeasure, &incident.Sendbymanager, &incident.Date, &incident.LessonLearned); err != nil {
 				http.Error(w, "Error scanning results from DB", http.StatusBadRequest)
-				log.Fatal(err.Error())
+				log.Println(err.Error())
 				return
 			}
 
@@ -249,7 +249,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 			groupsName, err := Db.Query("SELECT `Name` FROM `ReceiverGroups` WHERE `GroupId` = ? ;", incident.ReceivingGroup)
 			if err != nil {
 				http.Error(w, apitools.QueryError, http.StatusInternalServerError)
-				log.Fatal(err.Error())
+				log.Println(err.Error())
 				return
 			}
 
@@ -257,7 +257,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 				var name string
 				if err := groupsName.Scan(&name); err != nil {
 					http.Error(w, apitools.QueryError, http.StatusInternalServerError)
-					log.Fatal(err.Error())
+					log.Println(err.Error())
 					return
 				}
 				//Defining the name of the group
@@ -279,7 +279,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 		results, queryError := Db.Query(statementtext + " " + "IncidentId, Tag, Name, Description, Company, Receiving_group, Countermeasure, Sendbymanager, Date, LessonLearned" + " from Incident WHERE `IncidentId` = " + incidentId + " ;")
 		if queryError != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Fatal(queryError.Error())
+			log.Println(queryError.Error())
 			return
 		}
 		defer results.Close()
@@ -288,7 +288,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 			err := results.Scan(&incident.IncidentId, &incident.Tag, &incident.Name, &incident.Description, &incident.Company, &incident.ReceivingGroup, &incident.Countermeasure, &incident.Sendbymanager, &incident.Date, &incident.LessonLearned)
 			if err != nil {
 				http.Error(w, apitools.QueryError, http.StatusBadRequest)
-				log.Fatal(err.Error())
+				log.Println(err.Error())
 				return
 			}
 		}
@@ -296,14 +296,14 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 		groupsName, err := Db.Query("SELECT `Name` FROM `ReceiverGroups` WHERE `GroupId` = ? ;", incident.ReceivingGroup)
 		if err != nil {
 			http.Error(w, apitools.QueryError, http.StatusInternalServerError)
-			log.Fatal(err.Error())
+			log.Println(err.Error())
 			return
 		}
 		var name string
 		for groupsName.Next() {
 			if err := groupsName.Scan(&name); err != nil {
 				http.Error(w, apitools.QueryError, http.StatusInternalServerError)
-				log.Fatal(err.Error())
+				log.Println(err.Error())
 				return
 			}
 			incident.ReceivingGroup = name
@@ -312,7 +312,7 @@ func IncidentSelect(w http.ResponseWriter, incidentId string) {
 		err = results.Err()
 		if err != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Fatal(queryError.Error())
+			log.Println(queryError.Error())
 			return
 		}
 		results.Close()
@@ -338,7 +338,7 @@ func Select_warning_receivers(w http.ResponseWriter) {
 		var datares [6]string
 		if err := results.Scan(&datares[0], &datares[1], &datares[2], &datares[3], &datares[4], &datares[5]); err != nil {
 			http.Error(w, apitools.QueryError, http.StatusInternalServerError)
-			log.Fatal(err.Error())
+			log.Println(err.Error())
 			return
 		}
 		fmt.Fprintf(w, "%s\n", datares) //Returning response
@@ -346,7 +346,7 @@ func Select_warning_receivers(w http.ResponseWriter) {
 
 	if err := results.Err(); err != nil {
 		http.Error(w, apitools.QueryError, http.StatusInternalServerError)
-		log.Fatal(err.Error())
+		log.Println(err.Error())
 		return
 	}
 }
@@ -359,7 +359,7 @@ func SelecTags(w http.ResponseWriter) {
 	results, queryError := Db.Query(statementtext + " " + " `Tag` FROM `Incident` GROUP BY `Tag`")
 	if queryError != nil {
 		http.Error(w, apitools.QueryError, http.StatusBadRequest)
-		log.Fatal(queryError.Error())
+		log.Println(queryError.Error())
 		return
 	}
 
@@ -367,7 +367,7 @@ func SelecTags(w http.ResponseWriter) {
 		var dbResponse string
 		if err := results.Scan(&dbResponse); err != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Fatal(err.Error())
+			log.Println(err.Error())
 		}
 
 		result := structs.TagsStruct{Tag: dbResponse}
@@ -384,7 +384,7 @@ func SelecCmeasures(w http.ResponseWriter, tag string) {
 	results, queryError := Db.Query(statementtext+" "+"Description FROM `PredefinedCounterMeasures` where acTag = '?' ", tag)
 	if queryError != nil {
 		http.Error(w, apitools.QueryError, http.StatusBadRequest)
-		log.Fatal(queryError.Error())
+		log.Println(queryError.Error())
 		return
 	}
 
@@ -392,7 +392,8 @@ func SelecCmeasures(w http.ResponseWriter, tag string) {
 		var dbResponse string
 		if err := results.Scan(&dbResponse); err != nil {
 			http.Error(w, apitools.QueryError, http.StatusBadRequest)
-			log.Fatal(err.Error())
+			log.Println(err.Error())
+			return
 		}
 
 		result := structs.Countermeasure{Description: dbResponse}
