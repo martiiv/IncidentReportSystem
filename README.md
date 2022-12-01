@@ -115,7 +115,7 @@ Body:
    [{
         "incidentId": "string",
         "incidentName" : "string"
-    }]`
+    }]
 ```
 
 The endpoint will return the newly deleted incidents ID
@@ -263,7 +263,8 @@ Method gets all system receivers in the database, pass in an ID to get one speci
 
 ```json
     {
-        "id":2,"name":"Ulrik",
+        "id":2,
+        "name":"Ulrik",
         "phoneNumber":"78590153",
         "company":"IncidentCorp",
         "receiverGroup":"Development",
