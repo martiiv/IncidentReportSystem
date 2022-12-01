@@ -64,7 +64,7 @@ Method gets all incidents in the database, pass in an ID or tag variable to get 
 ```
 
 ```json
-    `{
+    {
         "id":110,
         "tag":"string",
         "name":"string",
@@ -74,7 +74,7 @@ Method gets all incidents in the database, pass in an ID or tag variable to get 
         "countermeasure":"string",
         "sendbymanager":"string",
         "lessonlearned":"string",
-        }`
+    }
 ```
 
 #### POST Incident
@@ -88,15 +88,15 @@ Method creates new incidents and sends them to a group of warning receivers
 Body:
 
 ```json
-    `{
-   "tag": "string",
-   "name":  "string",
-   "description": "string",
-   "company": "string",
-   "receivingGroup": "string",
-   "sendByManager": "string",
-   "lessonlearned": "string"
-  }`
+    {
+        "tag": "string",
+        "name":  "string",
+        "description": "string",
+        "company": "string",
+        "receivingGroup": "string",
+        "sendByManager": "string",
+        "lessonlearned": "string"
+    }
 ```
 
 The endpoint will return the newly created incidents ID
@@ -112,10 +112,10 @@ Endpoint will delete one or more incidents
 Body:
 
 ```json
-   `[{
-  "incidentId": "string",
-  "incidentName" : "string"
-  }]`
+   [{
+        "incidentId": "string",
+        "incidentName" : "string"
+    }]`
 ```
 
 The endpoint will return the newly deleted incidents ID
@@ -136,11 +136,11 @@ Method gets all groups in the database, pass in an ID to get one specific group:
 ```
 
 ```json
-    `{
-       "id": 1, 
-       "name": "Human Resources", 
-       "info": "Group for everyone working in the HR departments in the company"
-        }`
+    {
+        "id": 1, 
+        "name": "Human Resources", 
+        "info": "Group for everyone working in the HR departments in the company"
+    }
 ```
 
 ### POST Receiving group
@@ -154,10 +154,12 @@ Method creates new groups
 Body:
 
 ```json
-    `{{
-    "name": "string",
-    "info": "string"
-   } }`
+    {
+        {
+            "name": "string",
+            "info": "string"
+        }
+    }
 ```
 
 The endpoint will return the newly created groups ID
@@ -173,10 +175,10 @@ Endpoint will delete one or more groups
 Body:
 
 ```json
-   `[{
-  "id": "",
-  "name" : "TestGroupAPITEST"
-  }]`
+   [{
+        "id": "",
+        "name" : "TestGroupAPITEST"
+    }]
 ```
 
 The endpoint will return the newly deleted groups ID or name
@@ -197,12 +199,12 @@ Method gets all system managers in the database, pass in an ID to get one specif
 ```
 
 ```json
-    `{
+    {
         "id": 1, 
         "userName": "OdaManager",
         "company": "IncidentCorp",
         "credential": "1"
-        }`
+    }
 ```
 
 ### POST System manager
@@ -216,12 +218,12 @@ Method creates new managers
 Body:
 
 ```json
-    `{
-   "userName": "TestManagerAPITEST",
-   "company":"IncidentCorp",
-   "email":"testManager@gmail.com",
-   "password": "1241erreth23e23r1231"
-  }`
+    {
+        "userName": "TestManagerAPITEST",
+        "company":"IncidentCorp",
+        "email":"testManager@gmail.com",
+        "password": "1241erreth23e23r1231"
+    }
 ```
 
 The endpoint will return the newly created managers ID
@@ -237,9 +239,9 @@ Endpoint will delete one or more managers
 Body:
 
 ```json
-   `[{
-    "email" : "testManager@gmail.com"
-    }]`
+   [{
+        "email" : "testManager@gmail.com"
+    }]
 ```
 
 The endpoint will return the newly deleted managers id
@@ -260,13 +262,13 @@ Method gets all system receivers in the database, pass in an ID to get one speci
 ```
 
 ```json
-    `{
+    {
         "id":2,"name":"Ulrik",
         "phoneNumber":"78590153",
         "company":"IncidentCorp",
         "receiverGroup":"Development",
         "receiverEmail":"UlrikUtvikler@gmail.com"
-    }`
+    }
 ```
 
 ### POST Warning Receiver
@@ -280,13 +282,13 @@ Method creates new receivers
 Body:
 
 ```json
-    `{
-    "name":"TestReceiverAPITEST",
-    "phoneNumber":"12345678",
-    "company":"IncidentCorp",
-    "receiverGroup":"Marketing",
-    "receiverEmail":"APITEST@gmail.com"
-   }`
+    {
+        "name":"TestReceiverAPITEST",
+        "phoneNumber":"12345678",
+        "company":"IncidentCorp",
+        "receiverGroup":"Marketing",
+        "receiverEmail":"APITEST@gmail.com"
+   }
 ```
 
 The endpoint will return the newly created receivers ID
@@ -302,10 +304,10 @@ Endpoint will delete one or more receivers
 Body:
 
 ```json
-   `[{
-    "id": "",
-    "email":"APITEST@gmail.com"
-   }]`
+   [{
+        "id": "",
+        "email":"APITEST@gmail.com"
+   }]
 ```
 
 The endpoint will return the newly deleted receivers id
